@@ -71,3 +71,4 @@ codebase_cleanup_analysis.md
 /app/development/debug/
 tmp/
 /app/development/release/
+/app/production/release/

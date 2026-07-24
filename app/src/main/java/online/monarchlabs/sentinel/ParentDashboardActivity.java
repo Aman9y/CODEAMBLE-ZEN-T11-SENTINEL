@@ -618,6 +618,19 @@ public class ParentDashboardActivity extends BaseActivity {
             });
         }
 
+        View cardModesAction = findViewById(R.id.cardModesAction);
+        if (cardModesAction != null) {
+            cardModesAction.setOnClickListener(v -> {
+                if (currentChildDeviceId != null) {
+                    Intent intent = new Intent(this, ModesActivity.class);
+                    intent.putExtra(ModesActivity.EXTRA_CHILD_DEVICE_ID, currentChildDeviceId);
+                    intent.putExtra(ModesActivity.EXTRA_CHILD_NAME, getCurrentChildDisplayName());
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(this, "Please select a device first", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
         // Wire up "Usage Stats" to ChildUsageViewActivity
         View cardUsageStatsAction = findViewById(R.id.cardUsageStatsAction);
         if (cardUsageStatsAction != null) {

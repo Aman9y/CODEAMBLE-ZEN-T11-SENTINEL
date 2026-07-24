@@ -754,6 +754,44 @@
                         android:textColor="@color/neutral_900"/>
                 </LinearLayout>
 
+                <!-- 3. Modes -->
+                <LinearLayout
+                    android:id="@+id/cardModesAction"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/bg_card_glass"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <FrameLayout
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:layout_marginBottom="12dp"
+                        android:background="@drawable/bg_circle_primary_soft">
+
+                        <ImageView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_book"
+                            app:tint="@color/primary_600" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="Modes"
+                        android:textColor="@color/neutral_900"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
             </GridLayout>
 
             <!-- ── Actions Section (per-child) ────────────────────────── -->

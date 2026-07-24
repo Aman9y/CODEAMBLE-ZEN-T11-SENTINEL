@@ -189,6 +189,15 @@
             android:exported="false"
             android:theme="@style/Theme.Master2.NoActionBar" />
 
+        <activity
+            android:name=".ModesActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Master2.NoActionBar" />
+
+        <activity
+            android:name=".StudyModeEditActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Master2.NoActionBar" />
         <service
             android:name=".services.PermissionMonitorService"
             android:enabled="true"
