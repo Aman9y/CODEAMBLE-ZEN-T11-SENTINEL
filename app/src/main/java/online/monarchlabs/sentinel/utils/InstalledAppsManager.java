@@ -109,6 +109,8 @@ public class InstalledAppsManager {
                 app.put("versionCode", getVersionCode(packageInfo));
                 app.put("versionName",
                         packageInfo.versionName != null ? packageInfo.versionName : "");
+                app.put("category",
+                        AppCategorizer.getCategory(context, appInfo.packageName).getDisplayName());
                 app.put("packageUpdatedAt", packageInfo.lastUpdateTime);
                 app.put("lastUpdated", packageInfo.lastUpdateTime);
                 try {

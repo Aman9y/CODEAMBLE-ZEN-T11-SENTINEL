@@ -274,6 +274,12 @@ public class AppCategorizer {
         return categorizeByPatterns(packageName, "");
     }
 
+    public static AppCategory getCategory(String packageName, String appName) {
+        if (packageName == null || packageName.trim().isEmpty()) {
+            return AppCategory.OTHER;
+        }
+        return categorizeByPatterns(packageName, appName != null ? appName : "");
+    }
     public static AppCategory[] getAllCategories() {
         return AppCategory.values();
     }

@@ -257,6 +257,8 @@ public final class AppInventoryDeltaSync {
         app.put("versionCode", getVersionCode(packageInfo));
         app.put("versionName",
                 packageInfo.versionName != null ? packageInfo.versionName : "");
+        app.put("category",
+                AppCategorizer.getCategory(packageName, appInfo.loadLabel(packageManager).toString()).getDisplayName());
         app.put("packageUpdatedAt", packageInfo.lastUpdateTime);
         app.put("lastUpdated", packageInfo.lastUpdateTime);
         app.put("iconBase64", encodeIcon(packageManager, packageName));

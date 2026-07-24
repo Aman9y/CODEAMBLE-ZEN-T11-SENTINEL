@@ -1,5 +1,7 @@
 package online.monarchlabs.sentinel.data;
 
+import android.util.Base64;
+
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.database.DataSnapshot;
@@ -13,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.nio.charset.StandardCharsets;
 
 public final class StudyModePolicyRepository {
     private StudyModePolicyRepository() {
@@ -39,6 +42,8 @@ public final class StudyModePolicyRepository {
         }
 
         Map<String, Object> data = new LinkedHashMap<>(policy.toMap());
+        data.put("blockedPackages", encodeBooleanMap(policy.blockedPackages));
+        data.put("allowedOverrides", encodeBooleanMap(policy.allowedOverrides));
         data.put("modeId", StudyModeContract.MODE_ID);
         data.put("schemaVersion", StudyModeContract.POLICY_SCHEMA_VERSION);
         data.put("updatedAt", ServerValue.TIMESTAMP);
@@ -150,12 +155,49 @@ public final class StudyModePolicyRepository {
             return result;
         }
         for (Map.Entry<?, ?> entry : ((Map<?, ?>) value).entrySet()) {
-            String key = stringValue(entry.getKey(), "");
+            String key = decodePackageKey(stringValue(entry.getKey(), ""));
             if (!key.isEmpty()) {
                 result.put(key, boolValue(entry.getValue(), false));
             }
         }
         return result;
+    }
+
+    private static Map<String, Boolean> encodeBooleanMap(Map<String, Boolean> source) {
+        Map<String, Boolean> result = new LinkedHashMap<>();
+        if (source == null) {
+            return result;
+        }
+        for (Map.Entry<String, Boolean> entry : source.entrySet()) {
+            String key = encodePackageKey(entry.getKey());
+            if (!key.isEmpty()) {
+                result.put(key, Boolean.TRUE.equals(entry.getValue()));
+            }
+        }
+        return result;
+    }
+
+    private static String encodePackageKey(String packageName) {
+        if (isBlank(packageName)) {
+            return "";
+        }
+        return "pkg_" + Base64.encodeToString(
+                packageName.getBytes(StandardCharsets.UTF_8),
+                Base64.URL_SAFE | Base64.NO_WRAP | Base64.NO_PADDING);
+    }
+
+    private static String decodePackageKey(String key) {
+        if (isBlank(key) || !key.startsWith("pkg_")) {
+            return key == null ? "" : key;
+        }
+        try {
+            byte[] decoded = Base64.decode(
+                    key.substring(4),
+                    Base64.URL_SAFE | Base64.NO_WRAP | Base64.NO_PADDING);
+            return new String(decoded, StandardCharsets.UTF_8);
+        } catch (Exception ignored) {
+            return "";
+        }
     }
 
     private static String normalizeDay(Object value) {

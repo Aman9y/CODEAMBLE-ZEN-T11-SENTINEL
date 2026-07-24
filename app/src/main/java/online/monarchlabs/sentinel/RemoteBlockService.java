@@ -22,6 +22,7 @@ import online.monarchlabs.sentinel.data.StudyModeContract;
 import online.monarchlabs.sentinel.data.StudyModePolicyRepository;
 import online.monarchlabs.sentinel.models.StudyModePolicy;
 import online.monarchlabs.sentinel.utils.StudyModeScheduleEvaluator;
+import online.monarchlabs.sentinel.utils.AppCategorizer;
 import android.app.AppOpsManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager;
@@ -2177,6 +2178,7 @@ public class RemoteBlockService extends Service {
                     desiredBlocks.add(packageName);
                 }
             }
+            addStudyCategoryBlocks(policy, desiredBlocks);
         }
 
         boolean changed = rewriteStudyModeBlocks(desiredBlocks);
@@ -2184,6 +2186,71 @@ public class RemoteBlockService extends Service {
             broadcastBlockedAppsUpdate(null);
         }
         scheduleStudyModeTick(enabled);
+    }
+
+    private void addStudyCategoryBlocks(StudyModePolicy policy, Set<String> desiredBlocks) {
+        if (policy == null || policy.categories == null || desiredBlocks == null) {
+            return;
+        }
+        boolean social = isStudyCategoryEnabled(policy, StudyModeContract.CATEGORY_SOCIAL);
+        boolean games = isStudyCategoryEnabled(policy, StudyModeContract.CATEGORY_GAMES);
+        boolean entertainment = isStudyCategoryEnabled(policy, StudyModeContract.CATEGORY_ENTERTAINMENT);
+        if (!social && !games && !entertainment) {
+            return;
+        }
+
+        PackageManager packageManager = getPackageManager();
+        List<ApplicationInfo> installedApps;
+        try {
+            installedApps = packageManager.getInstalledApplications(PackageManager.GET_META_DATA);
+        } catch (Exception error) {
+            Log.w(TAG, "Could not expand Study Mode categories", error);
+            return;
+        }
+
+        for (ApplicationInfo appInfo : installedApps) {
+            if (appInfo == null || appInfo.packageName == null) {
+                continue;
+            }
+            String packageName = appInfo.packageName;
+            if (packageName.equals(getPackageName()) || AppBlockingPolicy.isUnblockable(packageName)) {
+                continue;
+            }
+            if (packageManager.getLaunchIntentForPackage(packageName) == null
+                    && (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                continue;
+            }
+            if (policy.allowedOverrides != null
+                    && Boolean.TRUE.equals(policy.allowedOverrides.get(packageName))) {
+                continue;
+            }
+            AppCategorizer.AppCategory category = AppCategorizer.getCategory(this, packageName);
+            if (matchesStudyCategory(category, social, games, entertainment)) {
+                desiredBlocks.add(packageName);
+            }
+        }
+    }
+
+    private boolean isStudyCategoryEnabled(StudyModePolicy policy, String categoryId) {
+        StudyModePolicy.CategorySelection selection = policy.categories.get(categoryId);
+        return selection != null && selection.enabled;
+    }
+
+    private boolean matchesStudyCategory(AppCategorizer.AppCategory category,
+            boolean social, boolean games, boolean entertainment) {
+        if (category == null) {
+            return false;
+        }
+        switch (category) {
+            case SOCIAL:
+                return social;
+            case GAMES:
+                return games;
+            case ENTERTAINMENT:
+                return entertainment;
+            default:
+                return false;
+        }
     }
 
     private boolean rewriteStudyModeBlocks(Set<String> desiredBlocks) {

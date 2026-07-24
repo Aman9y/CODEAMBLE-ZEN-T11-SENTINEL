@@ -2,31 +2,44 @@ package online.monarchlabs.sentinel;
 
 import android.app.AlertDialog;
 import android.app.TimePickerDialog;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.SwitchCompat;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.FirebaseDatabase;
+
+import online.monarchlabs.sentinel.data.FirebaseSchemaV2Repository;
 import online.monarchlabs.sentinel.data.StudyModeContract;
 import online.monarchlabs.sentinel.data.StudyModePolicyRepository;
 import online.monarchlabs.sentinel.models.StudyModePolicy;
+import online.monarchlabs.sentinel.utils.AppCategorizer;
 import online.monarchlabs.sentinel.utils.StudyModeDraftStore;
 import online.monarchlabs.sentinel.utils.StudyModeScheduleEvaluator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 public class StudyModeEditActivity extends BaseActivity {
     public static final String EXTRA_CHILD_DEVICE_ID = "childDeviceId";
@@ -45,6 +58,7 @@ public class StudyModeEditActivity extends BaseActivity {
     private LinearLayout layoutDayChips;
     private LinearLayout layoutRestrictions;
     private LinearLayout layoutReview;
+    private boolean inventoryLoaded;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +67,7 @@ public class StudyModeEditActivity extends BaseActivity {
 
         childDeviceId = getIntent().getStringExtra(EXTRA_CHILD_DEVICE_ID);
         policy = StudyModeDraftStore.load(this, childDeviceId);
-        seedCategoryApps();
+        initializeCategoryApps();
 
         switchStudyEnabled = findViewById(R.id.switchStudyEnabled);
         layoutTimeSlots = findViewById(R.id.layoutTimeSlots);
@@ -87,6 +101,7 @@ public class StudyModeEditActivity extends BaseActivity {
         ensureCategoryState();
         renderAll();
         loadRemotePolicy();
+        loadChildInventory();
     }
 
     private void loadRemotePolicy() {
@@ -104,9 +119,109 @@ public class StudyModeEditActivity extends BaseActivity {
                     if (switchStudyEnabled != null) {
                         switchStudyEnabled.setChecked(policy.enabled);
                     }
+                    syncEnabledCategoriesWithInventory();
                     StudyModeDraftStore.save(this, childDeviceId, policy);
                     renderAll();
                 });
+    }
+
+    private void loadChildInventory() {
+        if (isBlank(childDeviceId)) {
+            inventoryLoaded = true;
+            renderRestrictions();
+            renderReview();
+            return;
+        }
+
+        FirebaseDatabase.getInstance().getReference()
+                .child(FirebaseSchemaV2Repository.ROOT)
+                .child("device_installs")
+                .child(childDeviceId)
+                .child("apps")
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    initializeCategoryApps();
+                    for (DataSnapshot appSnapshot : snapshot.getChildren()) {
+                        CategoryApp app = parseInventoryApp(appSnapshot);
+                        if (app == null) {
+                            continue;
+                        }
+                        String categoryId = toStudyCategoryId(app.category, app.packageName, app.name);
+                        if (categoryId == null) {
+                            continue;
+                        }
+                        categoryApps.get(categoryId).add(app);
+                    }
+                    sortCategoryApps();
+                    inventoryLoaded = true;
+                    syncEnabledCategoriesWithInventory();
+                    renderRestrictions();
+                    renderReview();
+                })
+                .addOnFailureListener(error -> {
+                    inventoryLoaded = true;
+                    Toast.makeText(this, "Could not load child apps", Toast.LENGTH_SHORT).show();
+                    renderRestrictions();
+                    renderReview();
+                });
+    }
+
+    private CategoryApp parseInventoryApp(DataSnapshot appSnapshot) {
+        Map<?, ?> data = asMap(appSnapshot.getValue());
+        if (data == null) {
+            return null;
+        }
+        String packageName = stringValue(data.get("packageName"));
+        if (isBlank(packageName)) {
+            packageName = appSnapshot.getKey();
+        }
+        String appName = stringValue(data.get("appName"));
+        if (isBlank(appName)) {
+            appName = stringValue(data.get("name"));
+        }
+        if (isBlank(packageName) || isBlank(appName) || AppBlockingPolicy.isUnblockable(packageName)) {
+            return null;
+        }
+        return new CategoryApp(
+                appName.trim(),
+                packageName.trim(),
+                stringValue(data.get("category")),
+                stringValue(data.get("iconBase64")));
+    }
+
+    private Map<?, ?> asMap(Object value) {
+        return value instanceof Map ? (Map<?, ?>) value : null;
+    }
+
+    private String toStudyCategoryId(String storedCategory, String packageName, String appName) {
+        String normalized = storedCategory == null ? "" : storedCategory.toLowerCase(Locale.US);
+        if (normalized.contains("social")) {
+            return StudyModeContract.CATEGORY_SOCIAL;
+        }
+        if (normalized.contains("game")) {
+            return StudyModeContract.CATEGORY_GAMES;
+        }
+        if (normalized.contains("entertainment")) {
+            return StudyModeContract.CATEGORY_ENTERTAINMENT;
+        }
+
+        AppCategorizer.AppCategory category = AppCategorizer.getCategory(packageName, appName);
+        switch (category) {
+            case SOCIAL:
+                return StudyModeContract.CATEGORY_SOCIAL;
+            case GAMES:
+                return StudyModeContract.CATEGORY_GAMES;
+            case ENTERTAINMENT:
+                return StudyModeContract.CATEGORY_ENTERTAINMENT;
+            default:
+                return null;
+        }
+    }
+
+    private void sortCategoryApps() {
+        for (List<CategoryApp> apps : categoryApps.values()) {
+            Collections.sort(apps, (first, second) -> first.name.compareToIgnoreCase(second.name));
+        }
     }
     private void renderAll() {
         renderSlots();
@@ -231,9 +346,26 @@ public class StudyModeEditActivity extends BaseActivity {
 
     private void renderRestrictions() {
         layoutRestrictions.removeAllViews();
-        addCategoryRow(StudyModeContract.CATEGORY_SOCIAL, "Block Social Media", "Instagram, TikTok, Snapchat");
-        addCategoryRow(StudyModeContract.CATEGORY_GAMES, "Block Games", "All entertainment games");
-        addCategoryRow(StudyModeContract.CATEGORY_ENTERTAINMENT, "Block Entertainment", "YouTube, Netflix, video apps");
+        addCategoryRow(StudyModeContract.CATEGORY_SOCIAL, "Block Social Media",
+                categorySubtitle(StudyModeContract.CATEGORY_SOCIAL));
+        addCategoryRow(StudyModeContract.CATEGORY_GAMES, "Block Games",
+                categorySubtitle(StudyModeContract.CATEGORY_GAMES));
+        addCategoryRow(StudyModeContract.CATEGORY_ENTERTAINMENT, "Block Entertainment",
+                categorySubtitle(StudyModeContract.CATEGORY_ENTERTAINMENT));
+    }
+
+    private String categorySubtitle(String categoryId) {
+        List<CategoryApp> apps = categoryApps.get(categoryId);
+        if (!inventoryLoaded) {
+            return "Loading child apps...";
+        }
+        if (apps == null || apps.isEmpty()) {
+            return "No matching apps installed yet";
+        }
+        if (apps.size() == 1) {
+            return apps.get(0).name;
+        }
+        return apps.size() + " apps found";
     }
 
     private void addCategoryRow(String categoryId, String title, String subtitle) {
@@ -246,7 +378,7 @@ public class StudyModeEditActivity extends BaseActivity {
         row.setPadding(0, layoutRestrictions.getChildCount() == 0 ? 0 : dp(14), 0, 0);
         row.setOnClickListener(v -> showCategoryAppsDialog(categoryId, title));
 
-        FrameLayoutCompat iconWrap = new FrameLayoutCompat(this);
+        FrameLayout iconWrap = new FrameLayout(this);
         iconWrap.setBackgroundResource(R.drawable.bg_mode_icon_blue);
         ImageView icon = new ImageView(this);
         icon.setImageResource(categoryId.equals(StudyModeContract.CATEGORY_GAMES)
@@ -276,18 +408,23 @@ public class StudyModeEditActivity extends BaseActivity {
 
         SwitchCompat toggle = new SwitchCompat(this);
         toggle.setChecked(enabled);
-        toggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            setCategoryEnabled(categoryId, isChecked);
+        toggle.setOnClickListener(v -> {
+            setCategoryEnabled(categoryId, toggle.isChecked());
+            renderRestrictions();
             renderReview();
         });
         row.addView(toggle);
 
         layoutRestrictions.addView(row);
     }
-
     private void showCategoryAppsDialog(String categoryId, String title) {
         List<CategoryApp> apps = categoryApps.get(categoryId);
         if (apps == null || apps.isEmpty()) {
+            new AlertDialog.Builder(this)
+                    .setTitle(title)
+                    .setMessage("No installed apps found in this category. If this category stays ON, future matching apps will still be blocked during Study Mode.")
+                    .setPositiveButton("OK", null)
+                    .show();
             return;
         }
 
@@ -296,23 +433,44 @@ public class StudyModeEditActivity extends BaseActivity {
         content.setPadding(dp(8), dp(6), dp(8), 0);
 
         for (CategoryApp app : apps) {
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setGravity(Gravity.CENTER_VERTICAL);
+            row.setPadding(0, dp(6), 0, dp(6));
+
+            ImageView appIcon = new ImageView(this);
+            Bitmap bitmap = decodeIcon(app.iconBase64);
+            if (bitmap != null) {
+                appIcon.setImageBitmap(bitmap);
+            } else {
+                appIcon.setImageResource(R.drawable.ic_app);
+                appIcon.setColorFilter(getColor(R.color.modern_blue_700));
+            }
+            appIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(dp(36), dp(36));
+            iconParams.setMargins(0, 0, dp(10), 0);
+            row.addView(appIcon, iconParams);
+
             CheckBox checkBox = new CheckBox(this);
             checkBox.setText(app.name);
             checkBox.setTextSize(15);
             checkBox.setTextColor(getColor(R.color.modern_grey_900));
-            checkBox.setChecked(Boolean.TRUE.equals(policy.blockedPackages.get(app.packageName))
-                    && !Boolean.TRUE.equals(policy.allowedOverrides.get(app.packageName)));
+            checkBox.setChecked(isAppSelected(app));
             checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                policy.blockedPackages.put(app.packageName, isChecked);
-                policy.allowedOverrides.put(app.packageName, !isChecked);
+                setAppSelected(app, isChecked);
                 renderReview();
             });
-            content.addView(checkBox);
+            row.addView(checkBox, new LinearLayout.LayoutParams(
+                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+            content.addView(row);
         }
+
+        ScrollView scrollView = new ScrollView(this);
+        scrollView.addView(content);
 
         new AlertDialog.Builder(this)
                 .setTitle(title)
-                .setView(content)
+                .setView(scrollView)
                 .setPositiveButton("Done", (dialog, which) -> renderReview())
                 .show();
     }
@@ -329,20 +487,57 @@ public class StudyModeEditActivity extends BaseActivity {
 
         List<CategoryApp> blocked = new ArrayList<>();
         List<CategoryApp> allowed = new ArrayList<>();
+        collectReviewApps(blocked, allowed);
+
+        addReviewSection("Blocked apps", blocked, true);
+        addReviewSection("Allowed exceptions", allowed, false);
+    }
+
+    private void collectReviewApps(List<CategoryApp> blocked, List<CategoryApp> allowed) {
+        Set<String> knownPackages = new HashSet<>();
         for (List<CategoryApp> apps : categoryApps.values()) {
             for (CategoryApp app : apps) {
-                if (Boolean.TRUE.equals(policy.blockedPackages.get(app.packageName))) {
-                    if (Boolean.TRUE.equals(policy.allowedOverrides.get(app.packageName))) {
-                        allowed.add(app);
-                    } else {
-                        blocked.add(app);
-                    }
+                knownPackages.add(app.packageName);
+                if (isAppSelected(app)) {
+                    blocked.add(app);
+                } else if (Boolean.TRUE.equals(policy.allowedOverrides.get(app.packageName))) {
+                    allowed.add(app);
                 }
             }
         }
 
-        addReviewSection("Blocked apps", blocked, true);
-        addReviewSection("Allowed exceptions", allowed, false);
+        if (policy.blockedPackages != null) {
+            for (Map.Entry<String, Boolean> entry : policy.blockedPackages.entrySet()) {
+                String packageName = entry.getKey();
+                if (!Boolean.TRUE.equals(entry.getValue()) || knownPackages.contains(packageName)) {
+                    continue;
+                }
+                if (Boolean.TRUE.equals(policy.allowedOverrides.get(packageName))) {
+                    allowed.add(CategoryApp.placeholder(packageName));
+                } else if (!AppBlockingPolicy.isUnblockable(packageName)) {
+                    blocked.add(CategoryApp.placeholder(packageName));
+                }
+            }
+        }
+
+        if (policy.allowedOverrides != null) {
+            for (Map.Entry<String, Boolean> entry : policy.allowedOverrides.entrySet()) {
+                String packageName = entry.getKey();
+                if (Boolean.TRUE.equals(entry.getValue()) && !knownPackages.contains(packageName)
+                        && !containsPackage(allowed, packageName)) {
+                    allowed.add(CategoryApp.placeholder(packageName));
+                }
+            }
+        }
+    }
+
+    private boolean containsPackage(List<CategoryApp> apps, String packageName) {
+        for (CategoryApp app : apps) {
+            if (app.packageName.equals(packageName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String buildReviewSummary() {
@@ -377,16 +572,31 @@ public class StudyModeEditActivity extends BaseActivity {
             row.setGravity(Gravity.CENTER_VERTICAL);
             row.setPadding(0, dp(5), 0, dp(5));
 
+            FrameLayout iconStack = new FrameLayout(this);
+            ImageView appIcon = new ImageView(this);
+            Bitmap bitmap = decodeIcon(app.iconBase64);
+            if (bitmap != null) {
+                appIcon.setImageBitmap(bitmap);
+            } else {
+                appIcon.setImageResource(R.drawable.ic_app);
+                appIcon.setColorFilter(getColor(R.color.modern_blue_700));
+            }
+            appIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            iconStack.addView(appIcon, centeredParams(34, 34));
+
             TextView badge = new TextView(this);
             badge.setText(blocked ? "+" : "-");
             badge.setGravity(Gravity.CENTER);
             badge.setTextColor(getColor(R.color.white));
-            badge.setTextSize(16);
+            badge.setTextSize(12);
             badge.setTypeface(Typeface.DEFAULT_BOLD);
             badge.setBackgroundResource(blocked
                     ? R.drawable.bg_mode_review_block
                     : R.drawable.bg_mode_review_allow);
-            row.addView(badge, new LinearLayout.LayoutParams(dp(26), dp(26)));
+            FrameLayout.LayoutParams badgeParams = new FrameLayout.LayoutParams(dp(20), dp(20));
+            badgeParams.gravity = Gravity.BOTTOM | Gravity.END;
+            iconStack.addView(badge, badgeParams);
+            row.addView(iconStack, new LinearLayout.LayoutParams(dp(44), dp(44)));
 
             TextView name = new TextView(this);
             name.setText(app.name);
@@ -398,6 +608,22 @@ public class StudyModeEditActivity extends BaseActivity {
         }
     }
 
+    private Bitmap decodeIcon(String iconBase64) {
+        if (isBlank(iconBase64)) {
+            return null;
+        }
+        try {
+            String encoded = iconBase64;
+            int comma = encoded.indexOf(',');
+            if (comma >= 0) {
+                encoded = encoded.substring(comma + 1);
+            }
+            byte[] bytes = Base64.decode(encoded, Base64.DEFAULT);
+            return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
     private void saveDraft() {
         if (policy.days == null || policy.days.isEmpty()) {
             Toast.makeText(this, "Select at least one day", Toast.LENGTH_SHORT).show();
@@ -413,6 +639,7 @@ public class StudyModeEditActivity extends BaseActivity {
             Toast.makeText(this, "Time slots cannot overlap", Toast.LENGTH_SHORT).show();
             return;
         }
+        syncEnabledCategoriesWithInventory();
         if (isBlank(childDeviceId)) {
             StudyModeDraftStore.save(this, childDeviceId, policy);
             Toast.makeText(this, "Study Mode saved locally", Toast.LENGTH_SHORT).show();
@@ -459,8 +686,56 @@ public class StudyModeEditActivity extends BaseActivity {
             return;
         }
         for (CategoryApp app : apps) {
-            policy.blockedPackages.put(app.packageName, enabled);
+            if (enabled) {
+                policy.blockedPackages.put(app.packageName, true);
+                if (!Boolean.TRUE.equals(policy.allowedOverrides.get(app.packageName))) {
+                    policy.allowedOverrides.put(app.packageName, false);
+                }
+            } else {
+                policy.blockedPackages.remove(app.packageName);
+                policy.allowedOverrides.remove(app.packageName);
+            }
+        }
+    }
+
+    private void setAppSelected(CategoryApp app, boolean selected) {
+        if (selected) {
+            policy.blockedPackages.put(app.packageName, true);
             policy.allowedOverrides.put(app.packageName, false);
+        } else {
+            policy.blockedPackages.remove(app.packageName);
+            policy.allowedOverrides.put(app.packageName, true);
+        }
+    }
+
+    private boolean isAppSelected(CategoryApp app) {
+        if (app == null || isBlank(app.packageName)) {
+            return false;
+        }
+        if (Boolean.TRUE.equals(policy.allowedOverrides.get(app.packageName))) {
+            return false;
+        }
+        if (Boolean.TRUE.equals(policy.blockedPackages.get(app.packageName))) {
+            return true;
+        }
+        String categoryId = toStudyCategoryId(app.category, app.packageName, app.name);
+        StudyModePolicy.CategorySelection selection = categoryId != null
+                ? policy.categories.get(categoryId) : null;
+        return selection != null && selection.enabled;
+    }
+
+    private void syncEnabledCategoriesWithInventory() {
+        ensureCategoryState();
+        for (Map.Entry<String, List<CategoryApp>> entry : categoryApps.entrySet()) {
+            StudyModePolicy.CategorySelection selection = policy.categories.get(entry.getKey());
+            if (selection == null || !selection.enabled) {
+                continue;
+            }
+            for (CategoryApp app : entry.getValue()) {
+                if (!Boolean.TRUE.equals(policy.allowedOverrides.get(app.packageName))) {
+                    policy.blockedPackages.put(app.packageName, true);
+                }
+            }
         }
     }
 
@@ -484,23 +759,11 @@ public class StudyModeEditActivity extends BaseActivity {
         }
     }
 
-    private void seedCategoryApps() {
-        categoryApps.put(StudyModeContract.CATEGORY_SOCIAL, Arrays.asList(
-                new CategoryApp("Instagram", "com.instagram.android"),
-                new CategoryApp("TikTok", "com.zhiliaoapp.musically"),
-                new CategoryApp("Snapchat", "com.snapchat.android"),
-                new CategoryApp("Facebook", "com.facebook.katana"),
-                new CategoryApp("Reddit", "com.reddit.frontpage")));
-        categoryApps.put(StudyModeContract.CATEGORY_GAMES, Arrays.asList(
-                new CategoryApp("Free Fire", "com.dts.freefireth"),
-                new CategoryApp("PUBG Mobile", "com.tencent.ig"),
-                new CategoryApp("Roblox", "com.roblox.client"),
-                new CategoryApp("8 Ball Pool", "com.miniclip.eightballpool")));
-        categoryApps.put(StudyModeContract.CATEGORY_ENTERTAINMENT, Arrays.asList(
-                new CategoryApp("YouTube", "com.google.android.youtube"),
-                new CategoryApp("Netflix", "com.netflix.mediaclient"),
-                new CategoryApp("Prime Video", "com.amazon.avod.thirdpartyclient"),
-                new CategoryApp("MX Player", "com.mxtech.videoplayer.ad")));
+    private void initializeCategoryApps() {
+        categoryApps.clear();
+        categoryApps.put(StudyModeContract.CATEGORY_SOCIAL, new ArrayList<>());
+        categoryApps.put(StudyModeContract.CATEGORY_GAMES, new ArrayList<>());
+        categoryApps.put(StudyModeContract.CATEGORY_ENTERTAINMENT, new ArrayList<>());
     }
 
     private void sortDays() {
@@ -558,9 +821,8 @@ public class StudyModeEditActivity extends BaseActivity {
         }
     }
 
-    private android.widget.FrameLayout.LayoutParams centeredParams(int widthDp, int heightDp) {
-        android.widget.FrameLayout.LayoutParams params =
-                new android.widget.FrameLayout.LayoutParams(dp(widthDp), dp(heightDp));
+    private FrameLayout.LayoutParams centeredParams(int widthDp, int heightDp) {
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(dp(widthDp), dp(heightDp));
         params.gravity = Gravity.CENTER;
         return params;
     }
@@ -574,9 +836,14 @@ public class StudyModeEditActivity extends BaseActivity {
         btnSave.setText(busy ? "Saving..." : "Save");
     }
 
+    private String stringValue(Object value) {
+        return value == null ? "" : String.valueOf(value);
+    }
+
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
+
     private int dp(int value) {
         return Math.round(value * getResources().getDisplayMetrics().density);
     }
@@ -588,16 +855,18 @@ public class StudyModeEditActivity extends BaseActivity {
     private static class CategoryApp {
         final String name;
         final String packageName;
+        final String category;
+        final String iconBase64;
 
-        CategoryApp(String name, String packageName) {
+        CategoryApp(String name, String packageName, String category, String iconBase64) {
             this.name = name;
             this.packageName = packageName;
+            this.category = category;
+            this.iconBase64 = iconBase64;
         }
-    }
 
-    private static class FrameLayoutCompat extends android.widget.FrameLayout {
-        FrameLayoutCompat(android.content.Context context) {
-            super(context);
+        static CategoryApp placeholder(String packageName) {
+            return new CategoryApp(packageName, packageName, "", "");
         }
     }
 }
