@@ -22,6 +22,7 @@ public final class ChildConnectionDataCleaner {
     private static final String[] GLOBAL_FEATURE_PREFS = {
             "blocked_apps",
             "scheduled_block_policy_ids",
+            "study_mode_blocks",
             "app_timer_blocked_apps",
             "smart_timer_prefs",
             "timer_state",

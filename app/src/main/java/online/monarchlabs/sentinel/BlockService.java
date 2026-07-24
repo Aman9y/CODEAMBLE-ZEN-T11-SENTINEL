@@ -1320,7 +1320,12 @@ public class BlockService extends AccessibilityService {
         if (freshPrefs.getBoolean(packageName, false)) {
             return true;
         }
-        // 2. Timer-expired block via AppTimerLocalStore (populated by AppTimerService)
+        // 2. Study Mode block, maintained locally by RemoteBlockService.
+        SharedPreferences studyPrefs = getSharedPreferences("study_mode_blocks", MODE_PRIVATE);
+        if (studyPrefs.getBoolean(packageName, false)) {
+            return true;
+        }
+        // 3. Timer-expired block via AppTimerLocalStore (populated by AppTimerService)
         return isTimerExpired(packageName);
     }
 

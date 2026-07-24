@@ -16,6 +16,7 @@ import android.widget.Toast;
 import androidx.appcompat.widget.SwitchCompat;
 
 import online.monarchlabs.sentinel.data.StudyModeContract;
+import online.monarchlabs.sentinel.data.StudyModePolicyRepository;
 import online.monarchlabs.sentinel.models.StudyModePolicy;
 import online.monarchlabs.sentinel.utils.StudyModeDraftStore;
 import online.monarchlabs.sentinel.utils.StudyModeScheduleEvaluator;
@@ -39,6 +40,7 @@ public class StudyModeEditActivity extends BaseActivity {
     private String childDeviceId;
     private StudyModePolicy policy;
     private SwitchCompat switchStudyEnabled;
+    private TextView btnSave;
     private LinearLayout layoutTimeSlots;
     private LinearLayout layoutDayChips;
     private LinearLayout layoutRestrictions;
@@ -64,7 +66,7 @@ public class StudyModeEditActivity extends BaseActivity {
             btnBack.setOnClickListener(v -> finish());
         }
 
-        View btnSave = findViewById(R.id.btnSave);
+        btnSave = findViewById(R.id.btnSave);
         if (btnSave != null) {
             btnSave.setOnClickListener(v -> saveDraft());
         }
@@ -84,8 +86,28 @@ public class StudyModeEditActivity extends BaseActivity {
 
         ensureCategoryState();
         renderAll();
+        loadRemotePolicy();
     }
 
+    private void loadRemotePolicy() {
+        if (isBlank(childDeviceId)) {
+            return;
+        }
+        StudyModePolicyRepository.read(childDeviceId)
+                .addOnSuccessListener(snapshot -> {
+                    StudyModePolicy remotePolicy = StudyModePolicyRepository.fromSnapshot(snapshot);
+                    if (remotePolicy == null) {
+                        return;
+                    }
+                    policy = remotePolicy;
+                    ensureCategoryState();
+                    if (switchStudyEnabled != null) {
+                        switchStudyEnabled.setChecked(policy.enabled);
+                    }
+                    StudyModeDraftStore.save(this, childDeviceId, policy);
+                    renderAll();
+                });
+    }
     private void renderAll() {
         renderSlots();
         renderDays();
@@ -391,9 +413,24 @@ public class StudyModeEditActivity extends BaseActivity {
             Toast.makeText(this, "Time slots cannot overlap", Toast.LENGTH_SHORT).show();
             return;
         }
-        StudyModeDraftStore.save(this, childDeviceId, policy);
-        Toast.makeText(this, "Study Mode saved", Toast.LENGTH_SHORT).show();
-        finish();
+        if (isBlank(childDeviceId)) {
+            StudyModeDraftStore.save(this, childDeviceId, policy);
+            Toast.makeText(this, "Study Mode saved locally", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        setSaveBusy(true);
+        StudyModePolicyRepository.save(childDeviceId, policy)
+                .addOnSuccessListener(unused -> {
+                    StudyModeDraftStore.save(this, childDeviceId, policy);
+                    Toast.makeText(this, "Study Mode saved", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(error -> {
+                    setSaveBusy(false);
+                    Toast.makeText(this, "Could not save Study Mode", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void pickTime(String current, TimePicked picked) {
@@ -528,6 +565,18 @@ public class StudyModeEditActivity extends BaseActivity {
         return params;
     }
 
+    private void setSaveBusy(boolean busy) {
+        if (btnSave == null) {
+            return;
+        }
+        btnSave.setEnabled(!busy);
+        btnSave.setAlpha(busy ? 0.55f : 1f);
+        btnSave.setText(busy ? "Saving..." : "Save");
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
     private int dp(int value) {
         return Math.round(value * getResources().getDisplayMetrics().density);
     }

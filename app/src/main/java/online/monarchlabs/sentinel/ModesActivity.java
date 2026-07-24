@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import online.monarchlabs.sentinel.data.StudyModePolicyRepository;
 import online.monarchlabs.sentinel.models.StudyModePolicy;
 import online.monarchlabs.sentinel.utils.StudyModeDraftStore;
 
@@ -47,11 +48,30 @@ public class ModesActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        renderStudySummary();
+        StudyModePolicy localPolicy = StudyModeDraftStore.load(this, childDeviceId);
+        renderStudySummary(localPolicy);
+        loadRemoteStudySummary();
     }
 
-    private void renderStudySummary() {
-        StudyModePolicy policy = StudyModeDraftStore.load(this, childDeviceId);
+    private void loadRemoteStudySummary() {
+        if (childDeviceId == null || childDeviceId.trim().isEmpty()) {
+            return;
+        }
+        StudyModePolicyRepository.read(childDeviceId)
+                .addOnSuccessListener(snapshot -> {
+                    StudyModePolicy remotePolicy = StudyModePolicyRepository.fromSnapshot(snapshot);
+                    if (remotePolicy != null) {
+                        StudyModeDraftStore.save(this, childDeviceId, remotePolicy);
+                        renderStudySummary(remotePolicy);
+                    }
+                });
+    }
+
+    private void renderStudySummary(StudyModePolicy policy) {
+        if (policy == null) {
+            policy = StudyModePolicy.createDefault();
+            policy.enabled = true;
+        }
         if (tvStudyStatus != null) {
             tvStudyStatus.setText(policy.enabled ? "SCHEDULED" : "OFF");
             tvStudyStatus.setBackgroundResource(policy.enabled

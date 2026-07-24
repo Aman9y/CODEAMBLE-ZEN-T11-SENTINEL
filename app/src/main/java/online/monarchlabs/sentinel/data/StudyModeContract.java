@@ -3,6 +3,7 @@ package online.monarchlabs.sentinel.data;
 /** Firebase contract for Study Mode V1. */
 public final class StudyModeContract {
     public static final String MODE_ID = "study";
+    public static final int POLICY_SCHEMA_VERSION = 1;
     public static final String DEVICE_MODES_PATH = FirebaseSchemaV2Repository.ROOT + "/device_modes";
 
     public static final String CATEGORY_SOCIAL = "social";

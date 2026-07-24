@@ -18,6 +18,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.auth.FirebaseAuth;
+import online.monarchlabs.sentinel.data.StudyModeContract;
+import online.monarchlabs.sentinel.data.StudyModePolicyRepository;
+import online.monarchlabs.sentinel.models.StudyModePolicy;
+import online.monarchlabs.sentinel.utils.StudyModeScheduleEvaluator;
 import android.app.AppOpsManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager;
@@ -62,6 +66,8 @@ import online.monarchlabs.sentinel.data.FirebaseSchemaV2Repository;
 public class RemoteBlockService extends Service {
     private static final String TAG = "RemoteBlockService";
     private static final String PREF_NAME = "blocked_apps";
+    private static final String PREF_STUDY_MODE_BLOCKS = "study_mode_blocks";
+    private static final long STUDY_MODE_TICK_MS = 60_000L;
 
     // ðŸ”§ OEM COMPATIBILITY: Wake lock for aggressive OEMs
     private PowerManager.WakeLock wakeLock;
@@ -125,6 +131,12 @@ public class RemoteBlockService extends Service {
     // Real-time blocked apps sync down
     private DatabaseReference blockedAppsListenerRef;
     private ValueEventListener blockedAppsListener;
+
+    private DatabaseReference studyModeListenerRef;
+    private ValueEventListener studyModeListener;
+    private Handler studyModeHandler;
+    private Runnable studyModeRunnable;
+    private StudyModePolicy currentStudyModePolicy;
 
     private void promoteToForeground() {
         try {
@@ -1294,15 +1306,11 @@ public class RemoteBlockService extends Service {
 
     private void broadcastBlockedAppsUpdate(String changedPackage) {
         try {
-            // Count blocked apps
-            int blockedCount = 0;
-            Map<String, ?> allPrefs = blockedAppsPrefs.getAll();
-            for (Map.Entry<String, ?> entry : allPrefs.entrySet()) {
-                if (entry.getValue() instanceof Boolean && (Boolean) entry.getValue()) {
-                    blockedCount++;
-                }
-            }
-
+            // Count effective blocks from manual policy plus Study Mode.
+            Set<String> effectiveBlocks = readTruePrefs(blockedAppsPrefs);
+            effectiveBlocks.addAll(readTruePrefs(
+                    getSharedPreferences(PREF_STUDY_MODE_BLOCKS, MODE_PRIVATE)));
+            int blockedCount = effectiveBlocks.size();
             // Send broadcast to BlockService
             Intent broadcastIntent = new Intent("online.monarchlabs.sentinel.BLOCKED_APPS_UPDATED");
             broadcastIntent.putExtra("blocked_count", blockedCount);
@@ -2031,7 +2039,8 @@ public class RemoteBlockService extends Service {
         boolean listenersMissing = blockPolicyListener == null
                 || logoutListener == null
                 || usageRefreshListener == null
-                || locationRequestListener == null;
+                || locationRequestListener == null
+                || studyModeListener == null;
 
         if (deviceIdChanged || connectionChanged || listenersMissing) {
             Log.d(TAG, "ðŸ”„ updateDeviceIdAndListeners: deviceIdChanged="
@@ -2065,6 +2074,7 @@ public class RemoteBlockService extends Service {
                 setupV2CommandsListener();
                 startLocationUploads();
                 setupRealTimeBlockedAppsListener();
+                setupStudyModeListener();
                 Log.d(TAG, "âœ… All listeners dynamically re-bound to device ID: " + myDeviceId);
             } catch (Exception e) {
                 Log.e(TAG, "Error registering listeners: " + e.getMessage());
@@ -2119,6 +2129,103 @@ public class RemoteBlockService extends Service {
         };
 
         blockedAppsListenerRef.addValueEventListener(blockedAppsListener);
+    }
+
+    private void setupStudyModeListener() {
+        if (myDeviceId == null || myDeviceId.isEmpty()) {
+            return;
+        }
+        if (studyModeListener != null && studyModeListenerRef != null) {
+            try {
+                studyModeListenerRef.removeEventListener(studyModeListener);
+            } catch (Exception ignored) {
+            }
+            studyModeListener = null;
+        }
+        if (studyModeHandler == null) {
+            studyModeHandler = new Handler(Looper.getMainLooper());
+        }
+
+        studyModeListenerRef = FirebaseDatabase.getInstance()
+                .getReference("v2")
+                .child("device_modes")
+                .child(myDeviceId)
+                .child(StudyModeContract.MODE_ID);
+
+        studyModeListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                currentStudyModePolicy = StudyModePolicyRepository.fromSnapshot(snapshot);
+                applyStudyModePolicyNow();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "Study Mode listener cancelled: " + error.getMessage());
+            }
+        };
+        studyModeListenerRef.addValueEventListener(studyModeListener);
+    }
+
+    private void applyStudyModePolicyNow() {
+        Set<String> desiredBlocks = new HashSet<>();
+        StudyModePolicy policy = currentStudyModePolicy;
+        boolean enabled = policy != null && policy.enabled;
+        if (enabled && StudyModeScheduleEvaluator.isActiveNow(policy)) {
+            for (String packageName : policy.getEffectiveBlockedPackages()) {
+                if (packageName != null && !AppBlockingPolicy.isUnblockable(packageName)) {
+                    desiredBlocks.add(packageName);
+                }
+            }
+        }
+
+        boolean changed = rewriteStudyModeBlocks(desiredBlocks);
+        if (changed) {
+            broadcastBlockedAppsUpdate(null);
+        }
+        scheduleStudyModeTick(enabled);
+    }
+
+    private boolean rewriteStudyModeBlocks(Set<String> desiredBlocks) {
+        SharedPreferences studyPrefs = getSharedPreferences(PREF_STUDY_MODE_BLOCKS, MODE_PRIVATE);
+        Set<String> currentBlocks = readTruePrefs(studyPrefs);
+        if (currentBlocks.equals(desiredBlocks)) {
+            return false;
+        }
+        SharedPreferences.Editor editor = studyPrefs.edit().clear();
+        for (String packageName : desiredBlocks) {
+            editor.putBoolean(packageName, true);
+        }
+        editor.apply();
+        Log.d(TAG, "Study Mode local blocks updated: " + desiredBlocks.size());
+        return true;
+    }
+
+    private Set<String> readTruePrefs(SharedPreferences preferences) {
+        Set<String> result = new HashSet<>();
+        if (preferences == null) {
+            return result;
+        }
+        for (Map.Entry<String, ?> entry : preferences.getAll().entrySet()) {
+            if (entry.getValue() instanceof Boolean && (Boolean) entry.getValue()) {
+                result.add(entry.getKey());
+            }
+        }
+        return result;
+    }
+
+    private void scheduleStudyModeTick(boolean enabled) {
+        if (studyModeHandler == null) {
+            studyModeHandler = new Handler(Looper.getMainLooper());
+        }
+        if (studyModeRunnable != null) {
+            studyModeHandler.removeCallbacks(studyModeRunnable);
+        }
+        if (!enabled) {
+            return;
+        }
+        studyModeRunnable = this::applyStudyModePolicyNow;
+        studyModeHandler.postDelayed(studyModeRunnable, STUDY_MODE_TICK_MS);
     }
 
     private void setupV2CommandsListener() {
@@ -2293,6 +2400,15 @@ public class RemoteBlockService extends Service {
                 blockedAppsListenerRef.removeEventListener(blockedAppsListener);
                 blockedAppsListener = null;
             }
+            if (studyModeListener != null && studyModeListenerRef != null) {
+                studyModeListenerRef.removeEventListener(studyModeListener);
+                studyModeListener = null;
+            }
+            if (studyModeHandler != null && studyModeRunnable != null) {
+                studyModeHandler.removeCallbacks(studyModeRunnable);
+                studyModeRunnable = null;
+            }
+            currentStudyModePolicy = null;
         } catch (Exception e) {
             Log.e(TAG, "Error in removeAllListeners: " + e.getMessage());
         }

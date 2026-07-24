@@ -134,6 +134,12 @@
           ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid))"
         }
       },
+      "device_modes": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid"
+        }
+      },
       "app_block_state": {
         "$deviceId": {
           ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",

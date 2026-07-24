@@ -29,7 +29,7 @@ public final class RelationshipService {
     private static final long REMOVAL_TTL_MS = 180L * DAY_MS;
     private static final List<String> DEVICE_ROOTS = Arrays.asList(
             "usage_daily", "app_catalog", "device_installs", "app_events",
-            "device_policies", "app_block_state", "device_status", "commands",
+            "device_policies", "device_modes", "app_block_state", "device_status", "commands",
             "permissions_current", "permission_logs", "device_health", "locations",
             "timer_execution", "timer_state_requests", "timer_events",
             "client_capabilities");
