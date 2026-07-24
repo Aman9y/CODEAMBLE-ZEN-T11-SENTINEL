@@ -490,7 +490,7 @@ public class StudyModeEditActivity extends BaseActivity {
         collectReviewApps(blocked, allowed);
 
         addReviewSection("Blocked apps", blocked, true);
-        addReviewSection("Allowed exceptions", allowed, false);
+        addReviewSection("Allowed apps", allowed, false);
     }
 
     private void collectReviewApps(List<CategoryApp> blocked, List<CategoryApp> allowed) {
@@ -559,7 +559,7 @@ public class StudyModeEditActivity extends BaseActivity {
 
         if (apps.isEmpty()) {
             TextView empty = new TextView(this);
-            empty.setText(blocked ? "No apps selected yet." : "No exceptions.");
+            empty.setText(blocked ? "No apps selected yet." : "No allowed apps.");
             empty.setTextColor(getColor(R.color.modern_grey_500));
             empty.setTextSize(13);
             layoutReview.addView(empty);
@@ -572,7 +572,6 @@ public class StudyModeEditActivity extends BaseActivity {
             row.setGravity(Gravity.CENTER_VERTICAL);
             row.setPadding(0, dp(5), 0, dp(5));
 
-            FrameLayout iconStack = new FrameLayout(this);
             ImageView appIcon = new ImageView(this);
             Bitmap bitmap = decodeIcon(app.iconBase64);
             if (bitmap != null) {
@@ -582,28 +581,25 @@ public class StudyModeEditActivity extends BaseActivity {
                 appIcon.setColorFilter(getColor(R.color.modern_blue_700));
             }
             appIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            iconStack.addView(appIcon, centeredParams(34, 34));
-
-            TextView badge = new TextView(this);
-            badge.setText(blocked ? "+" : "-");
-            badge.setGravity(Gravity.CENTER);
-            badge.setTextColor(getColor(R.color.white));
-            badge.setTextSize(12);
-            badge.setTypeface(Typeface.DEFAULT_BOLD);
-            badge.setBackgroundResource(blocked
-                    ? R.drawable.bg_mode_review_block
-                    : R.drawable.bg_mode_review_allow);
-            FrameLayout.LayoutParams badgeParams = new FrameLayout.LayoutParams(dp(20), dp(20));
-            badgeParams.gravity = Gravity.BOTTOM | Gravity.END;
-            iconStack.addView(badge, badgeParams);
-            row.addView(iconStack, new LinearLayout.LayoutParams(dp(44), dp(44)));
+            row.addView(appIcon, new LinearLayout.LayoutParams(dp(34), dp(34)));
 
             TextView name = new TextView(this);
             name.setText(app.name);
             name.setTextColor(getColor(R.color.modern_grey_800));
             name.setTextSize(14);
-            name.setPadding(dp(10), 0, 0, 0);
+            name.setPadding(dp(10), 0, dp(8), 0);
             row.addView(name, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+
+            TextView status = new TextView(this);
+            status.setText(blocked ? "Blocked" : "Allowed");
+            status.setGravity(Gravity.CENTER);
+            status.setTextColor(getColor(blocked ? R.color.modern_blue_700 : R.color.modern_grey_700));
+            status.setTextSize(11);
+            status.setTypeface(Typeface.DEFAULT_BOLD);
+            status.setBackgroundResource(blocked
+                    ? R.drawable.bg_mode_icon_blue
+                    : R.drawable.bg_mode_day_unselected);
+            row.addView(status, new LinearLayout.LayoutParams(dp(72), dp(28)));
             layoutReview.addView(row);
         }
     }
