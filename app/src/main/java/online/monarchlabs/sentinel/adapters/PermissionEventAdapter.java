@@ -72,14 +72,18 @@ public class PermissionEventAdapter extends RecyclerView.Adapter<PermissionEvent
         }
 
         public void bind(PermissionEvent event) {
-            tvPermissionName.setText(event.getPermissionName());
-            tvAction.setText(event.getAction());
-            tvEffect.setText(event.getEffect());
+            String permissionName = cleanDisplayText(event.getPermissionName());
+            String action = cleanDisplayText(event.getAction());
+            String effect = cleanDisplayText(event.getEffect());
+
+            tvPermissionName.setText(permissionName);
+            tvAction.setText(action);
+            tvEffect.setText(effect);
             tvDate.setText(event.getDateFormatted());
             tvTime.setText(event.getTimeFormatted());
 
             // Set icon based on permission type
-            int iconRes = getIconForPermission(event.getPermissionName());
+            int iconRes = getIconForPermission(permissionName);
             ivEventIcon.setImageResource(iconRes);
 
             // Color based on action
@@ -96,6 +100,30 @@ public class PermissionEventAdapter extends RecyclerView.Adapter<PermissionEvent
             }
         }
 
+        private String cleanDisplayText(String value) {
+            if (value == null) {
+                return "";
+            }
+            String cleaned = value.replace("\uFFFD", "");
+            cleaned = cleaned.replaceAll("[\u00C3\u00C2\u00E2\u00F0][^\\s]*\\s*", "");
+            cleaned = cleaned.replaceAll("\\s+", " ").trim();
+            if (cleaned.contains("App Blocked")) {
+                return "App Blocked";
+            }
+            if (cleaned.contains("App Unblocked")) {
+                return "App Unblocked";
+            }
+            if (cleaned.contains("Uninstall Protection")) {
+                return cleaned.substring(cleaned.indexOf("Uninstall Protection"));
+            }
+            if (cleaned.contains("Protection Restored")) {
+                return cleaned.substring(cleaned.indexOf("Protection Restored"));
+            }
+            if (cleaned.contains("Usage synced")) {
+                return cleaned.substring(cleaned.indexOf("Usage synced"));
+            }
+            return cleaned;
+        }
         private int getIconForPermission(String permissionName) {
             if (permissionName == null)
                 return R.drawable.ic_security;

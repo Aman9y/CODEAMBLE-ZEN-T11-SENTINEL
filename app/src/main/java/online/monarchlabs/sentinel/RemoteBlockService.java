@@ -1332,7 +1332,7 @@ public class RemoteBlockService extends Service {
      */
     private void showBlockNotification(String appName, boolean blocked) {
         try {
-            String title = blocked ? "ðŸš« App Blocked" : "âœ… App Unblocked";
+            String title = blocked ? "App Blocked" : "App Unblocked";
             String message = appName + " has been " + (blocked ? "blocked" : "unblocked") + " by parent";
 
             android.app.NotificationManager notificationManager = (android.app.NotificationManager) getSystemService(
@@ -1414,7 +1414,7 @@ public class RemoteBlockService extends Service {
                     // Show toast confirmation
                     new Handler(Looper.getMainLooper()).post(() -> {
                         try {
-                            Toast.makeText(this, "ðŸ”„ Logout listener refreshed", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Logout listener refreshed", Toast.LENGTH_SHORT).show();
                         } catch (Exception e) {
                             Log.e(TAG, "Error showing toast: " + e.getMessage());
                         }
@@ -1447,7 +1447,7 @@ public class RemoteBlockService extends Service {
                                                 new Handler(Looper.getMainLooper()).post(() -> {
                                                     try {
                                                         Toast.makeText(RemoteBlockService.this,
-                                                                "ðŸ“Š Usage data refreshed", Toast.LENGTH_SHORT).show();
+                                                                "Usage data refreshed", Toast.LENGTH_SHORT).show();
                                                     } catch (Exception e) {
                                                         Log.e(TAG, "Error showing toast: " + e.getMessage());
                                                     }
@@ -1467,7 +1467,7 @@ public class RemoteBlockService extends Service {
                         Log.w(TAG, "âŒ Usage permission not available");
                         new Handler(Looper.getMainLooper()).post(() -> {
                             try {
-                                Toast.makeText(this, "âŒ Usage permission required",
+                                Toast.makeText(this, "Usage permission required",
                                         Toast.LENGTH_SHORT).show();
                             } catch (Exception e) {
                                 Log.e(TAG, "Error showing toast: " + e.getMessage());
@@ -1502,7 +1502,7 @@ public class RemoteBlockService extends Service {
                                                 new Handler(Looper.getMainLooper()).post(() -> {
                                                     try {
                                                         Toast.makeText(RemoteBlockService.this,
-                                                                "ðŸ“¤ Data uploaded for parent", Toast.LENGTH_SHORT)
+                                                                "Data uploaded for parent", Toast.LENGTH_SHORT)
                                                                 .show();
                                                     } catch (Exception e) {
                                                         Log.e(TAG, "Error showing toast: " + e.getMessage());
@@ -1523,7 +1523,7 @@ public class RemoteBlockService extends Service {
                         Log.w(TAG, "âŒ Usage permission not available");
                         new Handler(Looper.getMainLooper()).post(() -> {
                             try {
-                                Toast.makeText(this, "âŒ Usage permission required for data upload", Toast.LENGTH_SHORT)
+                                Toast.makeText(this, "Usage permission required for data upload", Toast.LENGTH_SHORT)
                                         .show();
                             } catch (Exception e) {
                                 Log.e(TAG, "Error showing toast: " + e.getMessage());
@@ -2243,6 +2243,7 @@ public class RemoteBlockService extends Service {
         }
         switch (category) {
             case SOCIAL:
+            case COMMUNICATION:
                 return social;
             case GAMES:
                 return games;

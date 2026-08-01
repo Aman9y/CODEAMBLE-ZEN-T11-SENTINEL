@@ -195,19 +195,24 @@ public class StudyModeEditActivity extends BaseActivity {
 
     private String toStudyCategoryId(String storedCategory, String packageName, String appName) {
         String normalized = storedCategory == null ? "" : storedCategory.toLowerCase(Locale.US);
-        if (normalized.contains("social")) {
+        if (normalized.contains("social")
+                || normalized.contains("communication")
+                || normalized.contains("messaging")) {
             return StudyModeContract.CATEGORY_SOCIAL;
         }
         if (normalized.contains("game")) {
             return StudyModeContract.CATEGORY_GAMES;
         }
-        if (normalized.contains("entertainment")) {
+        if (normalized.contains("entertainment")
+                || normalized.contains("video")
+                || normalized.contains("audio")) {
             return StudyModeContract.CATEGORY_ENTERTAINMENT;
         }
 
         AppCategorizer.AppCategory category = AppCategorizer.getCategory(packageName, appName);
         switch (category) {
             case SOCIAL:
+            case COMMUNICATION:
                 return StudyModeContract.CATEGORY_SOCIAL;
             case GAMES:
                 return StudyModeContract.CATEGORY_GAMES;
@@ -245,13 +250,31 @@ public class StudyModeEditActivity extends BaseActivity {
 
     private View createSlotRow(int index) {
         StudyModePolicy.TimeSlot slot = policy.timeSlots.get(index);
+        boolean showDelete = policy.timeSlots.size() > 1;
+
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.setPadding(0, index == 0 ? 0 : dp(12), 0, 0);
+
+        LinearLayout labelRow = new LinearLayout(this);
+        labelRow.setOrientation(LinearLayout.HORIZONTAL);
+        labelRow.setGravity(Gravity.CENTER_VERTICAL);
+        labelRow.addView(createTimeLabel("START"), new LinearLayout.LayoutParams(0,
+                LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+        labelRow.addView(new View(this), new LinearLayout.LayoutParams(dp(36), 1));
+        labelRow.addView(createTimeLabel("END"), new LinearLayout.LayoutParams(0,
+                LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+        if (showDelete) {
+            labelRow.addView(new View(this), new LinearLayout.LayoutParams(dp(42), 1));
+        }
+        container.addView(labelRow);
 
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(0, index == 0 ? 0 : dp(10), 0, 0);
+        row.setPadding(0, dp(6), 0, 0);
 
-        TextView start = createTimeButton("START", formatTime(slot.start));
+        TextView start = createTimeButton(formatTime(slot.start));
         start.setOnClickListener(v -> pickTime(slot.start, value -> {
             slot.start = value;
             renderSlots();
@@ -263,37 +286,49 @@ public class StudyModeEditActivity extends BaseActivity {
         arrow.setGravity(Gravity.CENTER);
         arrow.setTextColor(getColor(R.color.modern_grey_600));
         arrow.setTextSize(18);
-        row.addView(start, new LinearLayout.LayoutParams(0, dp(64), 1));
-        row.addView(arrow, new LinearLayout.LayoutParams(dp(36), dp(64)));
+        row.addView(start, new LinearLayout.LayoutParams(0, dp(44), 1));
+        row.addView(arrow, new LinearLayout.LayoutParams(dp(36), dp(44)));
 
-        TextView end = createTimeButton("END", formatTime(slot.end));
+        TextView end = createTimeButton(formatTime(slot.end));
         end.setOnClickListener(v -> pickTime(slot.end, value -> {
             slot.end = value;
             renderSlots();
             renderReview();
         }));
-        row.addView(end, new LinearLayout.LayoutParams(0, dp(64), 1));
+        row.addView(end, new LinearLayout.LayoutParams(0, dp(44), 1));
 
-        ImageButton delete = new ImageButton(this);
-        delete.setImageResource(R.drawable.ic_delete);
-        delete.setColorFilter(getColor(R.color.modern_red_500));
-        delete.setBackgroundColor(getColor(android.R.color.transparent));
-        delete.setContentDescription("Delete time slot");
-        delete.setVisibility(policy.timeSlots.size() > 1 ? View.VISIBLE : View.INVISIBLE);
-        delete.setOnClickListener(v -> {
-            policy.timeSlots.remove(index);
-            renderSlots();
-            renderReview();
-        });
-        row.addView(delete, new LinearLayout.LayoutParams(dp(42), dp(64)));
-        return row;
+        if (showDelete) {
+            ImageButton delete = new ImageButton(this);
+            delete.setImageResource(R.drawable.ic_delete);
+            delete.setColorFilter(getColor(R.color.modern_red_500));
+            delete.setBackgroundColor(getColor(android.R.color.transparent));
+            delete.setContentDescription("Delete time slot");
+            delete.setOnClickListener(v -> {
+                policy.timeSlots.remove(index);
+                renderSlots();
+                renderReview();
+            });
+            row.addView(delete, new LinearLayout.LayoutParams(dp(42), dp(44)));
+        }
+        container.addView(row);
+        return container;
     }
 
-    private TextView createTimeButton(String label, String time) {
+    private TextView createTimeLabel(String label) {
+        TextView view = new TextView(this);
+        view.setGravity(Gravity.CENTER);
+        view.setText(label);
+        view.setTextColor(getColor(R.color.modern_grey_600));
+        view.setTextSize(12);
+        view.setTypeface(Typeface.DEFAULT_BOLD);
+        return view;
+    }
+
+    private TextView createTimeButton(String time) {
         TextView view = new TextView(this);
         view.setBackgroundResource(R.drawable.bg_mode_time_pill);
         view.setGravity(Gravity.CENTER);
-        view.setText(label + "\n" + time);
+        view.setText(time);
         view.setTextColor(getColor(R.color.modern_blue_700));
         view.setTextSize(14);
         view.setTypeface(Typeface.DEFAULT_BOLD);

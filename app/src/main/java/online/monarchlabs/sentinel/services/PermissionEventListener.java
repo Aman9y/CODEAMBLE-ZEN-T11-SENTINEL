@@ -54,7 +54,7 @@ public class PermissionEventListener extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(TAG, "🔔 PermissionEventListener service starting...");
+        Log.d(TAG, "Ã°Å¸â€â€ PermissionEventListener service starting...");
 
         sessionManager = new SessionManager(this);
         deliveryPrefs = getSharedPreferences(DELIVERY_PREFS, MODE_PRIVATE);
@@ -66,7 +66,7 @@ public class PermissionEventListener extends Service {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() == null
                 || !"parent".equals(sessionManager.getUserType())) {
-            Log.w(TAG, "⚠️ Parent not logged in, stopping service");
+            Log.w(TAG, "Ã¢Å¡Â Ã¯Â¸Â Parent not logged in, stopping service");
             stopSelf();
             return;
         }
@@ -76,7 +76,7 @@ public class PermissionEventListener extends Service {
                 : sessionManager.getParentUserId();
 
         if (parentUserId == null || parentUserId.isEmpty()) {
-            Log.e(TAG, "❌ No parent user ID, cannot listen for events");
+            Log.e(TAG, "Ã¢ÂÅ’ No parent user ID, cannot listen for events");
             stopSelf();
             return;
         }
@@ -118,7 +118,7 @@ public class PermissionEventListener extends Service {
     }
 
     private void setupFirebaseListeners(String parentUserId) {
-        Log.d(TAG, "📡 Setting up Firebase listeners for parent: " + parentUserId);
+        Log.d(TAG, "Ã°Å¸â€œÂ¡ Setting up Firebase listeners for parent: " + parentUserId);
 
         permissionEventsRef = FirebaseDatabase.getInstance()
                 .getReference("v2")
@@ -130,7 +130,7 @@ public class PermissionEventListener extends Service {
             @Override
             public void onChildAdded(DataSnapshot childSnapshot, String previousChildKey) {
                 String childDeviceId = childSnapshot.getKey();
-                Log.d(TAG, "🆕 Detected child device: " + childDeviceId);
+                Log.d(TAG, "Ã°Å¸â€ â€¢ Detected child device: " + childDeviceId);
                 String displayName = childSnapshot.child("childName").getValue(String.class);
                 if (displayName == null || displayName.isEmpty()) {
                     displayName = childSnapshot.child("userName").getValue(String.class);
@@ -155,7 +155,7 @@ public class PermissionEventListener extends Service {
             @Override
             public void onChildRemoved(DataSnapshot snapshot) {
                 String childDeviceId = snapshot.getKey();
-                Log.d(TAG, "❌ Child device removed: " + childDeviceId);
+                Log.d(TAG, "Ã¢ÂÅ’ Child device removed: " + childDeviceId);
                 stopListeningToChild(childDeviceId);
             }
 
@@ -187,7 +187,7 @@ public class PermissionEventListener extends Service {
             public void onChildAdded(DataSnapshot eventSnapshot, String previousChildKey) {
                 PermissionEvent event = eventSnapshot.getValue(PermissionEvent.class);
                 if (event != null) {
-                    Log.d(TAG, "🔔 New permission event: " + event.getPermissionName() + " -> " + event.getAction());
+                    Log.d(TAG, "Ã°Å¸â€â€ New permission event: " + event.getPermissionName() + " -> " + event.getAction());
                     long lastDelivered = deliveryPrefs.getLong(
                             childDeviceId,
                             serviceStartTime - INITIAL_EVENT_LOOKBACK_MS);
@@ -227,7 +227,7 @@ public class PermissionEventListener extends Service {
         eventsRef.addChildEventListener(listener);
         childListeners.put(childDeviceId, listener);
         childEventRefs.put(childDeviceId, eventsRef);
-        Log.d(TAG, "✅ Now listening to events for: " + childDeviceId);
+        Log.d(TAG, "Ã¢Å“â€¦ Now listening to events for: " + childDeviceId);
     }
 
     private void stopListeningToChild(String childDeviceId) {
@@ -237,13 +237,16 @@ public class PermissionEventListener extends Service {
             if (eventsRef != null) {
                 eventsRef.removeEventListener(listener);
             }
-            Log.d(TAG, "🛑 Stopped listening to: " + childDeviceId);
+            Log.d(TAG, "Ã°Å¸â€ºâ€˜ Stopped listening to: " + childDeviceId);
         }
     }
 
     private void showSystemNotification(String childDeviceId, PermissionEvent event) {
         String childName = childNames.getOrDefault(childDeviceId, "Child Device");
-        boolean isActivated = "ACTIVATED".equals(event.getAction());
+        String permissionName = cleanDisplayText(event.getPermissionName());
+        String action = cleanDisplayText(event.getAction());
+        String effect = cleanDisplayText(event.getEffect());
+        boolean isActivated = "ACTIVATED".equals(action);
 
         // Build notification
         Intent intent = new Intent(this, ParentDashboardActivity.class);
@@ -259,21 +262,21 @@ public class PermissionEventListener extends Service {
         int icon = isActivated ? R.drawable.ic_child : R.drawable.ic_refresh;
         int color = isActivated ? 0xFF4CAF50 : 0xFFF44336; // Green or Red
 
-        boolean protectionStateChanged = "Uninstall Protection".equals(event.getPermissionName());
+        boolean protectionStateChanged = "Uninstall Protection".equals(permissionName);
         String title = protectionStateChanged
                 ? (isActivated ? "Protection active - " : "Protection deactivated - ") + childName
-                : childName + ": " + event.getPermissionName() + " " + event.getAction();
+                : childName + ": " + permissionName + " " + action;
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle(title)
-                .setContentText(event.getEffect())
+                .setContentText(effect)
                 .setSmallIcon(icon)
                 .setColor(color)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
                 .setOnlyAlertOnce(true)
                 .setContentIntent(pendingIntent)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(event.getEffect()))
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(effect))
                 .setGroup("child_" + childDeviceId); // Group by child device
 
         // Show notification
@@ -282,9 +285,33 @@ public class PermissionEventListener extends Service {
                 + ((childDeviceId + ":" + event.getPermissionName()).hashCode() & 0x7fffffff) % 100000;
         notificationManager.notify(notificationId, builder.build());
 
-        Log.d(TAG, "📲 Notification shown: " + title);
+        Log.d(TAG, "Ã°Å¸â€œÂ² Notification shown: " + title);
     }
 
+    private String cleanDisplayText(String value) {
+        if (value == null) {
+            return "";
+        }
+        String cleaned = value.replace("\uFFFD", "");
+            cleaned = cleaned.replaceAll("[\u00C3\u00C2\u00E2\u00F0][^\\s]*\\s*", "");
+        cleaned = cleaned.replaceAll("\\s+", " ").trim();
+        if (cleaned.contains("App Blocked")) {
+            return "App Blocked";
+        }
+        if (cleaned.contains("App Unblocked")) {
+            return "App Unblocked";
+        }
+        if (cleaned.contains("Uninstall Protection")) {
+            return cleaned.substring(cleaned.indexOf("Uninstall Protection"));
+        }
+        if (cleaned.contains("Protection Restored")) {
+            return cleaned.substring(cleaned.indexOf("Protection Restored"));
+        }
+        if (cleaned.contains("Usage synced")) {
+            return cleaned.substring(cleaned.indexOf("Usage synced"));
+        }
+        return cleaned;
+    }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand called");

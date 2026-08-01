@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import online.monarchlabs.sentinel.utils.AppCategorizer;
 
 public class ChildAppUtils {
 
@@ -111,15 +112,11 @@ public class ChildAppUtils {
                         } catch (Exception e) {
                             appInfoObj.isSystemApp = false;
                         }
-                        
-                        // Safe category handling
+                        // Centralized category handling
                         try {
-                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                int categoryInt = packageInfo.applicationInfo.category;
-                                appInfoObj.category = getCategoryName(categoryInt);
-                            } else {
-                                appInfoObj.category = "Other";
-                            }
+                            appInfoObj.category = AppCategorizer
+                                    .getCategory(packageName, appName)
+                                    .getDisplayName();
                         } catch (Exception e) {
                             appInfoObj.category = "Other";
                         }
@@ -244,37 +241,6 @@ public class ChildAppUtils {
             return model + " (Child)";
         } else {
             return manufacturer + " " + model + " (Child)";
-        }
-    }
-
-    private static String getCategoryName(int category) {
-        try {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                switch (category) {
-                    case android.content.pm.ApplicationInfo.CATEGORY_AUDIO:
-                        return "Audio";
-                    case android.content.pm.ApplicationInfo.CATEGORY_GAME:
-                        return "Game";
-                    case android.content.pm.ApplicationInfo.CATEGORY_IMAGE:
-                        return "Image";
-                    case android.content.pm.ApplicationInfo.CATEGORY_MAPS:
-                        return "Maps";
-                    case android.content.pm.ApplicationInfo.CATEGORY_NEWS:
-                        return "News";
-                    case android.content.pm.ApplicationInfo.CATEGORY_PRODUCTIVITY:
-                        return "Productivity";
-                    case android.content.pm.ApplicationInfo.CATEGORY_SOCIAL:
-                        return "Social";
-                    case android.content.pm.ApplicationInfo.CATEGORY_VIDEO:
-                        return "Video";
-                    default:
-                        return "Other";
-                }
-            }
-            return "Other";
-        } catch (Exception e) {
-            android.util.Log.e("ChildAppUtils", "Error getting category name: " + e.getMessage());
-            return "Other";
         }
     }
 

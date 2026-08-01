@@ -1389,7 +1389,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
                 Log.d(TAG, "Ã°Å¸Å¡â‚¬Ã°Å¸Å¡â‚¬Ã¯Â¿Â½ UI UPDATED FOR DEVICE: " + device.deviceName);
 
-                showRecentConnectionToast(device, "Ã°Å¸Å½â€° " + device.deviceName + " connected!");
+                showRecentConnectionToast(device, device.deviceName + " connected!");
             });
 
         } catch (Exception e) {
@@ -1455,7 +1455,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
             // Show success message for QR scan connections
             if (isFromQRScan) {
-                Toast.makeText(this, "Ã¢Å“â€¦ " + device.deviceName + " connected via QR scan", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, device.deviceName + " connected via QR scan", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "Ã°Å¸Å½â€° QR scan connection successful - device now appears in parent app");
             }
 
@@ -2677,7 +2677,7 @@ public class ParentDashboardActivity extends BaseActivity {
             // Create welcome text directly - no card wrapper, no button
             TextView welcomeText = new TextView(this);
             welcomeText.setTag("welcome_text");
-            welcomeText.setText("Ã°Å¸Å½â€° Welcome & Important Information\n\n" +
+            welcomeText.setText("Welcome & Important Information\\n\\n" +
                     "Welcome! Here are some important tips:\n\n" +
                     "Ã¢â‚¬Â¢ Use the QR code scanner to connect child devices\n" +
                     "Ã¢â‚¬Â¢ Monitor and manage your child's screen time easily\n" +
@@ -2740,7 +2740,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
                 // Title
                 TextView helpTitle = new TextView(this);
-                helpTitle.setText("Ã°Å¸Å½â€° Welcome & Important Information");
+                helpTitle.setText("Welcome & Important Information");
                 helpTitle.setTextSize(16);
                 helpTitle.setTextColor(ContextCompat.getColor(this, R.color.primary_600));
                 helpTitle.setTypeface(null, Typeface.BOLD);
@@ -2973,7 +2973,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 loadingDialogManager.hide();
             }
 
-            Toast.makeText(this, "Ã¢Å“â€¦ Logged out successfully - All devices disconnected", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Logged out successfully - All devices disconnected", Toast.LENGTH_LONG).show();
 
             // Navigate to main activity
             Intent intent = new Intent(this, MainActivity.class);
@@ -4683,14 +4683,14 @@ public class ParentDashboardActivity extends BaseActivity {
 
             switchDevice(device.deviceId);
 
-            Toast.makeText(this, "Ã¢Å“â€¦ Switched to " + device.deviceName, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Switched to " + device.deviceName, Toast.LENGTH_SHORT).show();
 
             Log.d(TAG, "Ã°Å¸â€â€ž Successfully switched to device: " + device.deviceName + " (" + device.deviceId + ")");
         } catch (Exception e) {
             Log.e(TAG, "Ã¢ÂÅ’ Error switching device: " + e.getMessage());
             runOnUiThread(() -> {
                 hideChildSwitchLoading();
-                Toast.makeText(this, "Ã¢ÂÅ’ Error switching device: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Error switching device: " + e.getMessage(), Toast.LENGTH_LONG).show();
             });
             // Fallback: Clear display on error
             clearUsageDisplay();
@@ -4818,72 +4818,6 @@ public class ParentDashboardActivity extends BaseActivity {
             Log.w(TAG, "No device selected, showing empty usage data");
             clearUsageDisplay();
         }
-    }
-
-    private void showCategoryAppsDialog(String categoryName, List<String> apps) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(
-                new android.view.ContextThemeWrapper(this, R.style.AlertDialogCustom));
-        builder.setTitle(categoryName + " Apps");
-
-        // Create the app list text
-        StringBuilder appList = new StringBuilder();
-        for (String app : apps) {
-            appList.append("Ã¢â‚¬Â¢ ").append(app).append("\n");
-        }
-
-        builder.setMessage(appList.toString());
-        builder.setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-
-    private List<String> getSocialMediaApps() {
-        List<String> apps = new ArrayList<>();
-        apps.add("WhatsApp");
-        apps.add("Instagram");
-        apps.add("Facebook");
-        apps.add("Snapchat");
-        apps.add("Twitter");
-        apps.add("TikTok");
-        apps.add("Telegram");
-        return apps;
-    }
-
-    private List<String> getGamesApps() {
-        List<String> apps = new ArrayList<>();
-        apps.add("PUBG Mobile");
-        apps.add("Free Fire");
-        apps.add("Candy Crush");
-        apps.add("Subway Surfers");
-        apps.add("Temple Run");
-        apps.add("Clash of Clans");
-        apps.add("Minecraft");
-        return apps;
-    }
-
-    private List<String> getEntertainmentApps() {
-        List<String> apps = new ArrayList<>();
-        apps.add("YouTube");
-        apps.add("Netflix");
-        apps.add("Disney+");
-        apps.add("Amazon Prime");
-        apps.add("Spotify");
-        apps.add("TikTok");
-        apps.add("Twitch");
-        return apps;
-    }
-
-    private List<String> getOthersApps() {
-        List<String> apps = new ArrayList<>();
-        apps.add("Chrome");
-        apps.add("Gmail");
-        apps.add("Maps");
-        apps.add("Camera");
-        apps.add("Gallery");
-        apps.add("Settings");
-        apps.add("Calculator");
-        return apps;
     }
 
     // Date navigation is disabled - only showing today's data
@@ -6542,7 +6476,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
         // Use SMART tracking structure for immediate refresh
         loadSmartUsageDataForSelectedDate();
-        Toast.makeText(this, "Ã°Å¸â€œÅ  Refreshing usage data...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Refreshing usage data...", Toast.LENGTH_SHORT).show();
 
         // Re-enable button after short delay
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -6589,7 +6523,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
         // Show toast only if not in silent mode
         if (!silentMode) {
-            Toast.makeText(this, "Ã°Å¸â€â€ž Refreshing usage data from " + currentChildDeviceName + "...", Toast.LENGTH_SHORT)
+            Toast.makeText(this, "Refreshing usage data from " + currentChildDeviceName + "...", Toast.LENGTH_SHORT)
                     .show();
             showLoadingState();
         } else {
@@ -6715,7 +6649,7 @@ public class ParentDashboardActivity extends BaseActivity {
             // Force reload of current date's usage data
             loadSmartUsageDataForSelectedDate();
 
-            Toast.makeText(this, "Ã¢Å“â€¦ Usage data updated successfully", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Usage data updated successfully", Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -6972,7 +6906,7 @@ public class ParentDashboardActivity extends BaseActivity {
                         && Boolean.TRUE.equals(dataSnapshot.child("isActive").getValue(Boolean.class))) {
                     // Timer is already active
                     Toast.makeText(ParentDashboardActivity.this,
-                            "Ã¢Å¡Â Ã¯Â¸Â Timer is already running! Clear it first to set a new one.", Toast.LENGTH_LONG).show();
+                            "Timer is already running. Clear it first to set a new one.", Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -6998,17 +6932,17 @@ public class ParentDashboardActivity extends BaseActivity {
         String minutesText = etLimiterMinutes.getText().toString().trim();
 
         if (hoursText.isEmpty() && minutesText.isEmpty()) {
-            Toast.makeText(this, "Ã¢ÂÂ° Please enter timer duration (hours or minutes)", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Please enter timer duration (hours or minutes)", Toast.LENGTH_LONG).show();
             return;
         }
 
         if (selectedDays.isEmpty()) {
-            Toast.makeText(this, "Ã°Å¸â€œâ€¦ Please select which days the timer should work", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Please select which days the timer should work", Toast.LENGTH_LONG).show();
             return;
         }
 
         if (selectedApps.isEmpty()) {
-            Toast.makeText(this, "Ã°Å¸â€œÂ± Please select apps to limit first", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Please select apps to limit first", Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -7053,7 +6987,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
                         // Enhanced success message
                         String timeText = (hours > 0 ? hours + "h " : "") + (minutes > 0 ? minutes + "m" : "");
-                        Toast.makeText(this, "Ã¢Å“â€¦ Usage limiter activated!\n" +
+                        Toast.makeText(this, "Usage limiter activated!\\n" +
                                 "Ã¢ÂÂ±Ã¯Â¸Â Daily limit: " + timeText + "\n" +
                                 "Ã°Å¸â€œÂ± Apps: " + selectedApps.size() + " apps selected\n" +
                                 "Ã°Å¸â€œâ€¦ Active on: " + selectedDays.size() + " days",
@@ -7099,7 +7033,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 if (!dataSnapshot.exists()
                         || !Boolean.TRUE.equals(dataSnapshot.child("isActive").getValue(Boolean.class))) {
                     // No timer is set
-                    Toast.makeText(ParentDashboardActivity.this, "Ã¢ÂÅ’ No timer set", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ParentDashboardActivity.this, "No timer set", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -7139,7 +7073,7 @@ public class ParentDashboardActivity extends BaseActivity {
             limiterRef.child(currentChildDeviceId).removeValue()
                     .addOnSuccessListener(aVoid -> {
                         Log.d(TAG, "Usage limiter cleared successfully for device: " + currentChildDeviceId);
-                        Toast.makeText(this, "Ã¢Å“â€¦ Usage limiter cleared for " + currentChildDeviceName,
+                        Toast.makeText(this, "Usage limiter cleared for " + currentChildDeviceName,
                                 Toast.LENGTH_SHORT).show();
 
                         // Clear local data
@@ -7557,7 +7491,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 tvLimiterStatus.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
             }
             if (tvLimiterTimer != null) {
-                tvLimiterTimer.setText("Ã¢ÂÂ±Ã¯Â¸Â --:--:--");
+                tvLimiterTimer.setText("--:--:--");
                 tvLimiterTimer.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
             }
 
@@ -7621,7 +7555,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 timeText = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
             }
 
-            tvLimiterTimer.setText("Ã¢ÂÂ±Ã¯Â¸Â " + timeText);
+            tvLimiterTimer.setText(timeText);
 
             // Color coding based on remaining time
             if (remainingTimeMs > 600000) { // More than 10 minutes
@@ -7632,7 +7566,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 tvLimiterTimer.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark));
             } else {
                 tvLimiterTimer.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark));
-                tvLimiterTimer.setText("Ã¢ÂÂ° TIME UP!");
+                tvLimiterTimer.setText("TIME UP!");
             }
         }
 
@@ -7992,7 +7926,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 tvLimiterStatus.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
             }
             if (tvLimiterTimer != null) {
-                tvLimiterTimer.setText("Ã¢ÂÂ±Ã¯Â¸Â --:--:--");
+                tvLimiterTimer.setText("--:--:--");
                 tvLimiterTimer.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
             }
 
@@ -8112,7 +8046,7 @@ public class ParentDashboardActivity extends BaseActivity {
             Notification notification = new NotificationCompat.Builder(this, "timer_expiry_channel")
                     .setSmallIcon(R.drawable.ic_timer_status)
                     .setContentTitle("Timer expired: " + appName)
-                    .setContentText(appName + " Ã¢â‚¬â€ " + exceedText + ". App remains accessible.")
+                    .setContentText(appName + " - " + exceedText + ". App remains accessible.")
                     .setContentIntent(pendingIntent)
                     .setOnlyAlertOnce(true)
                     .setAutoCancel(true)
@@ -8350,7 +8284,7 @@ public class ParentDashboardActivity extends BaseActivity {
             layoutUninstallWarning.setVisibility(View.VISIBLE);
 
             if (tvUninstallWarningTitle != null) {
-                tvUninstallWarningTitle.setText("Ã¢Å¡Â Ã¯Â¸Â App might be affected.");
+                tvUninstallWarningTitle.setText("App might be affected.");
             }
 
             if (tvUninstallWarningMessage != null) {
@@ -8359,7 +8293,7 @@ public class ParentDashboardActivity extends BaseActivity {
             }
 
             if (tvSeeIssuesToggle != null) {
-                tvSeeIssuesToggle.setText("See possible issues Ã¢â€“Â¼");
+                tvSeeIssuesToggle.setText("See possible issues");
                 tvSeeIssuesToggle.setVisibility(View.VISIBLE);
             }
 
@@ -8394,7 +8328,7 @@ public class ParentDashboardActivity extends BaseActivity {
         }
 
         if (tvUninstallWarningTitle != null) {
-            tvUninstallWarningTitle.setText("Ã¢Å¡Â Ã¯Â¸Â App might be affected.");
+            tvUninstallWarningTitle.setText("App might be affected.");
         }
 
         if (tvUninstallWarningMessage != null) {
@@ -8403,7 +8337,7 @@ public class ParentDashboardActivity extends BaseActivity {
         }
 
         if (tvSeeIssuesToggle != null) {
-            tvSeeIssuesToggle.setText("See possible issues Ã¢â€“Â¼");
+            tvSeeIssuesToggle.setText("See possible issues");
         }
 
         if (layoutPossibleIssues != null) {
@@ -8479,7 +8413,7 @@ public class ParentDashboardActivity extends BaseActivity {
                     .setDuration(180)
                     .withEndAction(() -> layoutPossibleIssues.setVisibility(View.GONE))
                     .start();
-            tvSeeIssuesToggle.setText("See possible issues Ã¢â€“Â¼");
+            tvSeeIssuesToggle.setText("See possible issues");
         } else {
             layoutPossibleIssues.setAlpha(0f);
             layoutPossibleIssues.setVisibility(View.VISIBLE);
@@ -8487,7 +8421,7 @@ public class ParentDashboardActivity extends BaseActivity {
                     .alpha(1f)
                     .setDuration(180)
                     .start();
-            tvSeeIssuesToggle.setText("See possible issues Ã¢â€“Â²");
+            tvSeeIssuesToggle.setText("Hide possible issues");
         }
 
         isPossibleIssuesExpanded = !isPossibleIssuesExpanded;
@@ -8581,7 +8515,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 notificationManager.createNotificationChannel(channel);
             }
 
-            String title = "Ã¢Å¡Â Ã¯Â¸Â Uninstall Protection Alert: " + (childName != null ? childName : "Child Device");
+            String title = "Uninstall Protection Alert: " + (childName != null ? childName : "Child Device");
             String message = "";
             if (UninstallDetectionManager.STATUS_SUSPECTED_UNINSTALL.equals(status)) {
                 message = "No communication with child's device for over 30 minutes. App might be uninstalled or disabled.";
@@ -8629,7 +8563,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 notificationManager.createNotificationChannel(channel);
             }
 
-            String title = "Ã¢Å“â€œ Protection Restored: " + (childName != null ? childName : "Child Device");
+            String title = "Protection Restored: " + (childName != null ? childName : "Child Device");
             String message = "Communication has been successfully restored with child's device.";
 
             Intent intent = new Intent(this, ParentDashboardActivity.class);
