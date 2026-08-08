@@ -2694,18 +2694,18 @@ public class ParentDashboardActivity extends BaseActivity {
             welcomeText.setTag("welcome_text");
             welcomeText.setText("Welcome & Important Information\\n\\n" +
                     "Welcome! Here are some important tips:\n\n" +
-                    "Ã¢â‚¬Â¢ Use the QR code scanner to connect child devices\n" +
-                    "Ã¢â‚¬Â¢ Monitor and manage your child's screen time easily\n" +
-                    "Ã¢â‚¬Â¢ Access all controls from this parent dashboard\n\n" +
-                    "Ã¢Å¡Â Ã¯Â¸Â TROUBLESHOOTING: If you can see a device name but cannot track its data, please:\n" +
+                    "- Use the QR code scanner to connect child devices\n" +
+                    "- Monitor and manage your child's screen time easily\n" +
+                    "- Access all controls from this parent dashboard\n\n" +
+                    "TROUBLESHOOTING: If you can see a device name but cannot track its data, please:\n" +
                     "1. Remove the device from this app\n" +
                     "2. Reinstall the app on the child device\n" +
                     "3. Connect the child via QR code again\n\n" +
-                    "Ã°Å¸â€â€™ IMPORTANT SECURITY: Before uninstalling this app or logging out permanently:\n" +
-                    "Ã¢â‚¬Â¢ Always remove all connected child devices first\n" +
-                    "Ã¢â‚¬Â¢ This prevents security issues and data conflicts\n" +
-                    "Ã¢â‚¬Â¢ Use 'Disconnect All Devices' in Settings if needed\n\n" +
-                    "Ã°Å¸â€™Â¡ TIP: Ensure both devices have stable internet when connecting via QR code.");
+                    "IMPORTANT SECURITY: Before uninstalling this app or logging out permanently:\n" +
+                    "- Always remove all connected child devices first\n" +
+                    "- This prevents security issues and data conflicts\n" +
+                    "- Use 'Disconnect All Devices' in Settings if needed\n\n" +
+                    "TIP: Ensure both devices have stable internet when connecting via QR code.");
 
             // Style the text
             welcomeText.setTextSize(14);
@@ -2764,18 +2764,18 @@ public class ParentDashboardActivity extends BaseActivity {
                 // Help content - FULL WELCOME MESSAGE
                 TextView helpContent = new TextView(this);
                 helpContent.setText("Welcome! Here are some important tips:\n\n" +
-                        "Ã¢â‚¬Â¢ Use the QR code scanner to connect child devices\n" +
-                        "Ã¢â‚¬Â¢ Monitor and manage your child's screen time easily\n" +
-                        "Ã¢â‚¬Â¢ Access all controls from this parent dashboard\n\n" +
-                        "Ã¢Å¡Â Ã¯Â¸Â TROUBLESHOOTING: If you can see a device name but cannot track its data, please:\n" +
+                        "- Use the QR code scanner to connect child devices\n" +
+                        "- Monitor and manage your child's screen time easily\n" +
+                        "- Access all controls from this parent dashboard\n\n" +
+                        "TROUBLESHOOTING: If you can see a device name but cannot track its data, please:\n" +
                         "1. Remove the device from this app\n" +
                         "2. Reinstall the app on the child device\n" +
                         "3. Connect the child via QR code again\n\n" +
-                        "Ã¯Â¿Â½ IMPORTANT SECURITY: Before uninstalling this app or logging out permanently:\n" +
-                        "Ã¢â‚¬Â¢ Always remove all connected child devices first\n" +
-                        "Ã¢â‚¬Â¢ This prevents security issues and data conflicts\n" +
-                        "Ã¢â‚¬Â¢ Use 'Disconnect All Devices' in Settings if needed\n\n" +
-                        "Ã¯Â¿Â½ TIP: Ensure both devices have stable internet when connecting via QR code.");
+                        "IMPORTANT SECURITY: Before uninstalling this app or logging out permanently:\n" +
+                        "- Always remove all connected child devices first\n" +
+                        "- This prevents security issues and data conflicts\n" +
+                        "- Use 'Disconnect All Devices' in Settings if needed\n\n" +
+                        "TIP: Ensure both devices have stable internet when connecting via QR code.");
                 helpContent.setTextSize(14);
                 helpContent.setTextColor(ContextCompat.getColor(this, android.R.color.black));
                 helpContent.setLineSpacing(4, 1.1f);
@@ -2812,7 +2812,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 new android.view.ContextThemeWrapper(this, R.style.AlertDialogCustom));
         builder.setTitle("Disconnect All Devices");
         builder.setMessage(
-                "Are you sure you want to disconnect all connected child devices?\n\nThis action will:\nÃ¢â‚¬Â¢ Remove all connected devices\nÃ¢â‚¬Â¢ Sign out all child devices\nÃ¢â‚¬Â¢ Redirect you to the login page\n\nThis action cannot be undone.");
+                "Are you sure you want to disconnect all connected child devices?\n\nThis action will:\n- Remove all connected devices\n- Sign out all child devices\n- Redirect you to the login page\n\nThis action cannot be undone.");
         builder.setPositiveButton("Disconnect All", (dialog, which) -> {
             disconnectAllDevices();
         });
@@ -3908,9 +3908,9 @@ public class ParentDashboardActivity extends BaseActivity {
                                 // Show confirmation dialog and pass device ID directly
                                 new AlertDialog.Builder(new android.view.ContextThemeWrapper(
                                         ParentDashboardActivity.this, R.style.AlertDialogCustom))
-                                        .setTitle("Ã°Å¸â€”â€˜Ã¯Â¸Â Remove Device")
-                                        .setMessage("Removing \"" + deviceNameToRemove
-                                            + "\".\n\nThis will log out the child from the child side as well as here.\n\nDo you wish to continue?")
+                                        .setTitle("Remove Device")
+                                        .setMessage("Remove \"" + deviceNameToRemove
+                                            + "\"?\n\nThis will sign the child out on their device and remove it from this parent account.")
                                         .setPositiveButton("Remove", (dialog, which) -> {
                                             removeChildDevice(deviceIdToRemove);
                                         })
@@ -3960,10 +3960,9 @@ public class ParentDashboardActivity extends BaseActivity {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(
                 new android.view.ContextThemeWrapper(this, R.style.AlertDialogCustom));
-        builder.setTitle("Ã°Å¸â€”â€˜Ã¯Â¸Â Remove Device");
-        builder.setMessage("Removing \"" + deviceName + "\".\n\n" +
-                "This will log out the child from the child side as well as here.\n\n" +
-                "Do you wish to continue?");
+        builder.setTitle("Remove Device");
+        builder.setMessage("Remove \"" + deviceName + "\"?\n\n" +
+                "This will sign the child out on their device and remove it from this parent account.");
 
         builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
             @Override
@@ -4473,17 +4472,17 @@ public class ParentDashboardActivity extends BaseActivity {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(
                 new android.view.ContextThemeWrapper(this, R.style.AlertDialogCustom));
-        builder.setTitle("Ã°Å¸â€”â€˜Ã¯Â¸Â Clear Timer");
+        builder.setTitle("Clear Timer");
         builder.setMessage("Are you sure you want to clear the timer for \"" + currentChildDeviceName + "\"?\n\n" +
-                "Ã¢Å¡Â Ã¯Â¸Â This will:\n" +
-                "Ã¢â‚¬Â¢ Stop the current timer immediately\n" +
-                "Ã¢â‚¬Â¢ Remove all timer settings\n" +
-                "Ã¢â‚¬Â¢ Clear selected apps for this device\n" +
-                "Ã¢â‚¬Â¢ Require setting a new timer to restart\n\n" +
+                "This will:\n" +
+                "- Stop the current timer immediately\n" +
+                "- Remove all timer settings\n" +
+                "- Clear selected apps for this device\n" +
+                "- Require setting a new timer to restart\n\n" +
                 "This action cannot be undone.");
         builder.setIcon(android.R.drawable.ic_dialog_alert);
 
-        builder.setPositiveButton("Ã°Å¸â€”â€˜Ã¯Â¸Â Clear Timer", (dialog, which) -> {
+        builder.setPositiveButton("Clear Timer", (dialog, which) -> {
             Log.d(TAG, "Ã¢Å“â€¦ User confirmed timer clear for device: " + currentChildDeviceName);
             clearUsageLimiter();
         });
@@ -4658,8 +4657,8 @@ public class ParentDashboardActivity extends BaseActivity {
                     // Show confirmation dialog before removing
                     new AlertDialog.Builder(ParentDashboardActivity.this)
                             .setTitle("Remove Device?")
-                                .setMessage("Removing \"" + device.deviceName
-                                    + "\".\n\nThis will log out the child from the child side as well as here.\n\nDo you wish to continue?")
+                                .setMessage("Remove \"" + device.deviceName
+                                    + "\"?\n\nThis will sign the child out on their device and remove it from this parent account.")
                             .setPositiveButton("Remove", (dialog, which) -> {
                                 removeChildDevice(device.deviceId);
                                 if (dialogHolder[0] != null)
@@ -5661,7 +5660,7 @@ public class ParentDashboardActivity extends BaseActivity {
     private void showSmartTrackingInfo(long trackingStartTime, long daysSinceTracking, int appsCount) {
         try {
             Date trackingStart = new Date(trackingStartTime);
-            String trackingInfo = String.format("Ã°Å¸Å½Â¯ Smart Tracking: Day %d since %s (%d apps)",
+            String trackingInfo = String.format("Smart Tracking: Day %d since %s (%d apps)",
                     daysSinceTracking + 1,
                     new SimpleDateFormat("MMM dd", Locale.getDefault()).format(trackingStart),
                     appsCount);
@@ -6407,7 +6406,7 @@ public class ParentDashboardActivity extends BaseActivity {
                         } else {
                             StringBuilder appListText = new StringBuilder();
                             for (String appName : appNames) {
-                                appListText.append("Ã¢â‚¬Â¢ ").append(appName).append("\n");
+                                appListText.append("- ").append(appName).append("\n");
                             }
                             appListText.append("\nTotal: ").append(appNames.size()).append(" apps");
                             builder.setMessage(appListText.toString());
@@ -6603,7 +6602,7 @@ public class ParentDashboardActivity extends BaseActivity {
                             .addOnSuccessListener(aVoid -> {
                                 Log.d(TAG, "Ã¢Å“â€¦ Upload trigger sent successfully to child device");
                                 Toast.makeText(ParentDashboardActivity.this,
-                                        "Ã°Å¸â€œÂ¤ Requesting fresh data from " + currentChildDeviceName,
+                                        "Requesting fresh data from " + currentChildDeviceName,
                                         Toast.LENGTH_SHORT).show();
                             })
                             .addOnFailureListener(e -> {
@@ -6623,7 +6622,7 @@ public class ParentDashboardActivity extends BaseActivity {
                     }
 
                     Toast.makeText(ParentDashboardActivity.this,
-                            "Ã°Å¸â€œÂ± " + currentChildDeviceName + " is offline (last seen " + lastSeenText + ")",
+                            currentChildDeviceName + " is offline (last seen " + lastSeenText + ")",
                             Toast.LENGTH_LONG).show();
                 }
             }
@@ -6686,18 +6685,18 @@ public class ParentDashboardActivity extends BaseActivity {
             }
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
-            builder.setTitle("Ã°Å¸Å½â€° Welcome to Parental Control");
+            builder.setTitle("Welcome to Parental Control");
             builder.setMessage("Welcome! Here are some important tips:\n\n" +
-                    "Ã¢â‚¬Â¢ Use the QR code scanner to connect child devices\n" +
-                    "Ã¢â‚¬Â¢ Monitor and manage your child's screen time easily\n" +
-                    "Ã¢â‚¬Â¢ Access all controls from this parent dashboard\n\n" +
-                    "Ã¢Å¡Â Ã¯Â¸Â TROUBLESHOOTING: If you can see a device name but cannot track its data, please:\n" +
+                    "- Use the QR code scanner to connect child devices\n" +
+                    "- Monitor and manage your child's screen time easily\n" +
+                    "- Access all controls from this parent dashboard\n\n" +
+                    "TROUBLESHOOTING: If you can see a device name but cannot track its data, please:\n" +
                     "1. Remove the device from this app\n" +
                     "2. Reinstall the app on the child device\n" +
                     "3. Connect the child via QR code again\n\n" +
-                    "Ã°Å¸â€â€™ IMPORTANT SECURITY: Before uninstalling this app or logging out permanently:\n" +
-                    "Ã¢â‚¬Â¢ Always remove all connected child devices first\n" +
-                    "Ã¢â‚¬Â¢ This prevents security issues and data conflicts");
+                    "IMPORTANT SECURITY: Before uninstalling this app or logging out permanently:\n" +
+                    "- Always remove all connected child devices first\n" +
+                    "- This prevents security issues and data conflicts");
             builder.setCancelable(false);
 
             builder.setPositiveButton("Got It", (dialog, which) -> {
@@ -6741,15 +6740,15 @@ public class ParentDashboardActivity extends BaseActivity {
     private void showTroubleshootingDialog() {
         try {
             AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
-            builder.setTitle("Ã°Å¸â€ºÂ Ã¯Â¸Â Device Tracking Help");
+            builder.setTitle("Device Tracking Help");
             builder.setMessage("If you can see a device name but cannot track its data:\n\n" +
                     "SOLUTION:\n" +
                     "1. Remove the device from this parent app\n" +
                     "2. Reinstall the app on the child device\n" +
                     "3. Connect the child via QR code again\n\n" +
                     "This usually fixes connection and data tracking issues.\n\n" +
-                    "Ã°Å¸â€™Â¡ TIP: Make sure both devices have stable internet connection when connecting via QR code.\n\n" +
-                    "Ã°Å¸â€â€™ SECURITY REMINDER: Before uninstalling this app, always remove all connected devices first to prevent security issues.");
+                    "TIP: Make sure both devices have a stable internet connection when connecting via QR code.\n\n" +
+                    "SECURITY REMINDER: Before uninstalling this app, always remove all connected devices first to prevent security issues.");
 
             builder.setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
 
@@ -7004,10 +7003,10 @@ public class ParentDashboardActivity extends BaseActivity {
 
                         // Enhanced success message
                         String timeText = (hours > 0 ? hours + "h " : "") + (minutes > 0 ? minutes + "m" : "");
-                        Toast.makeText(this, "Usage limiter activated!\\n" +
-                                "Ã¢ÂÂ±Ã¯Â¸Â Daily limit: " + timeText + "\n" +
-                                "Ã°Å¸â€œÂ± Apps: " + selectedApps.size() + " apps selected\n" +
-                                "Ã°Å¸â€œâ€¦ Active on: " + selectedDays.size() + " days",
+                        Toast.makeText(this, "Usage limiter activated!\n" +
+                                "Daily limit: " + timeText + "\n" +
+                                "Apps: " + selectedApps.size() + " apps selected\n" +
+                                "Active on: " + selectedDays.size() + " days",
                                 Toast.LENGTH_LONG).show();
 
                         // Update UI
@@ -7076,10 +7075,10 @@ public class ParentDashboardActivity extends BaseActivity {
         builder.setMessage(
                 "Are you sure you want to clear the usage limiter for \"" + currentChildDeviceName + "\"?\n\n" +
                         "This will:\n" +
-                        "Ã¢â‚¬Â¢ Stop the current limiter immediately\n" +
-                        "Ã¢â‚¬Â¢ Remove all limiter settings\n" +
-                        "Ã¢â‚¬Â¢ Clear selected apps and days\n" +
-                        "Ã¢â‚¬Â¢ Reset the timer\n\n" +
+                        "- Stop the current limiter immediately\n" +
+                        "- Remove all limiter settings\n" +
+                        "- Clear selected apps and days\n" +
+                        "- Reset the timer\n\n" +
                         "This action cannot be undone.");
         builder.setIcon(android.R.drawable.ic_dialog_alert);
 
@@ -7268,14 +7267,14 @@ public class ParentDashboardActivity extends BaseActivity {
             String statusText;
             if (remainingTimeMs <= 0) {
                 color = ContextCompat.getColor(this, android.R.color.holo_red_dark);
-                statusText = "Ã¢ÂÂ° TIME EXPIRED";
+                statusText = "TIME EXPIRED";
                 timeText = "00:00:00";
             } else if (remainingTimeMs < 30 * 60 * 1000) { // Less than 30 minutes
                 color = ContextCompat.getColor(this, android.R.color.holo_orange_dark);
-                statusText = "Ã¢Å¡Â Ã¯Â¸Â TIME RUNNING LOW";
+                statusText = "TIME RUNNING LOW";
             } else {
                 color = ContextCompat.getColor(this, android.R.color.holo_green_dark);
-                statusText = "Ã¢Å“â€¦ TIMER ACTIVE";
+                statusText = "TIMER ACTIVE";
             }
 
             // Show original parent-set duration
@@ -7302,9 +7301,9 @@ public class ParentDashboardActivity extends BaseActivity {
             binding.tvDeviceStatus.setTextColor(textColor);
 
             // Create detailed timer info
-            String detailedInfo = "Ã¢ÂÂ° Live Timer: " + timeText + originalDuration +
-                    "\nÃ°Å¸â€œâ€¦ Device: " + currentChildDeviceName +
-                    "\nÃ°Å¸â€œÅ  Status: " + statusText;
+            String detailedInfo = "Live Timer: " + timeText + originalDuration +
+                    "\nDevice: " + currentChildDeviceName +
+                    "\nStatus: " + statusText;
 
             // Show in a timer status view if available
             if (tvLimiterStatus != null) {
@@ -7696,7 +7695,7 @@ public class ParentDashboardActivity extends BaseActivity {
                     if (lastSync != null) {
                         long syncAge = System.currentTimeMillis() - lastSync;
                         if (syncAge < 5000) { // Recent sync (within 5 seconds)
-                            status += " Ã¢â€”Â"; // Live indicator
+                            status += " (live)";
                         }
                     }
 
