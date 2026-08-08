@@ -149,6 +149,7 @@
         <activity
             android:name=".ForgotPasswordActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:theme="@style/Theme.Master2.NoActionBar" />
 
         <activity

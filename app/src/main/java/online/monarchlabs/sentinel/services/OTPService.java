@@ -1,7 +1,7 @@
 package online.monarchlabs.sentinel.services;
 
 import android.util.Log;
-import online.monarchlabs.sentinel.config.AppwriteConfig;
+import online.monarchlabs.sentinel.BuildConfig;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -12,10 +12,12 @@ import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 
 /**
  * OTP Service for handling email-based OTP verification
- * Uses Appwrite backend services for secure OTP management
+ * Uses Cloudflare Workers for secure OTP management
  */
 public class OTPService {
     
@@ -23,12 +25,10 @@ public class OTPService {
     private static final int OTP_LENGTH = 6;
     private static final long OTP_VALIDITY_MINUTES = 5; // OTP valid for 5 minutes
     
-    private AppwriteConfig appwriteConfig;
     private ParentOtpLoginService parentOtpLoginService;
     private Gson gson;
     
-    // In-memory OTP storage for demo purposes
-    // In production, use a proper database like Appwrite
+    // In-memory OTP storage for tracking sent codes locally
     private static final Map<String, OTPData> otpStorage = new HashMap<>();
     
     private static class OTPData {
@@ -46,16 +46,9 @@ public class OTPService {
     }
     
     public OTPService(android.content.Context context) {
-        // Initialize Appwrite config
-        try {
-            this.appwriteConfig = AppwriteConfig.getInstance(context);
-            Log.d(TAG, "🚀 OTPService initialized with Appwrite backend");
-        } catch (Exception e) {
-            Log.w(TAG, "Appwrite config not available, falling back to in-memory storage: " + e.getMessage());
-            this.appwriteConfig = null;
-        }
         this.gson = new Gson();
         this.parentOtpLoginService = new ParentOtpLoginService(context);
+        Log.d(TAG, "OTPService initialized with Cloudflare backend");
     }
     
     /**
@@ -104,14 +97,13 @@ public class OTPService {
                         .sendSignupOtp(email, otp, userType)
                         .get();
                 if (sendResult.success) {
-                    // Verification remains client-side; store only after delivery succeeds.
                     long expirationTime = System.currentTimeMillis() + (OTP_VALIDITY_MINUTES * 60 * 1000);
                     storeOTPInMemory(email, otp, expirationTime, userType);
-                    Log.d(TAG, "OTP email sent through rate-limited Appwrite function to: " + email);
-                    return new OTPResult(true, sendResult.message, "rate_limited_function", null, 0L);
+                    Log.d(TAG, "OTP email sent through Cloudflare to: " + email);
+                    return new OTPResult(true, "Verification code sent.", "cloudflare", null, 0L);
                 }
 
-                Log.w(TAG, "OTP send rejected: " + sendResult.message);
+                Log.w(TAG, "Cloudflare OTP send rejected: " + sendResult.message);
                 return new OTPResult(false, sendResult.message, null, null, sendResult.retryAfterSeconds);
                 
             } catch (Exception e) {
@@ -121,145 +113,7 @@ public class OTPService {
         });
     }
     
-    /**
-     * Send email via Appwrite Function using HTTP request
-     */
-    private boolean sendEmailViaAppwriteFunction(AppwriteConfig config, Map<String, Object> emailData) {
-        // Try multiple authentication methods
-        
-        // Method 1: Try with API key
-        boolean result = attemptFunctionCall(config, emailData, true);
-        if (result) return true;
-        
-        // Method 2: Try without API key (public function)
-        Log.d(TAG, "🔄 Retrying function call without API key (public execution)...");
-        return attemptFunctionCall(config, emailData, false);
-    }
-    
-    private boolean attemptFunctionCall(AppwriteConfig config, Map<String, Object> emailData, boolean useApiKey) {
-        try {
-            // Construct Appwrite Functions execution endpoint
-            String functionUrl = config.getEndpoint() + "/functions/" + config.getEmailFunctionId() + "/executions";
-            URL url = new URL(functionUrl);
-            
-            Log.d(TAG, "🔗 Calling Appwrite function at: " + functionUrl + (useApiKey ? " (with API key)" : " (public)"));
-            
-            // Create HTTP connection
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("X-Appwrite-Project", config.getProjectId());
-            
-            // Do NOT send server API keys from the client. Appwrite Functions should
-            // be secured via Appwrite permissions or invoked from trusted backend.
-            
-            conn.setDoOutput(true);
-            conn.setConnectTimeout(30000);
-            conn.setReadTimeout(30000);
-            
-            // Prepare function execution payload
-            Map<String, Object> payload = new HashMap<>();
-            payload.put("body", gson.toJson(emailData));
-            payload.put("async", false);
-            payload.put("path", "/");
-            payload.put("method", "POST");
-            payload.put("headers", new HashMap<>());
-            
-            String jsonPayload = gson.toJson(payload);
-            Log.d(TAG, "📤 Sending payload: " + jsonPayload);
-            
-            // Send request
-            try (OutputStream os = conn.getOutputStream()) {
-                byte[] input = jsonPayload.getBytes(StandardCharsets.UTF_8);
-                os.write(input, 0, input.length);
-            }
-            
-            // Get response
-            int responseCode = conn.getResponseCode();
-            String responseMessage = conn.getResponseMessage();
-            
-            Log.d(TAG, "📥 HTTP Response Code: " + responseCode);
-            Log.d(TAG, "📥 HTTP Response Message: " + responseMessage);
-            
-            // Read response body for debugging
-            String responseBody = "";
-            try {
-                java.io.InputStream inputStream = (responseCode >= 200 && responseCode < 300) 
-                    ? conn.getInputStream() 
-                    : conn.getErrorStream();
-                
-                if (inputStream != null) {
-                    java.util.Scanner scanner = new java.util.Scanner(inputStream, "UTF-8");
-                    responseBody = scanner.useDelimiter("\\A").hasNext() ? scanner.next() : "";
-                    scanner.close();
-                    Log.d(TAG, "📥 Response Body: " + responseBody);
-                }
-            } catch (Exception e) {
-                Log.w(TAG, "Failed to read response body: " + e.getMessage());
-            }
-            
-            // Handle specific error cases for retry logic
-            if (responseCode == 401 && useApiKey) {
-                Log.w(TAG, "🔄 API key authentication failed, will try public access");
-                return false; // Let the parent method retry without API key
-            }
-            
-            if (responseCode == 404) {
-                Log.e(TAG, "❌ Function not found - please check function ID: " + config.getEmailFunctionId());
-                return false;
-            } else if (responseCode == 403) {
-                Log.e(TAG, "❌ Forbidden - check your project permissions");
-                return false;
-            }
-            
-            boolean success = (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_CREATED);
-            if (success) {
-                Log.i(TAG, "✅ Email function executed successfully!" + (useApiKey ? " (with API key)" : " (public)"));
-            } else {
-                Log.e(TAG, "❌ Function execution failed with code: " + responseCode + " - " + responseMessage);
-                Log.e(TAG, "❌ Function URL: " + functionUrl);
-                Log.e(TAG, "❌ Response body: " + responseBody);
-                Log.e(TAG, "❌ Project ID: " + config.getEndpoint());
-                Log.e(TAG, "❌ Function ID: " + config.getEmailFunctionId());
-            }
-            
-            return success;
-            
-        } catch (IOException e) {
-            Log.e(TAG, "❌ Network error calling Appwrite function: " + e.getMessage(), e);
-            return false;
-        } catch (Exception e) {
-            Log.e(TAG, "❌ Error calling Appwrite function: " + e.getMessage(), e);
-            return false;
-        }
-    }
 
-    /**
-     * Fallback method for sending OTP when Appwrite fails
-     * This simulates email sending for development/testing purposes
-     */
-     private OTPResult sendOTPFallback(String email, String otp, String userType) {
-        try {
-            Log.d(TAG, "📧 FALLBACK: Email function not available, using development mode so pls see what is the prolem and fix that");
-            Log.i(TAG, "🔑 DEVELOPMENT MODE - Your OTP is: " + otp + " (Valid for " + OTP_VALIDITY_MINUTES + " minutes)");
-            Log.i(TAG, "📧 Email would be sent to: " + email);
-            Log.i(TAG, "👤 User type: " + userType);
-            Log.w(TAG, "⚠️ To enable real email sending:");
-            Log.w(TAG, "   1. Deploy the email function to Appwrite");
-            Log.w(TAG, "   2. Configure email provider (Gmail/Outlook)"); 
-            Log.w(TAG, "   3. Set EMAIL_USER and EMAIL_PASS environment variables");
-            Log.w(TAG, "   4. See backend/appwrite/parent-email-otp-login/README.md for instructions");
-            
-            return new OTPResult(true, 
-                "DEVELOPMENT MODE - OTP: " + otp + " (Deploy email function for real emails)", 
-                "fallback_method", null);
-                
-        } catch (Exception e) {
-            Log.e(TAG, "❌ Even fallback method failed: " + e.getMessage(), e);
-            return new OTPResult(false, "All email sending methods failed: " + e.getMessage(), null, e);
-        }
-    }
-    
     /**
      * Verify the provided OTP
      * @param email Email address

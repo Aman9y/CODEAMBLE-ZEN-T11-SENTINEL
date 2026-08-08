@@ -22,6 +22,9 @@ import android.text.Editable;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import android.widget.ScrollView;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import online.monarchlabs.sentinel.services.OTPService;
 import online.monarchlabs.sentinel.services.ParentOtpLoginService;
@@ -41,6 +44,7 @@ public class ForgotPasswordActivity extends BaseActivity {
     private static final String TAG = "ForgotPassword";
 
     // Views
+    private ScrollView forgotPasswordScrollView;
     private ImageView btnBack;
     private TextView tvTitle, tvSubtitle;
 
@@ -97,10 +101,12 @@ public class ForgotPasswordActivity extends BaseActivity {
         loadingDialogManager = new LoadingDialogManager(this);
 
         setupClickListeners();
+        setupKeyboardHandling();
         showState(State.EMAIL);
     }
 
     private void initViews() {
+        forgotPasswordScrollView = findViewById(R.id.forgotPasswordScrollView);
         btnBack = findViewById(R.id.btnBack);
         tvTitle = findViewById(R.id.tvTitle);
         tvSubtitle = findViewById(R.id.tvSubtitle);
@@ -150,6 +156,34 @@ public class ForgotPasswordActivity extends BaseActivity {
             }
             @Override public void afterTextChanged(Editable s) {}
         });
+    }
+
+    private void setupKeyboardHandling() {
+        ViewCompat.setOnApplyWindowInsetsListener(forgotPasswordScrollView, (view, insets) -> {
+            int imeBottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
+            int systemBottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
+            int bottomPadding = Math.max(imeBottom, systemBottom);
+            view.setPadding(view.getPaddingLeft(), view.getPaddingTop(), view.getPaddingRight(), bottomPadding);
+            return insets;
+        });
+
+        View.OnFocusChangeListener scrollIntoView = (view, hasFocus) -> {
+            if (hasFocus) {
+                view.post(() -> {
+                    if (forgotPasswordScrollView != null) {
+                        android.graphics.Rect rect = new android.graphics.Rect();
+                        view.getDrawingRect(rect);
+                        forgotPasswordScrollView.offsetDescendantRectToMyCoords(view, rect);
+                        forgotPasswordScrollView.smoothScrollTo(0, Math.max(0, rect.top - 48));
+                    }
+                });
+            }
+        };
+
+        etEmail.setOnFocusChangeListener(scrollIntoView);
+        etOtp.setOnFocusChangeListener(scrollIntoView);
+
+        ViewCompat.requestApplyInsets(forgotPasswordScrollView);
     }
 
     private void showState(State state) {

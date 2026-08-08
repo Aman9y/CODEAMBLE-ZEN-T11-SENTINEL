@@ -13,7 +13,20 @@
           "package_name": "com.example.master2"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "727704588991-bkv2pen1tvdklcp70njm750mhap1q99o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "online.monarchlabs.sentinel",
+            "certificate_hash": "f0b0d95d6f0489e48514bb2a5a988ccb5dba311c"
+          }
+        },
+        {
+          "client_id": "727704588991-aofbk4qagfcq9qnl715h1ftmcjcadiag.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDKncVcqAghVky7wmDDPYeB84Gc8tMz6B4"
@@ -21,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "727704588991-aofbk4qagfcq9qnl715h1ftmcjcadiag.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     },

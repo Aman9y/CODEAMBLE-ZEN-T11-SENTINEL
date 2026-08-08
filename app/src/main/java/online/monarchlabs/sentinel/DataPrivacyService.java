@@ -3,7 +3,6 @@ package online.monarchlabs.sentinel;
 import android.content.Context;
 import android.util.Log;
 
-import online.monarchlabs.sentinel.config.AppwriteConfig;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -18,18 +17,15 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 
-/** Calls the Appwrite privacy function using a verified Firebase ID token. */
+/** Calls the Cloudflare privacy service using a verified Firebase ID token. */
 public final class DataPrivacyService {
     private static final String TAG = "DataPrivacyService";
 
-    private final AppwriteConfig config;
     private final Gson gson = new Gson();
-
     private final android.content.Context context;
 
     public DataPrivacyService(Context context) {
         this.context = context;
-        config = AppwriteConfig.getInstance(context);
     }
 
     public CompletableFuture<Result> deleteCurrentAccount() {
@@ -106,11 +102,14 @@ public final class DataPrivacyService {
     private Result execute(String action, Map<String, Object> data, String idToken) {
         HttpURLConnection connection = null;
         try {
-            URL url = new URL(config.getEndpoint() + "/functions/" + config.getPrivacyFunctionId() + "/executions");
+            if (BuildConfig.CLOUDFLARE_PRIVACY_WORKER_URL == null || BuildConfig.CLOUDFLARE_PRIVACY_WORKER_URL.isEmpty()) {
+                return new Result(false, "Cloudflare Privacy service URL is not configured.");
+            }
+            URL url = new URL(BuildConfig.CLOUDFLARE_PRIVACY_WORKER_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestProperty("X-Appwrite-Project", config.getProjectId());
+            connection.setRequestProperty("X-Sentinel-Client-Secret", BuildConfig.CLOUDFLARE_CLIENT_SECRET);
             connection.setDoOutput(true);
             connection.setConnectTimeout(30000);
             connection.setReadTimeout(60000);
@@ -119,29 +118,25 @@ public final class DataPrivacyService {
             functionBody.put("action", action);
             functionBody.put("firebaseIdToken", idToken);
 
-            Map<String, Object> execution = new HashMap<>();
-            execution.put("body", gson.toJson(functionBody));
-            execution.put("async", false);
-            execution.put("path", "/");
-            execution.put("method", "POST");
-            execution.put("headers", new HashMap<>());
-
             try (OutputStream output = connection.getOutputStream()) {
-                output.write(gson.toJson(execution).getBytes(StandardCharsets.UTF_8));
+                output.write(gson.toJson(functionBody).getBytes(StandardCharsets.UTF_8));
             }
 
             int responseCode = connection.getResponseCode();
             String responseBody = readResponse(connection, responseCode);
             if (responseCode < 200 || responseCode >= 300) {
-                return new Result(false, "Privacy service request failed.");
+                if (!responseBody.isEmpty()) {
+                    try {
+                        JsonObject errorObj = JsonParser.parseString(responseBody).getAsJsonObject();
+                        if (errorObj.has("message")) {
+                            return new Result(false, errorObj.get("message").getAsString());
+                        }
+                    } catch (Exception ignored) {}
+                }
+                return new Result(false, "Privacy service request failed: HTTP " + responseCode);
             }
 
-            JsonObject executionResult = JsonParser.parseString(responseBody).getAsJsonObject();
-            String functionResponse = getString(executionResult, "responseBody");
-            if (functionResponse == null || functionResponse.isEmpty()) {
-                functionResponse = getString(executionResult, "response");
-            }
-            JsonObject result = JsonParser.parseString(functionResponse).getAsJsonObject();
+            JsonObject result = JsonParser.parseString(responseBody).getAsJsonObject();
             return new Result(result.has("success") && result.get("success").getAsBoolean(),
                     getString(result, "message"));
         } catch (Exception error) {

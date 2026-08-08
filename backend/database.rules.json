@@ -20,6 +20,7 @@
         }
       },
       "parent_profiles": {
+        ".indexOn": ["email"],
         "$uid": {
           ".read": "auth != null && auth.uid === $uid",
           ".write": "auth != null && auth.uid === $uid"

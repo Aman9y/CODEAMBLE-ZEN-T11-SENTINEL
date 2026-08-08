@@ -17,6 +17,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import android.widget.ScrollView;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import online.monarchlabs.sentinel.services.OTPService;
 import online.monarchlabs.sentinel.utils.InfoContentRepository;
@@ -27,6 +30,7 @@ import com.google.android.material.textfield.TextInputLayout;
 public class ParentSignupPasswordActivity extends BaseActivity {
     private static final String TAG = "ParentSignupPassword";
 
+    private ScrollView signupPasswordScrollView;
     private EditText etPassword, etConfirmPassword;
     private TextInputLayout tilPassword, tilConfirmPassword;
     private Button btnCreateAccount;
@@ -49,6 +53,7 @@ public class ParentSignupPasswordActivity extends BaseActivity {
             return;
         }
 
+        signupPasswordScrollView = findViewById(R.id.signupPasswordScrollView);
         etPassword = findViewById(R.id.etPassword);
         etConfirmPassword = findViewById(R.id.etConfirmPassword);
         tilPassword = findViewById(R.id.tilPassword);
@@ -68,6 +73,7 @@ public class ParentSignupPasswordActivity extends BaseActivity {
         cbLegalAgreement.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) tvLegalError.setVisibility(View.GONE);
         });
+        setupKeyboardHandling();
     }
 
     private void setupLegalAgreementText() {
@@ -168,5 +174,33 @@ public class ParentSignupPasswordActivity extends BaseActivity {
         etPassword.setEnabled(!loading);
         etConfirmPassword.setEnabled(!loading);
         cbLegalAgreement.setEnabled(!loading);
+    }
+
+    private void setupKeyboardHandling() {
+        ViewCompat.setOnApplyWindowInsetsListener(signupPasswordScrollView, (view, insets) -> {
+            int imeBottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
+            int systemBottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
+            int bottomPadding = Math.max(imeBottom, systemBottom);
+            view.setPadding(view.getPaddingLeft(), view.getPaddingTop(), view.getPaddingRight(), bottomPadding);
+            return insets;
+        });
+
+        View.OnFocusChangeListener scrollIntoView = (view, hasFocus) -> {
+            if (hasFocus) {
+                view.post(() -> {
+                    if (signupPasswordScrollView != null) {
+                        android.graphics.Rect rect = new android.graphics.Rect();
+                        view.getDrawingRect(rect);
+                        signupPasswordScrollView.offsetDescendantRectToMyCoords(view, rect);
+                        signupPasswordScrollView.smoothScrollTo(0, Math.max(0, rect.top - 48));
+                    }
+                });
+            }
+        };
+
+        etPassword.setOnFocusChangeListener(scrollIntoView);
+        etConfirmPassword.setOnFocusChangeListener(scrollIntoView);
+
+        ViewCompat.requestApplyInsets(signupPasswordScrollView);
     }
 }

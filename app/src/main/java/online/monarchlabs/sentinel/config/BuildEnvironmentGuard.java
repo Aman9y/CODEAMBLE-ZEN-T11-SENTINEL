@@ -50,15 +50,9 @@ public final class BuildEnvironmentGuard {
                             + actualProjectId + " / " + actualDatabaseUrl);
         }
 
-        required("APPWRITE_ENDPOINT", BuildConfig.APPWRITE_ENDPOINT);
-        String appwriteProjectId = required(
-                "APPWRITE_PROJECT_ID",
-                BuildConfig.APPWRITE_PROJECT_ID);
-
         Log.i(TAG, "Environment=" + BuildConfig.BUILD_ENVIRONMENT
                 + ", FirebaseProject=" + actualProjectId
-                + ", Database=" + actualDatabaseUrl
-                + ", AppwriteProject=" + appwriteProjectId);
+                + ", Database=" + actualDatabaseUrl);
     }
 
     private static String required(String label, String value) {

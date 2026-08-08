@@ -3,7 +3,7 @@ package online.monarchlabs.sentinel.services;
 import android.content.Context;
 import android.util.Log;
 
-import online.monarchlabs.sentinel.config.AppwriteConfig;
+import online.monarchlabs.sentinel.BuildConfig;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -20,11 +20,9 @@ import java.util.concurrent.CompletableFuture;
 public class ParentOtpLoginService {
     private static final String TAG = "ParentOtpLoginService";
 
-    private final AppwriteConfig config;
     private final Gson gson = new Gson();
 
     public ParentOtpLoginService(Context context) {
-        this.config = AppwriteConfig.getInstance(context);
     }
 
     public CompletableFuture<Result> sendLoginOtp(String email) {
@@ -55,46 +53,40 @@ public class ParentOtpLoginService {
         return CompletableFuture.supplyAsync(() -> {
             HttpURLConnection conn = null;
             try {
-                String functionUrl = config.getEndpoint() + "/functions/" + config.getParentOtpFunctionId()
-                        + "/executions";
-                URL url = new URL(functionUrl);
+                String workerUrl = BuildConfig.CLOUDFLARE_EMAIL_WORKER_URL;
+                if (workerUrl == null || workerUrl.isEmpty()) {
+                    Log.e(TAG, "Cloudflare Worker URL is not configured.");
+                    return new Result(false, "OTP service is not configured.", null);
+                }
 
+                URL url = new URL(workerUrl);
                 conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json");
-                conn.setRequestProperty("X-Appwrite-Project", config.getProjectId());
+                conn.setRequestProperty("X-Sentinel-Client-Secret", BuildConfig.CLOUDFLARE_CLIENT_SECRET);
                 conn.setDoOutput(true);
                 conn.setConnectTimeout(30000);
                 conn.setReadTimeout(30000);
 
-                Map<String, Object> executionPayload = new HashMap<>();
-                executionPayload.put("body", gson.toJson(bodyData));
-                executionPayload.put("async", false);
-                executionPayload.put("path", "/");
-                executionPayload.put("method", "POST");
-                executionPayload.put("headers", new HashMap<>());
-
                 try (OutputStream os = conn.getOutputStream()) {
-                    os.write(gson.toJson(executionPayload).getBytes(StandardCharsets.UTF_8));
+                    os.write(gson.toJson(bodyData).getBytes(StandardCharsets.UTF_8));
                 }
 
                 int responseCode = conn.getResponseCode();
                 String responseBody = readResponse(conn, responseCode);
                 if (responseCode < 200 || responseCode >= 300) {
-                    Log.e(TAG, "Appwrite parent OTP function failed: " + responseBody);
-                    return new Result(false, "OTP login service failed. Please try again.", null);
+                    Log.e(TAG, "Cloudflare OTP service failed: " + responseBody);
+                    String message = "OTP service failed. Please try again.";
+                    try {
+                        JsonObject errObj = JsonParser.parseString(responseBody).getAsJsonObject();
+                        if (errObj.has("message")) {
+                            message = errObj.get("message").getAsString();
+                        }
+                    } catch (Exception ignored) {}
+                    return new Result(false, message, null);
                 }
 
-                JsonObject execution = JsonParser.parseString(responseBody).getAsJsonObject();
-                String response = getString(execution, "responseBody");
-                if (response == null || response.isEmpty()) {
-                    response = getString(execution, "response");
-                }
-                if (response == null || response.isEmpty()) {
-                    return new Result(false, "OTP login service returned an empty response.", null);
-                }
-
-                JsonObject result = JsonParser.parseString(response).getAsJsonObject();
+                JsonObject result = JsonParser.parseString(responseBody).getAsJsonObject();
                 boolean success = result.has("success") && result.get("success").getAsBoolean();
                 String message = getString(result, "message");
                 String customToken = getString(result, "customToken");
@@ -103,7 +95,7 @@ public class ParentOtpLoginService {
                         : 0L;
                 return new Result(success, message != null ? message : "", customToken, retryAfterSeconds);
             } catch (Exception e) {
-                Log.e(TAG, "Error calling parent OTP login function", e);
+                Log.e(TAG, "Error calling parent OTP service", e);
                 return new Result(false, e.getMessage() != null ? e.getMessage() : "OTP login failed.", null);
             } finally {
                 if (conn != null) {

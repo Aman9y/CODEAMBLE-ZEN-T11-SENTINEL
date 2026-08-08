@@ -73,15 +73,10 @@ android {
             buildConfigString(productionFirebaseDatabaseUrl)
         )
 
-        // Consolidated SHARED Appwrite Backend Configuration
-        buildConfigField("String", "APPWRITE_ENDPOINT", buildConfigString(localValue("APPWRITE_ENDPOINT", "https://nyc.cloud.appwrite.io/v1")))
-        buildConfigField("String", "APPWRITE_PROJECT_ID", buildConfigString(localValue("APPWRITE_PROJECT_ID", "6954c478002421753c93")))
-        buildConfigField("String", "APPWRITE_DATABASE_ID", buildConfigString(localValue("APPWRITE_DATABASE_ID", "familyguard_db")))
-        buildConfigField("String", "APPWRITE_USERS_COLLECTION_ID", buildConfigString(localValue("APPWRITE_USERS_COLLECTION_ID", "users_collection")))
-        buildConfigField("String", "APPWRITE_OTP_COLLECTION_ID", buildConfigString(localValue("APPWRITE_OTP_COLLECTION_ID", "otp_verification_collection")))
-        buildConfigField("String", "APPWRITE_EMAIL_FUNCTION_ID", buildConfigString(localValue("APPWRITE_EMAIL_FUNCTION_ID", "6954c61d0039f7129141")))
-        buildConfigField("String", "APPWRITE_PARENT_OTP_FUNCTION_ID", buildConfigString(localValue("APPWRITE_PARENT_OTP_FUNCTION_ID", "parent_email_otp_login")))
-        buildConfigField("String", "APPWRITE_PRIVACY_FUNCTION_ID", buildConfigString(localValue("APPWRITE_PRIVACY_FUNCTION_ID", "parent_email_otp_login")))
+        // Cloudflare Workers Configuration
+        buildConfigField("String", "CLOUDFLARE_EMAIL_WORKER_URL", buildConfigString(localValue("CLOUDFLARE_EMAIL_WORKER_URL", "")))
+        buildConfigField("String", "CLOUDFLARE_PRIVACY_WORKER_URL", buildConfigString(localValue("CLOUDFLARE_PRIVACY_WORKER_URL", "")))
+        buildConfigField("String", "CLOUDFLARE_CLIENT_SECRET", buildConfigString(localValue("CLOUDFLARE_CLIENT_SECRET", "")))
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", buildConfigString(localValue("GOOGLE_WEB_CLIENT_ID", "")))
     }
 

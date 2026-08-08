@@ -125,7 +125,10 @@ public class ParentEmailLoginActivity extends BaseActivity {
             if (hasFocus) {
                 view.post(() -> {
                     if (loginScrollView != null) {
-                        loginScrollView.smoothScrollTo(0, Math.max(0, view.getBottom() - 64));
+                        android.graphics.Rect rect = new android.graphics.Rect();
+                        view.getDrawingRect(rect);
+                        loginScrollView.offsetDescendantRectToMyCoords(view, rect);
+                        loginScrollView.smoothScrollTo(0, Math.max(0, rect.top - 48));
                     }
                 });
             }

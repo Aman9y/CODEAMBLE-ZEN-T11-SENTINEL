@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_dashboard_gradient"
     android:clipToPadding="false"
-    android:focusableInTouchMode="true"
     android:fillViewport="true"
     android:fitsSystemWindows="true">
 

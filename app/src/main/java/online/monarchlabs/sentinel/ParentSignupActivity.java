@@ -19,6 +19,10 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import android.view.View;
+import android.widget.ScrollView;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,6 +40,7 @@ import online.monarchlabs.sentinel.utils.PhoneUtils;
 public class ParentSignupActivity extends BaseActivity {
     private static final String TAG = "ParentSignup";
 
+    private ScrollView signupScrollView;
     private EditText etName, etEmail, etPhone;
     private TextInputLayout tilName, tilEmail, tilPhone;
     private Button btnSignup;
@@ -51,9 +56,11 @@ public class ParentSignupActivity extends BaseActivity {
         mAuth = FirebaseAuth.getInstance();
         initViews();
         setupListeners();
+        setupKeyboardHandling();
     }
 
     private void initViews() {
+        signupScrollView = findViewById(R.id.signupScrollView);
         etName = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
         etPhone = findViewById(R.id.etPhone);
@@ -229,5 +236,34 @@ public class ParentSignupActivity extends BaseActivity {
         etName.setEnabled(!loading);
         etEmail.setEnabled(!loading);
         etPhone.setEnabled(!loading);
+    }
+
+    private void setupKeyboardHandling() {
+        ViewCompat.setOnApplyWindowInsetsListener(signupScrollView, (view, insets) -> {
+            int imeBottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
+            int systemBottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
+            int bottomPadding = Math.max(imeBottom, systemBottom);
+            view.setPadding(view.getPaddingLeft(), view.getPaddingTop(), view.getPaddingRight(), bottomPadding);
+            return insets;
+        });
+
+        View.OnFocusChangeListener scrollIntoView = (view, hasFocus) -> {
+            if (hasFocus) {
+                view.post(() -> {
+                    if (signupScrollView != null) {
+                        android.graphics.Rect rect = new android.graphics.Rect();
+                        view.getDrawingRect(rect);
+                        signupScrollView.offsetDescendantRectToMyCoords(view, rect);
+                        signupScrollView.smoothScrollTo(0, Math.max(0, rect.top - 48));
+                    }
+                });
+            }
+        };
+
+        etName.setOnFocusChangeListener(scrollIntoView);
+        etEmail.setOnFocusChangeListener(scrollIntoView);
+        etPhone.setOnFocusChangeListener(scrollIntoView);
+
+        ViewCompat.requestApplyInsets(signupScrollView);
     }
 }
