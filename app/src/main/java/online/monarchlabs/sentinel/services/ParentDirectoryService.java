@@ -15,6 +15,7 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 
 import online.monarchlabs.sentinel.utils.PhoneUtils;
+import online.monarchlabs.sentinel.utils.DataSecurityUtils;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -29,11 +30,12 @@ public final class ParentDirectoryService {
     }
 
     private DatabaseReference getDirectoryRef(String phone) {
+        String hashedPhoneKey = DataSecurityUtils.hashLookupKey(phone);
         return FirebaseDatabase.getInstance()
                 .getReference("v2")
                 .child("directory")
                 .child("phone_to_email")
-                .child(phone);
+                .child(hashedPhoneKey);
     }
 
     public CompletableFuture<Boolean> registerProfileIndex(
@@ -52,13 +54,15 @@ public final class ParentDirectoryService {
             return future;
         }
 
+        String encryptedEmail = DataSecurityUtils.encryptText(email);
         getDirectoryRef(normalizedPhone).runTransaction(new Transaction.Handler() {
             @NonNull
             @Override
             public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
-                String currentEmail = mutableData.getValue(String.class);
-                if (currentEmail == null || currentEmail.equals(email)) {
-                    mutableData.setValue(email);
+                String currentRawValue = mutableData.getValue(String.class);
+                String currentDecryptedEmail = DataSecurityUtils.decryptText(currentRawValue);
+                if (currentDecryptedEmail == null || currentDecryptedEmail.equals(email)) {
+                    mutableData.setValue(encryptedEmail);
                     return Transaction.success(mutableData);
                 }
                 return Transaction.abort();
@@ -118,7 +122,8 @@ public final class ParentDirectoryService {
         }
 
         // We use set value since the current user already owns this phone
-        getDirectoryRef(normalizedPhone).setValue(newEmail)
+        String encryptedEmail = DataSecurityUtils.encryptText(newEmail);
+        getDirectoryRef(normalizedPhone).setValue(encryptedEmail)
                 .addOnSuccessListener(aVoid -> future.complete(true))
                 .addOnFailureListener(e -> future.complete(false));
 

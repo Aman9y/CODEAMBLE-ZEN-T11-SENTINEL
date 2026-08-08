@@ -290,19 +290,34 @@ public class ParentEmailLoginActivity extends BaseActivity {
         }
     }
 
+    private String pendingResolvedPhone = null;
+
     private void loginWithEmailAndPassword(String email, String password) {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        Log.d(TAG, "Firebase Auth successful");
+                        Log.d(TAG, "Firebase Auth successful for email: " + email);
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null) {
+                            if (pendingResolvedPhone != null) {
+                                // Execute index auto-repair after user is authenticated (auth != null)
+                                new online.monarchlabs.sentinel.services.ParentDirectoryService(this)
+                                        .registerProfileIndex(user.getUid(), email, pendingResolvedPhone);
+                                pendingResolvedPhone = null;
+                            }
                             // Check for existing device session before proceeding
                             checkDeviceSession(user.getUid());
                         }
                     } else {
                         setLoading(false);
-                        Log.e(TAG, "Login failed", task.getException());
+                        Log.e(TAG, "Login failed for email " + email, task.getException());
+                        if (task.getException() != null && task.getException().getMessage() != null 
+                                && task.getException().getMessage().contains("password")) {
+                            tilPassword.setError("Incorrect password. Please check your password.");
+                            etPassword.requestFocus();
+                        } else {
+                            tilEmail.setError(getLoginFailureMessage(task.getException()));
+                        }
                         Toast.makeText(this, getLoginFailureMessage(task.getException()), Toast.LENGTH_LONG).show();
                     }
                 });
@@ -322,13 +337,13 @@ public class ParentEmailLoginActivity extends BaseActivity {
 
     private void resolvePhoneAndLogin(String phoneInput, String password) {
         String normalizedPhone = online.monarchlabs.sentinel.utils.PhoneUtils.normalize(phoneInput);
-        
-        DatabaseReference indexRef = FirebaseDatabase.getInstance()
-                .getReference("v2")
-                .child("directory")
-                .child("phone_to_email")
-                .child(normalizedPhone);
-                
+        String rawDigitsPhone = online.monarchlabs.sentinel.utils.PhoneUtils.rawDigits(phoneInput);
+
+        String primaryHashKey = online.monarchlabs.sentinel.utils.DataSecurityUtils.hashLookupKey(normalizedPhone);
+        String secondaryHashKey = !rawDigitsPhone.equals(normalizedPhone)
+                ? online.monarchlabs.sentinel.utils.DataSecurityUtils.hashLookupKey(rawDigitsPhone)
+                : "";
+
         final boolean[] completed = {false};
         android.os.Handler timeoutHandler = new android.os.Handler(android.os.Looper.getMainLooper());
         Runnable timeout = () -> {
@@ -339,22 +354,91 @@ public class ParentEmailLoginActivity extends BaseActivity {
             }
         };
         timeoutHandler.postDelayed(timeout, 10_000L);
-                
-        indexRef.addListenerForSingleValueEvent(new ValueEventListener() {
+
+        // Candidate 1: Primary 10-digit hash key (v2/directory/phone_to_email/{primaryHashKey})
+        DatabaseReference ref1 = FirebaseDatabase.getInstance()
+                .getReference("v2").child("directory").child("phone_to_email").child(primaryHashKey);
+
+        ref1.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (completed[0]) return;
+                if (snapshot.exists()) {
+                    onPhoneResolved(snapshot.getValue(String.class), password, completed, timeoutHandler, timeout, normalizedPhone);
+                } else if (!secondaryHashKey.isEmpty()) {
+                    // Candidate 2: Secondary raw-digits hash key (e.g. 917304377739)
+                    tryCandidate2(secondaryHashKey, normalizedPhone, password, completed, timeoutHandler, timeout);
+                } else {
+                    // Candidate 3: Unhashed 10-digit key in v2
+                    tryCandidate3(normalizedPhone, password, completed, timeoutHandler, timeout);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                if (completed[0]) return;
+                completed[0] = true;
+                timeoutHandler.removeCallbacks(timeout);
+                setLoading(false);
+                Log.e(TAG, "Phone-to-email resolution failed", error.toException());
+                Toast.makeText(ParentEmailLoginActivity.this, "Network error. Please try again.", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void tryCandidate2(String secondaryHashKey, String normalizedPhone, String password, boolean[] completed, Handler timeoutHandler, Runnable timeout) {
+        DatabaseReference ref2 = FirebaseDatabase.getInstance()
+                .getReference("v2").child("directory").child("phone_to_email").child(secondaryHashKey);
+        ref2.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (completed[0]) return;
+                if (snapshot.exists()) {
+                    onPhoneResolved(snapshot.getValue(String.class), password, completed, timeoutHandler, timeout, normalizedPhone);
+                } else {
+                    tryCandidate3(normalizedPhone, password, completed, timeoutHandler, timeout);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                tryCandidate3(normalizedPhone, password, completed, timeoutHandler, timeout);
+            }
+        });
+    }
+
+    private void tryCandidate3(String normalizedPhone, String password, boolean[] completed, Handler timeoutHandler, Runnable timeout) {
+        DatabaseReference ref3 = FirebaseDatabase.getInstance()
+                .getReference("v2").child("directory").child("phone_to_email").child(normalizedPhone);
+        ref3.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (completed[0]) return;
+                if (snapshot.exists()) {
+                    onPhoneResolved(snapshot.getValue(String.class), password, completed, timeoutHandler, timeout, normalizedPhone);
+                } else {
+                    tryCandidate4(normalizedPhone, password, completed, timeoutHandler, timeout);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                tryCandidate4(normalizedPhone, password, completed, timeoutHandler, timeout);
+            }
+        });
+    }
+
+    private void tryCandidate4(String normalizedPhone, String password, boolean[] completed, Handler timeoutHandler, Runnable timeout) {
+        DatabaseReference ref4 = FirebaseDatabase.getInstance()
+                .getReference("phone_login_index").child(normalizedPhone);
+        ref4.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 if (completed[0]) return;
                 completed[0] = true;
                 timeoutHandler.removeCallbacks(timeout);
-                
                 if (snapshot.exists()) {
-                    String email = snapshot.getValue(String.class);
-                    if (email != null && !email.isEmpty()) {
-                        Log.d(TAG, "Phone resolved to email, proceeding with login.");
-                        loginWithEmailAndPassword(email, password);
-                    } else {
-                        handlePhoneResolutionFailed();
-                    }
+                    onPhoneResolved(snapshot.getValue(String.class), password, completed, timeoutHandler, timeout, normalizedPhone);
                 } else {
                     handlePhoneResolutionFailed();
                 }
@@ -365,13 +449,22 @@ public class ParentEmailLoginActivity extends BaseActivity {
                 if (completed[0]) return;
                 completed[0] = true;
                 timeoutHandler.removeCallbacks(timeout);
-                
-                setLoading(false);
-                Log.e(TAG, "Phone-to-email resolution failed", error.toException());
-                Toast.makeText(ParentEmailLoginActivity.this, 
-                        "Network error. Please try again.", Toast.LENGTH_LONG).show();
+                handlePhoneResolutionFailed();
             }
         });
+    }
+
+    private void onPhoneResolved(String rawEmailValue, String password, boolean[] completed, Handler timeoutHandler, Runnable timeout, String normalizedPhone) {
+        completed[0] = true;
+        timeoutHandler.removeCallbacks(timeout);
+        String email = online.monarchlabs.sentinel.utils.DataSecurityUtils.decryptText(rawEmailValue);
+        if (email != null && !email.isEmpty()) {
+            Log.d(TAG, "Phone resolved to email, proceeding with login.");
+            pendingResolvedPhone = normalizedPhone;
+            loginWithEmailAndPassword(email, password);
+        } else {
+            handlePhoneResolutionFailed();
+        }
     }
 
     private void handlePhoneResolutionFailed() {

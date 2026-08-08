@@ -7,7 +7,7 @@
         "phone_to_email": {
           "$phone": {
             ".read": true,
-            ".write": "auth != null && (!data.exists() || root.child('v2/parent_profiles/' + auth.uid + '/phone').val() === $phone)",
+            ".write": "auth != null",
             ".validate": "newData.isString()"
           }
         }
@@ -167,7 +167,7 @@
       "permission_logs": {
         "$deviceId": {
           ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
-          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)"
+          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid))"
         }
       },
       "device_health": {
@@ -191,7 +191,7 @@
       "timer_state_requests": {
         "$deviceId": {
           ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
-          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)"
+          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid))"
         }
       },
       "timer_events": {

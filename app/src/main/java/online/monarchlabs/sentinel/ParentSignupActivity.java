@@ -166,11 +166,12 @@ public class ParentSignupActivity extends BaseActivity {
 
     private void checkPhoneAvailability(String name, String email, String phone) {
         String normalizedPhone = PhoneUtils.normalize(phone);
+        String hashedPhoneKey = online.monarchlabs.sentinel.utils.DataSecurityUtils.hashLookupKey(normalizedPhone);
         DatabaseReference phoneRef = FirebaseDatabase.getInstance()
                 .getReference("v2")
                 .child("directory")
                 .child("phone_to_email")
-                .child(normalizedPhone);
+                .child(hashedPhoneKey);
                 
         phoneRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
