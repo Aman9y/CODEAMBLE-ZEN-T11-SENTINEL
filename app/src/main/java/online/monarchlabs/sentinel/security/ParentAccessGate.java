@@ -20,11 +20,10 @@ import java.util.Locale;
 import java.util.concurrent.Executor;
 
 public final class ParentAccessGate {
-    private static final long ACCESS_WINDOW_MS = 10 * 60 * 1000L;
     private static final String PREF_NAME = "parent_access_lock";
     private static final String KEY_PIN_HASH = "pin_hash";
     private static final String KEY_PIN_SALT = "pin_salt";
-    private static long lastVerifiedAt = 0L;
+    private static boolean verifiedForCurrentAppSession = false;
     private static boolean promptShowing = false;
 
     private ParentAccessGate() {
@@ -181,15 +180,15 @@ public final class ParentAccessGate {
     }
 
     public static boolean hasFreshVerification() {
-        return System.currentTimeMillis() - lastVerifiedAt < ACCESS_WINDOW_MS;
+        return verifiedForCurrentAppSession;
     }
 
     public static void clearVerification() {
-        lastVerifiedAt = 0L;
+        verifiedForCurrentAppSession = false;
     }
 
     private static void markVerified() {
-        lastVerifiedAt = System.currentTimeMillis();
+        verifiedForCurrentAppSession = true;
     }
 
     private static boolean hasPin(Context context) {

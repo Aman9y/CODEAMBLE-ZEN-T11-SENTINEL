@@ -11,6 +11,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import online.monarchlabs.sentinel.config.BuildEnvironmentGuard;
+import online.monarchlabs.sentinel.security.ParentAccessGate;
 import online.monarchlabs.sentinel.utils.CrashlyticsLogger;
 
 public class Master2Application extends Application {
@@ -34,6 +35,9 @@ public class Master2Application extends Application {
             @Override
             public void onActivityStopped(Activity activity) {
                 startedActivityCount = Math.max(0, startedActivityCount - 1);
+                if (startedActivityCount == 0) {
+                    ParentAccessGate.clearVerification();
+                }
             }
 
             @Override public void onActivityCreated(Activity activity, Bundle state) {}
