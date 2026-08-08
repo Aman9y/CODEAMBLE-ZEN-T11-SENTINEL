@@ -175,6 +175,12 @@
             android:theme="@style/Theme.Master2.NoActionBar" />
 
         <activity
+            android:name=".ContentFilteringActivity"
+            android:exported="false"
+            android:label="Content Filtering"
+            android:theme="@style/Theme.Master2.NoActionBar" />
+
+        <activity
             android:name=".InfoDetailActivity"
             android:exported="false"
             android:theme="@style/Theme.Master2.NoActionBar" />

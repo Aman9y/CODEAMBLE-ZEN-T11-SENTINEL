@@ -182,6 +182,8 @@ public class ParentSettingsActivity extends BaseActivity {
         // Help & Support
         findViewById(R.id.btnHelpSupport).setOnClickListener(v -> openInfoPage(InfoContentRepository.KEY_HELP));
 
+        findViewById(R.id.btnContentFiltering).setOnClickListener(v -> openContentFiltering());
+
         // Logout
         MaterialButton btnLogout = findViewById(R.id.btnLogout);
         if (btnLogout != null) {
@@ -197,6 +199,28 @@ public class ParentSettingsActivity extends BaseActivity {
     private void openInfoPage(String contentKey) {
         Intent intent = new Intent(this, InfoDetailActivity.class);
         intent.putExtra(InfoDetailActivity.EXTRA_CONTENT_KEY, contentKey);
+        startActivity(intent);
+    }
+
+    private void openContentFiltering() {
+        String childId = selectedChildDeviceId;
+        if (childId == null || childId.isEmpty()) {
+            childId = connectedDevicesManager.getCurrentDeviceId();
+        }
+        if (childId == null || childId.isEmpty()) {
+            childId = connectedDevicesManager.autoSelectDevice();
+        }
+        if (childId == null || childId.isEmpty()) {
+            Toast.makeText(this, "Please connect or select a child device first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ChildDevice device = connectedDevicesManager.getDevice(childId);
+        Intent intent = new Intent(this, ContentFilteringActivity.class);
+        intent.putExtra(ContentFilteringActivity.EXTRA_DEVICE_ID, childId);
+        if (device != null) {
+            intent.putExtra(ContentFilteringActivity.EXTRA_DEVICE_NAME, device.deviceName);
+        }
         startActivity(intent);
     }
 
