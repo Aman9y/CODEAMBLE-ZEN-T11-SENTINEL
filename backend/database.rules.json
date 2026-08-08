@@ -200,6 +200,20 @@
           ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid))"
         }
       },
+      "sos_events": {
+        "$parentUid": {
+          ".read": "auth != null && auth.uid === $parentUid",
+          "$eventId": {
+            ".write": "auth != null && ((newData.exists() && newData.child('parentUid').val() === $parentUid && root.child('v2/device_owners').child(newData.child('childDeviceId').val()).child('childAuthUid').val() === auth.uid && root.child('v2/device_owners').child(newData.child('childDeviceId').val()).child('parentUid').val() === $parentUid) || (data.exists() && auth.uid === $parentUid))"
+          }
+        }
+      },
+      "sos_active_by_device": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && ((newData.exists() && newData.child('childDeviceId').val() === $deviceId && root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid) || (data.exists() && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid))"
+        }
+      },
       "client_capabilities": {
         "$deviceId": {
           ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
