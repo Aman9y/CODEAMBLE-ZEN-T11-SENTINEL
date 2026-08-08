@@ -146,6 +146,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.activity:activity:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.biometric:biometric:1.2.0-alpha05")
 
     // Material Design
     implementation("com.google.android.material:material:1.10.0")

@@ -73,6 +73,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import online.monarchlabs.sentinel.models.ChildDeviceManager;
+import online.monarchlabs.sentinel.security.ParentAccessGate;
 import online.monarchlabs.sentinel.utils.LoadingDialogManager;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -282,6 +283,7 @@ public class ParentDashboardActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ParentAccessGate.requireVerifiedParent(this);
         Log.d(TAG, "onCreate called");
 
         // Make status bar transparent but visible (light status bar icons)

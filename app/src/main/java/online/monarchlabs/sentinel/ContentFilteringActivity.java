@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import online.monarchlabs.sentinel.data.FirebaseSchemaV2Repository;
+import online.monarchlabs.sentinel.security.ParentAccessGate;
 import online.monarchlabs.sentinel.services.NextDnsWorkerService;
 
 public class ContentFilteringActivity extends BaseActivity {
@@ -55,6 +56,7 @@ public class ContentFilteringActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_content_filtering);
+        ParentAccessGate.requireVerifiedParent(this);
 
         connectedDevicesManager = new ConnectedDevicesManager(this);
         deviceId = getIntent().getStringExtra(EXTRA_DEVICE_ID);

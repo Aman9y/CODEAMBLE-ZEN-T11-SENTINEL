@@ -12,6 +12,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import online.monarchlabs.sentinel.utils.LoadingDialogManager;
 import online.monarchlabs.sentinel.utils.InfoContentRepository;
+import online.monarchlabs.sentinel.security.ParentAccessGate;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -39,6 +40,7 @@ public class ParentSettingsActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_parent_settings);
+        ParentAccessGate.requireVerifiedParent(this);
 
         // Initialize managers
         sessionManager = new SessionManager(this);
@@ -265,6 +267,7 @@ public class ParentSettingsActivity extends BaseActivity {
 
         // Logout logic
         sessionManager.logoutUser();
+        ParentAccessGate.clearVerification();
         if (mAuth != null) {
             mAuth.signOut();
         }
