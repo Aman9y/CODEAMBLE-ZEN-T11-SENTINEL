@@ -72,6 +72,7 @@ import android.content.DialogInterface;
 import androidx.annotation.NonNull;
 import online.monarchlabs.sentinel.ChildLoginActivity;
 import online.monarchlabs.sentinel.ChildDevice;
+import online.monarchlabs.sentinel.services.SosService;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.os.Build;
@@ -859,6 +860,11 @@ public class ChildDashboardActivity extends BaseActivity {
             Log.w(TAG, "⚠️ cardViewUsageData not found in layout");
         }
 
+        View cardSos = findViewById(R.id.cardSos);
+        if (cardSos != null) {
+            cardSos.setOnClickListener(v -> showSosReasonDialog());
+        }
+
         updateTodayScreenTime();
 
 
@@ -902,6 +908,45 @@ public class ChildDashboardActivity extends BaseActivity {
         } else {
             registerReceiver(blockedAppsUiReceiver, filter);
         }
+    }
+
+    private void showSosReasonDialog() {
+        String[] reasons = {
+                "I feel unsafe",
+                "I am lost",
+                "I need pickup",
+                "Medical help",
+                "Other emergency"
+        };
+        new AlertDialog.Builder(this)
+                .setTitle("Send SOS to parent?")
+                .setItems(reasons, (dialog, which) -> confirmSos(reasons[which]))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void confirmSos(String reason) {
+        new AlertDialog.Builder(this)
+                .setTitle("Confirm SOS")
+                .setMessage("This will send an urgent alert to your parent.")
+                .setPositiveButton("Send SOS", (dialog, which) -> sendSos(reason))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void sendSos(String reason) {
+        String parentUid = sessionManager != null ? sessionManager.getParentUserId() : null;
+        String childName = sessionManager != null ? sessionManager.getChildName() : "";
+        String deviceName = sessionManager != null ? sessionManager.getDeviceName() : Build.MODEL;
+        SosService.sendSos(this, parentUid, childDeviceId, childName, deviceName, reason)
+                .addOnSuccessListener(unused -> new AlertDialog.Builder(this)
+                        .setTitle("SOS Sent")
+                        .setMessage("Your parent has been notified. Stay somewhere safe if you can.")
+                        .setPositiveButton("OK", null)
+                        .show())
+                .addOnFailureListener(error -> Toast.makeText(this,
+                        "Could not send SOS: " + error.getMessage(),
+                        Toast.LENGTH_LONG).show());
     }
 
     private void updateBlockedAppsSection() {
