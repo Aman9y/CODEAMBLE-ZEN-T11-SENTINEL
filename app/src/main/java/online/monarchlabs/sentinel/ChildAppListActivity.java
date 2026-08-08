@@ -174,6 +174,20 @@ public class ChildAppListActivity extends BaseActivity {
         adapter = new ChildAppListAdapter(appList, new ChildAppListAdapter.OnAppSelectionListener() {
             @Override
             public void onAppSelected(AppInfo appInfo, boolean isSelected) {
+                if (blockingSelection && isSelected
+                        && AppBlockingPolicy.isUnblockable(appInfo.packageName)) {
+                    appInfo.isSelected = false;
+                    selectedApps.remove(appInfo);
+                    Toast.makeText(
+                            ChildAppListActivity.this,
+                            AppBlockingPolicy.getBlockedSelectionMessage(
+                                    appInfo.packageName,
+                                    appInfo.name),
+                            Toast.LENGTH_LONG).show();
+                    adapter.notifyDataSetChanged();
+                    updateFabVisibility();
+                    return;
+                }
                 if (isSelected) {
                     if (!selectedApps.contains(appInfo)) {
                         selectedApps.add(appInfo);
