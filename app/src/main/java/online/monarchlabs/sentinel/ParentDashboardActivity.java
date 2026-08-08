@@ -7974,6 +7974,24 @@ public class ParentDashboardActivity extends BaseActivity {
             Toast.makeText(this, "Connect a child device first", Toast.LENGTH_SHORT).show();
             return;
         }
+        new AlertDialog.Builder(this)
+                .setTitle("Safe Zones")
+                .setItems(new String[]{"Add safe zone here", "Remove safe zone"}, (dialog, which) -> {
+                    if (which == 0) {
+                        showAddGeofenceDialog();
+                    } else {
+                        showRemoveGeofenceDialog();
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void showAddGeofenceDialog() {
+        if (currentChildDeviceId == null || currentChildDeviceId.isEmpty()) {
+            Toast.makeText(this, "Connect a child device first", Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (lastChildLocation == null) {
             Toast.makeText(this, "Waiting for child location. Try refresh location first.", Toast.LENGTH_LONG).show();
             requestFreshLocation(currentChildDeviceId);
@@ -7984,14 +8002,81 @@ public class ParentDashboardActivity extends BaseActivity {
             return;
         }
 
-        String[] labels = {"Home - 150 m", "School - 250 m", "Area - 500 m", "Wide area - 1 km"};
-        String[] names = {"Home", "School", "Safe Zone", "Wide Safe Zone"};
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        int padding = (int) (20 * getResources().getDisplayMetrics().density);
+        layout.setPadding(padding, padding / 2, padding, 0);
+
+        TextView hint = new TextView(this);
+        hint.setText("This will save the child marker's current map location as the place center.");
+        hint.setTextColor(Color.DKGRAY);
+        hint.setTextSize(14);
+        layout.addView(hint);
+
+        EditText nameInput = new EditText(this);
+        nameInput.setHint("Place name, e.g. Home");
+        nameInput.setSingleLine(true);
+        layout.addView(nameInput);
+
+        String[] labels = {"Home size - 150 m", "School size - 250 m", "Area size - 500 m", "Wide area - 1 km"};
         int[] radii = {150, 250, 500, 1000};
         new AlertDialog.Builder(this)
-                .setTitle("Add Safe Zone")
-                .setItems(labels, (dialog, which) -> createGeofence(names[which], radii[which]))
+                .setTitle("Add Safe Zone Here")
+                .setView(layout)
+                .setSingleChoiceItems(labels, 0, null)
+                .setPositiveButton("Save", (dialog, which) -> {
+                    AlertDialog alertDialog = (AlertDialog) dialog;
+                    int checked = alertDialog.getListView().getCheckedItemPosition();
+                    if (checked < 0 || checked >= radii.length) {
+                        checked = 0;
+                    }
+                    String name = nameInput.getText().toString().trim();
+                    if (name.isEmpty()) {
+                        name = checked == 1 ? "School" : checked == 3 ? "Wide Safe Zone" : "Home";
+                    }
+                    createGeofence(name, radii[checked]);
+                })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    private void showRemoveGeofenceDialog() {
+        FirebaseDatabase.getInstance()
+                .getReference("v2")
+                .child("geofences")
+                .child(currentChildDeviceId)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    java.util.List<DataSnapshot> zones = new java.util.ArrayList<>();
+                    java.util.List<String> labels = new java.util.ArrayList<>();
+                    for (DataSnapshot child : snapshot.getChildren()) {
+                        Boolean active = child.child("active").getValue(Boolean.class);
+                        if (!Boolean.TRUE.equals(active)) {
+                            continue;
+                        }
+                        String name = child.child("name").getValue(String.class);
+                        Integer radius = child.child("radiusMeters").getValue(Integer.class);
+                        zones.add(child);
+                        labels.add((name != null && !name.isEmpty() ? name : "Safe Zone")
+                                + " - " + (radius != null ? radius : 0) + " m");
+                    }
+                    if (zones.isEmpty()) {
+                        Toast.makeText(this, "No safe zones added yet", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    new AlertDialog.Builder(this)
+                            .setTitle("Remove Safe Zone")
+                            .setItems(labels.toArray(new String[0]), (dialog, which) ->
+                                    zones.get(which).getRef().removeValue()
+                                            .addOnSuccessListener(ignored -> Toast.makeText(this,
+                                                    "Safe zone removed", Toast.LENGTH_SHORT).show())
+                                            .addOnFailureListener(error -> Toast.makeText(this,
+                                                    "Could not remove: " + error.getMessage(), Toast.LENGTH_LONG).show()))
+                            .setNegativeButton("Cancel", null)
+                            .show();
+                })
+                .addOnFailureListener(error -> Toast.makeText(this,
+                        "Could not load safe zones: " + error.getMessage(), Toast.LENGTH_LONG).show());
     }
 
     private void createGeofence(String name, int radiusMeters) {
