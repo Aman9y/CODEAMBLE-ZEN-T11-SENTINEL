@@ -149,6 +149,13 @@ public final class FirebaseSchemaV2Repository {
                 .child("app_timers").setValue(timerPolicies);
     }
 
+    public static Task<Void> syncContentFilteringPolicy(String deviceId,
+            Map<String, Object> policy) {
+        return FirebaseDatabase.getInstance().getReference()
+                .child(ROOT).child("device_policies").child(deviceId)
+                .child("content_filtering").setValue(policy);
+    }
+
     public static Task<Void> syncDeviceStatus(String deviceId, Map<String, Object> status) {
         return FirebaseDatabase.getInstance().getReference()
                 .child(ROOT).child("device_status").child(deviceId).setValue(status);
