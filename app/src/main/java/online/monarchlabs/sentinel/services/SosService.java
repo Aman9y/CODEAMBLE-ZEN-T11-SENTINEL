@@ -51,12 +51,23 @@ public final class SosService {
                             && locationTask.getResult().exists()) {
                         Object lat = locationTask.getResult().child("latitude").getValue();
                         Object lng = locationTask.getResult().child("longitude").getValue();
+                        if (lat == null) {
+                            lat = locationTask.getResult().child("lat").getValue();
+                        }
+                        if (lng == null) {
+                            lng = locationTask.getResult().child("lng").getValue();
+                        }
                         Object accuracy = locationTask.getResult().child("accuracy").getValue();
                         Object timestamp = locationTask.getResult().child("timestamp").getValue();
+                        if (timestamp == null) {
+                            timestamp = locationTask.getResult().child("updatedAt").getValue();
+                        }
                         if (lat != null && lng != null) {
                             Map<String, Object> location = new HashMap<>();
                             location.put("latitude", lat);
                             location.put("longitude", lng);
+                            location.put("lat", lat);
+                            location.put("lng", lng);
                             if (accuracy != null) {
                                 location.put("accuracy", accuracy);
                             }

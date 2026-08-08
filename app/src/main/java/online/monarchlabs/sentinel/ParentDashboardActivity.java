@@ -8021,6 +8021,12 @@ public class ParentDashboardActivity extends BaseActivity {
         Integer battery = snapshot.child("batteryPercent").getValue(Integer.class);
         Double latitude = snapshot.child("location").child("latitude").getValue(Double.class);
         Double longitude = snapshot.child("location").child("longitude").getValue(Double.class);
+        if (latitude == null) {
+            latitude = snapshot.child("location").child("lat").getValue(Double.class);
+        }
+        if (longitude == null) {
+            longitude = snapshot.child("location").child("lng").getValue(Double.class);
+        }
 
         showSosNotification(eventId, childName, reason);
         showSosDialog(snapshot.getRef(), childDeviceId, childName, deviceName, reason,
