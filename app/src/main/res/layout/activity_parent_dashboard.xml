@@ -150,8 +150,6 @@
                         android:lineSpacingExtra="3dp"/>
                 </LinearLayout>
 
-
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -326,6 +324,26 @@
                 </FrameLayout>
 
                 <!-- GPS-off warning — shown when child has GPS disabled -->
+                <FrameLayout
+                    android:id="@+id/btnAddSafeZone"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="98dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_location_btn"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:elevation="8dp">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_shield_time"
+                        android:contentDescription="Add safe zone" />
+                </FrameLayout>
+
                 <TextView
                     android:id="@+id/tvMapGpsOff"
                     android:layout_width="wrap_content"

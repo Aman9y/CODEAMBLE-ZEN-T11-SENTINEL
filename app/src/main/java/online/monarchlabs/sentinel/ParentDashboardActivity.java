@@ -44,6 +44,7 @@ import online.monarchlabs.sentinel.databinding.ActivityParentDashboardBinding;
 import online.monarchlabs.sentinel.data.FirebaseSchemaV2Repository;
 import online.monarchlabs.sentinel.data.ParentAppInventoryCache;
 import online.monarchlabs.sentinel.models.AppUsage; // Added for AppUsage model
+import online.monarchlabs.sentinel.services.GeofenceService;
 import androidx.annotation.NonNull;
 import android.content.SharedPreferences;
 import com.google.firebase.auth.FirebaseAuth;
@@ -183,6 +184,8 @@ public class ParentDashboardActivity extends BaseActivity {
     private ChildEventListener parentDeviceLinksListener;
     private DatabaseReference sosEventsRef;
     private ChildEventListener sosEventsListener;
+    private DatabaseReference geofenceEventsRef;
+    private ChildEventListener geofenceEventsListener;
     private DatabaseReference deviceAppsConnectionRef;
     private boolean deviceAppsConnectionListenerAttached = false;
     private DatabaseReference uninstallProtectionStatusRef;
@@ -390,6 +393,7 @@ public class ParentDashboardActivity extends BaseActivity {
             // Ã°Å¸â€â€ START PERSISTENT TIMER NOTIFICATION SERVICE for parent devices
             setupParentTimerExpiryListener();
             setupSosEventsListener();
+            setupGeofenceEventsListener();
 
             // Ã°Å¸â€œÂ¡ START PERMISSION EVENT LISTENER to monitor child device service status
             startPermissionEventListener();
@@ -589,6 +593,11 @@ public class ParentDashboardActivity extends BaseActivity {
             });
         }
         // Ã¢â€â‚¬Ã¢â€â‚¬ End map card setup Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+
+        View btnAddSafeZone = findViewById(R.id.btnAddSafeZone);
+        if (btnAddSafeZone != null) {
+            btnAddSafeZone.setOnClickListener(v -> showCreateGeofenceDialog());
+        }
 
         // Quick Actions
         // View cardQrAction = findViewById(R.id.cardQrAction); // Removed from XML
@@ -2183,6 +2192,7 @@ public class ParentDashboardActivity extends BaseActivity {
         refreshCurrentChildDeviceCards();
 
         setupParentTimerExpiryListener();
+        setupGeofenceEventsListener();
 
         // Start uninstall detection for new device
         startUninstallDetection();
@@ -3782,6 +3792,7 @@ public class ParentDashboardActivity extends BaseActivity {
         detachParentConnectionListener();
         detachV2ParentDeviceLinksListener();
         detachSosEventsListener();
+        detachGeofenceEventsListener();
 
         // Detach usage listeners
         stopSmartUsageMonitoring();
@@ -7956,6 +7967,157 @@ public class ParentDashboardActivity extends BaseActivity {
     private ValueEventListener timerExpiryListener;
     private final java.util.Set<String> shownTimerExpiryKeys = new java.util.HashSet<>();
     private final java.util.Set<String> shownSosEventKeys = new java.util.HashSet<>();
+    private final java.util.Set<String> shownGeofenceEventKeys = new java.util.HashSet<>();
+
+    private void showCreateGeofenceDialog() {
+        if (currentChildDeviceId == null || currentChildDeviceId.isEmpty()) {
+            Toast.makeText(this, "Connect a child device first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (lastChildLocation == null) {
+            Toast.makeText(this, "Waiting for child location. Try refresh location first.", Toast.LENGTH_LONG).show();
+            requestFreshLocation(currentChildDeviceId);
+            return;
+        }
+        if (mAuth == null || mAuth.getCurrentUser() == null) {
+            Toast.makeText(this, "Sign in again to create a safe zone", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String[] labels = {"Home - 150 m", "School - 250 m", "Area - 500 m", "Wide area - 1 km"};
+        String[] names = {"Home", "School", "Safe Zone", "Wide Safe Zone"};
+        int[] radii = {150, 250, 500, 1000};
+        new AlertDialog.Builder(this)
+                .setTitle("Add Safe Zone")
+                .setItems(labels, (dialog, which) -> createGeofence(names[which], radii[which]))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void createGeofence(String name, int radiusMeters) {
+        LatLng center = lastChildLocation;
+        if (center == null) {
+            Toast.makeText(this, "Child location is not ready yet", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String parentUid = mAuth.getCurrentUser().getUid();
+        GeofenceService.createSafeZone(currentChildDeviceId, parentUid, name,
+                        center.latitude, center.longitude, radiusMeters)
+                .addOnSuccessListener(ignored -> Toast.makeText(this,
+                        name + " safe zone added", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(error -> Toast.makeText(this,
+                        "Could not add safe zone: " + error.getMessage(), Toast.LENGTH_LONG).show());
+    }
+
+    private void setupGeofenceEventsListener() {
+        detachGeofenceEventsListener();
+        shownGeofenceEventKeys.clear();
+        if (currentChildDeviceId == null || currentChildDeviceId.isEmpty()) {
+            return;
+        }
+        geofenceEventsRef = FirebaseDatabase.getInstance()
+                .getReference("v2")
+                .child("geofence_events")
+                .child(currentChildDeviceId);
+        geofenceEventsListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, String previousChildName) {
+                handleGeofenceSnapshot(snapshot);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, String previousChildName) {
+                handleGeofenceSnapshot(snapshot);
+            }
+
+            @Override public void onChildRemoved(@NonNull DataSnapshot snapshot) {}
+            @Override public void onChildMoved(@NonNull DataSnapshot snapshot, String previousChildName) {}
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "Geofence listener cancelled: " + error.getMessage());
+            }
+        };
+        geofenceEventsRef.addChildEventListener(geofenceEventsListener);
+    }
+
+    private void detachGeofenceEventsListener() {
+        if (geofenceEventsRef != null && geofenceEventsListener != null) {
+            geofenceEventsRef.removeEventListener(geofenceEventsListener);
+        }
+        geofenceEventsRef = null;
+        geofenceEventsListener = null;
+    }
+
+    private void handleGeofenceSnapshot(@NonNull DataSnapshot snapshot) {
+        String eventId = snapshot.child("eventId").getValue(String.class);
+        if (eventId == null || eventId.isEmpty()) {
+            eventId = snapshot.getKey();
+        }
+        String status = snapshot.child("status").getValue(String.class);
+        if (!"unread".equals(status) || eventId == null || shownGeofenceEventKeys.contains(eventId)) {
+            return;
+        }
+        shownGeofenceEventKeys.add(eventId);
+
+        String zoneName = snapshot.child("geofenceName").getValue(String.class);
+        String transition = snapshot.child("transition").getValue(String.class);
+        Double lat = snapshot.child("lat").getValue(Double.class);
+        Double lng = snapshot.child("lng").getValue(Double.class);
+        String action = "enter".equals(transition) ? "entered" : "left";
+        String label = zoneName != null && !zoneName.isEmpty() ? zoneName : "safe zone";
+        String childName = currentChildUserName != null && !currentChildUserName.isEmpty()
+                ? currentChildUserName : "Child";
+
+        showGeofenceNotification(eventId, childName, action, label);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle("Geofence Alert")
+                .setMessage(childName + " " + action + " " + label + ".")
+                .setPositiveButton("Mark Read", (dialog, which) -> snapshot.getRef().child("status").setValue("read"))
+                .setNegativeButton("Close", (dialog, which) -> snapshot.getRef().child("status").setValue("read"));
+        if (lat != null && lng != null) {
+            builder.setNeutralButton("Open Map", (dialog, which) -> {
+                snapshot.getRef().child("status").setValue("read");
+                Uri uri = Uri.parse("geo:" + lat + "," + lng
+                        + "?q=" + lat + "," + lng + "(" + Uri.encode(childName + " " + label) + ")");
+                startActivity(new Intent(Intent.ACTION_VIEW, uri));
+            });
+        }
+        builder.show();
+    }
+
+    private void showGeofenceNotification(String eventId, String childName, String action, String zoneName) {
+        try {
+            NotificationManager notificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notificationManager == null) {
+                return;
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel channel = new NotificationChannel(
+                        "geofence_alert_channel",
+                        "Geofence Alerts",
+                        NotificationManager.IMPORTANCE_HIGH);
+                notificationManager.createNotificationChannel(channel);
+            }
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    this,
+                    eventId.hashCode(),
+                    new Intent(this, ParentDashboardActivity.class),
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            Notification notification = new NotificationCompat.Builder(this, "geofence_alert_channel")
+                    .setSmallIcon(R.drawable.ic_warning)
+                    .setContentTitle("Safe zone alert")
+                    .setContentText(childName + " " + action + " " + zoneName)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true)
+                    .build();
+            notificationManager.notify(920000 + Math.abs(eventId.hashCode() % 9999), notification);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to show geofence notification: " + e.getMessage());
+        }
+    }
 
     private void setupSosEventsListener() {
         detachSosEventsListener();

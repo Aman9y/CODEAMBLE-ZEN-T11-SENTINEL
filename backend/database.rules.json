@@ -200,6 +200,18 @@
           ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid))"
         }
       },
+      "geofences": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid"
+        }
+      },
+      "geofence_events": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && ((newData.exists() && newData.child('childDeviceId').val() === $deviceId && root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid) || (data.exists() && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid))"
+        }
+      },
       "sos_events": {
         "$parentUid": {
           ".read": "auth != null && auth.uid === $parentUid",

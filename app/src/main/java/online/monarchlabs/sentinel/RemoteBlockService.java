@@ -63,6 +63,7 @@ import com.google.android.gms.tasks.CancellationTokenSource;
 import online.monarchlabs.sentinel.services.PersistentConnectionService;
 import online.monarchlabs.sentinel.utils.SUsageDataManager;
 import online.monarchlabs.sentinel.data.FirebaseSchemaV2Repository;
+import online.monarchlabs.sentinel.services.GeofenceService;
 
 public class RemoteBlockService extends Service {
     private static final String TAG = "RemoteBlockService";
@@ -680,6 +681,8 @@ public class RemoteBlockService extends Service {
                             location.getLatitude(),
                             location.getLongitude());
                     completeLocationRequest("success");
+                    GeofenceService.evaluateAndPublish(this, myDeviceId,
+                            location.getLatitude(), location.getLongitude());
                     Log.d(TAG, "Location uploaded to v2");
                 })
                 .addOnFailureListener(error ->
