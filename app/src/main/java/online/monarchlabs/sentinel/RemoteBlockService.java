@@ -68,7 +68,9 @@ public class RemoteBlockService extends Service {
     private static final String TAG = "RemoteBlockService";
     private static final String PREF_NAME = "blocked_apps";
     private static final String PREF_STUDY_MODE_BLOCKS = "study_mode_blocks";
-    private static final long STUDY_MODE_TICK_MS = 60_000L;
+    private static final long STUDY_MODE_MIN_TICK_MS = 1_000L;
+    private static final long STUDY_MODE_BOUNDARY_GRACE_MS = 750L;
+    private static final long STUDY_MODE_FALLBACK_TICK_MS = 15 * 60_000L;
 
     // ðŸ”§ OEM COMPATIBILITY: Wake lock for aggressive OEMs
     private PowerManager.WakeLock wakeLock;
@@ -137,6 +139,7 @@ public class RemoteBlockService extends Service {
     private ValueEventListener studyModeListener;
     private Handler studyModeHandler;
     private Runnable studyModeRunnable;
+    private BroadcastReceiver appInventoryChangeReceiver;
     private StudyModePolicy currentStudyModePolicy;
 
     private void promoteToForeground() {
@@ -2076,6 +2079,7 @@ public class RemoteBlockService extends Service {
                 startLocationUploads();
                 setupRealTimeBlockedAppsListener();
                 setupStudyModeListener();
+                setupAppInventoryChangeReceiver();
                 Log.d(TAG, "âœ… All listeners dynamically re-bound to device ID: " + myDeviceId);
             } catch (Exception e) {
                 Log.e(TAG, "Error registering listeners: " + e.getMessage());
@@ -2169,33 +2173,72 @@ public class RemoteBlockService extends Service {
     }
 
     private void applyStudyModePolicyNow() {
+        applyStudyModePolicyNow(null);
+    }
+
+    private void applyStudyModePolicyNow(String changedPackage) {
         Set<String> desiredBlocks = new HashSet<>();
         StudyModePolicy policy = currentStudyModePolicy;
         boolean enabled = policy != null && policy.enabled;
         if (enabled && StudyModeScheduleEvaluator.isActiveNow(policy)) {
-            for (String packageName : policy.getEffectiveBlockedPackages()) {
-                if (packageName != null && !AppBlockingPolicy.isUnblockable(packageName)) {
+            Set<String> explicitBlocks = policy.getEffectiveBlockedPackages();
+            for (String packageName : explicitBlocks) {
+                if (packageName != null && packageName.contains(".")
+                        && !AppBlockingPolicy.isUnblockable(packageName)
+                        && !isStudyModeSessionAllowed(policy, packageName)) {
                     desiredBlocks.add(packageName);
                 }
             }
-            addStudyCategoryBlocks(policy, desiredBlocks);
+            addStudyCategoryBlocks(policy, desiredBlocks, explicitBlocks);
         }
 
         boolean changed = rewriteStudyModeBlocks(desiredBlocks);
         if (changed) {
-            broadcastBlockedAppsUpdate(null);
+            broadcastBlockedAppsUpdate(changedPackage);
         }
         scheduleStudyModeTick(enabled);
     }
 
-    private void addStudyCategoryBlocks(StudyModePolicy policy, Set<String> desiredBlocks) {
+    private void setupAppInventoryChangeReceiver() {
+        if (appInventoryChangeReceiver != null) {
+            return;
+        }
+        appInventoryChangeReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent == null
+                        || !AppInstallUninstallReceiver.ACTION_APP_INVENTORY_CHANGED.equals(intent.getAction())) {
+                    return;
+                }
+                String packageName = intent.getStringExtra(AppInstallUninstallReceiver.EXTRA_PACKAGE_NAME);
+                if (currentStudyModePolicy != null) {
+                    Log.d(TAG, "App inventory changed; refreshing Study Mode blocks for " + packageName);
+                    applyStudyModePolicyNow(packageName);
+                }
+            }
+        };
+        IntentFilter filter = new IntentFilter(AppInstallUninstallReceiver.ACTION_APP_INVENTORY_CHANGED);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(appInventoryChangeReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+            } else {
+                registerReceiver(appInventoryChangeReceiver, filter);
+            }
+        } catch (Exception error) {
+            Log.w(TAG, "Could not register app inventory Study Mode receiver: " + error.getMessage());
+            appInventoryChangeReceiver = null;
+        }
+    }
+
+    private void addStudyCategoryBlocks(StudyModePolicy policy, Set<String> desiredBlocks, Set<String> explicitBlocks) {
         if (policy == null || policy.categories == null || desiredBlocks == null) {
             return;
         }
         boolean social = isStudyCategoryEnabled(policy, StudyModeContract.CATEGORY_SOCIAL);
         boolean games = isStudyCategoryEnabled(policy, StudyModeContract.CATEGORY_GAMES);
         boolean entertainment = isStudyCategoryEnabled(policy, StudyModeContract.CATEGORY_ENTERTAINMENT);
-        if (!social && !games && !entertainment) {
+        if (!social && !games && !entertainment
+                && (explicitBlocks == null || explicitBlocks.isEmpty())) {
             return;
         }
 
@@ -2220,17 +2263,48 @@ public class RemoteBlockService extends Service {
                     && (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
                 continue;
             }
-            if (policy.allowedOverrides != null
-                    && Boolean.TRUE.equals(policy.allowedOverrides.get(packageName))) {
+            if (isStudyAllowedOverride(policy, packageName)) {
+                continue;
+            }
+            if (isStudyModeSessionAllowed(policy, packageName)) {
                 continue;
             }
             AppCategorizer.AppCategory category = AppCategorizer.getCategory(this, packageName);
-            if (matchesStudyCategory(category, social, games, entertainment)) {
+            if (matchesPackageReference(explicitBlocks, packageName)
+                    || matchesStudyCategory(category, social, games, entertainment)) {
                 desiredBlocks.add(packageName);
             }
         }
     }
 
+    private boolean isStudyModeSessionAllowed(StudyModePolicy policy, String packageName) {
+        if (policy == null || packageName == null || policy.sessionAllowedPackages == null) {
+            return false;
+        }
+        String sessionKey = StudyModeScheduleEvaluator.currentSessionKey(policy);
+        if (sessionKey == null) {
+            return false;
+        }
+        return sessionKey.equals(policy.sessionAllowedPackages.get(packageName))
+                || sessionKey.equals(policy.sessionAllowedPackages.get(sanitizeAppKey(packageName)));
+    }
+
+    private boolean isStudyAllowedOverride(StudyModePolicy policy, String packageName) {
+        return policy != null && policy.allowedOverrides != null && packageName != null
+                && (Boolean.TRUE.equals(policy.allowedOverrides.get(packageName))
+                || Boolean.TRUE.equals(policy.allowedOverrides.get(sanitizeAppKey(packageName))));
+    }
+
+    private boolean matchesPackageReference(Set<String> references, String packageName) {
+        return references != null && packageName != null
+                && (references.contains(packageName) || references.contains(sanitizeAppKey(packageName)));
+    }
+
+    private String sanitizeAppKey(String packageName) {
+        return packageName != null
+                ? packageName.replaceAll("[.#$\\[\\]/]", "_")
+                : "";
+    }
     private boolean isStudyCategoryEnabled(StudyModePolicy policy, String categoryId) {
         StudyModePolicy.CategorySelection selection = policy.categories.get(categoryId);
         return selection != null && selection.enabled;
@@ -2292,8 +2366,21 @@ public class RemoteBlockService extends Service {
         if (!enabled) {
             return;
         }
+        long delayMs = nextStudyModeRefreshDelay(currentStudyModePolicy);
         studyModeRunnable = this::applyStudyModePolicyNow;
-        studyModeHandler.postDelayed(studyModeRunnable, STUDY_MODE_TICK_MS);
+        studyModeHandler.postDelayed(studyModeRunnable, delayMs);
+        Log.d(TAG, "Next Study Mode refresh in " + delayMs + "ms");
+    }
+
+    private long nextStudyModeRefreshDelay(StudyModePolicy policy) {
+        long transitionDelay = StudyModeScheduleEvaluator.millisUntilNextTransition(
+                policy, System.currentTimeMillis());
+        if (transitionDelay >= 0L) {
+            return Math.max(STUDY_MODE_MIN_TICK_MS,
+                    Math.min(STUDY_MODE_FALLBACK_TICK_MS,
+                            transitionDelay + STUDY_MODE_BOUNDARY_GRACE_MS));
+        }
+        return STUDY_MODE_FALLBACK_TICK_MS;
     }
 
     private void setupV2CommandsListener() {
@@ -2475,6 +2562,13 @@ public class RemoteBlockService extends Service {
             if (studyModeHandler != null && studyModeRunnable != null) {
                 studyModeHandler.removeCallbacks(studyModeRunnable);
                 studyModeRunnable = null;
+            }
+            if (appInventoryChangeReceiver != null) {
+                try {
+                    unregisterReceiver(appInventoryChangeReceiver);
+                } catch (Exception ignored) {
+                }
+                appInventoryChangeReceiver = null;
             }
             currentStudyModePolicy = null;
         } catch (Exception e) {

@@ -329,7 +329,7 @@ public class BlockService extends AccessibilityService {
 
                     String changedPackage = intent.getStringExtra("changed_package");
                     if (changedPackage != null
-                            && isManuallyBlockedOrExpired(changedPackage)
+                            && isBlockedByActivePolicy(changedPackage)
                             && isPackageVisible(changedPackage)) {
                         Log.w(TAG, "⚡ IMMEDIATE TARGET BLOCK: Blocked app is visible: " + changedPackage);
                         blockAppEnhanced(changedPackage);
@@ -339,7 +339,7 @@ public class BlockService extends AccessibilityService {
                     // Check and enforce immediately if the active app is blocked
                     String currentApp = getCurrentForegroundPackage();
                     if (currentApp != null && !shouldSkipForBlocking(currentApp)) {
-                        if (isManuallyBlockedOrExpired(currentApp)) {
+                        if (isBlockedByActivePolicy(currentApp)) {
                             Log.w(TAG, "⚡ IMMEDIATE BROADCAST BLOCK: Blocked app active: " + currentApp);
                             blockAppEnhanced(currentApp);
                         }
@@ -421,8 +421,8 @@ public class BlockService extends AccessibilityService {
         // Check on every pass. A remote block can arrive while the foreground app
         // remains unchanged and produces no new accessibility event.
         if (!shouldSkipForBlocking(currentApp)) {
-            if (isManuallyBlockedOrExpired(currentApp)) {
-                Log.w(TAG, "⚡ AGGRESSIVE: Blocked/expired-timer foreground app detected: " + currentApp);
+            if (isBlockedByActivePolicy(currentApp)) {
+                Log.w(TAG, "⚡ AGGRESSIVE: Blocked foreground app detected: " + currentApp);
                 blockAppEnhanced(currentApp);
                 return;
             }
@@ -583,8 +583,8 @@ public class BlockService extends AccessibilityService {
                 }
 
                 // *** CRITICAL BLOCKING LOGIC ***
-                // 🔧 Read both manual blocks AND expired timers for INSTANT updates
-                boolean shouldBlock = isManuallyBlockedOrExpired(packageName);
+                // 🔧 Read manual and Study Mode blocks for instant updates
+                boolean shouldBlock = isBlockedByActivePolicy(packageName);
 
                 // Log every single app launch for debugging
                 Log.d(TAG,
@@ -597,7 +597,7 @@ public class BlockService extends AccessibilityService {
                     return;
                 }
 
-                // If app is blocked or its timer expired, block it immediately
+                // If app is blocked by active policy, block it immediately
                 if (shouldBlock) {
                     Log.d(TAG, "🚫 BLOCKING APP NOW: " + packageName);
                     blockAppEnhanced(packageName);
@@ -619,8 +619,8 @@ public class BlockService extends AccessibilityService {
             if (event.getPackageName() != null) {
                 packageName = event.getPackageName().toString();
                 if (!shouldSkipForBlocking(packageName)) {
-                    if (isManuallyBlockedOrExpired(packageName)) {
-                        Log.d(TAG, "🔍 BLOCKED/EXPIRED APP INTERACTED (floating window?): " + packageName);
+                    if (isBlockedByActivePolicy(packageName)) {
+                        Log.d(TAG, "🔍 BLOCKED APP INTERACTED (floating window?): " + packageName);
                         blockAppEnhanced(packageName);
                     }
                 }
@@ -637,7 +637,6 @@ public class BlockService extends AccessibilityService {
         }
 
         Set<String> pipPackages = new HashSet<>();
-        SharedPreferences freshPrefs = getSharedPreferences("blocked_apps", MODE_PRIVATE);
         try {
             for (AccessibilityWindowInfo window : getWindows()) {
                 if (window.getType() != AccessibilityWindowInfo.TYPE_APPLICATION
@@ -659,7 +658,7 @@ public class BlockService extends AccessibilityService {
 
                     pipPackages.add(packageValue);
                     if (!AppBlockingPolicy.isUnblockable(packageValue)
-                            && freshPrefs.getBoolean(packageValue, false)) {
+                            && isBlockedByActivePolicy(packageValue)) {
                         boolean dismissed = root.performAction(AccessibilityNodeInfo.ACTION_DISMISS);
                         Log.d(TAG, "Blocked PiP dismiss requested for " + packageValue + ": " + dismissed);
                         blockAppEnhanced(packageValue);
@@ -733,11 +732,11 @@ public class BlockService extends AccessibilityService {
                     if (pkgName != null) {
                         String pkg = pkgName.toString();
 
-                        // Check if this package is manually blocked or has an expired timer
+                        // Check if this package is blocked by active policy
                         if (!AppBlockingPolicy.isUnblockable(pkg)
-                                && isManuallyBlockedOrExpired(pkg)) {
+                                && isBlockedByActivePolicy(pkg)) {
                             blockedPackages.add(pkg);
-                            Log.d(TAG, "🪟 Found blocked/expired app in multi-window: " + pkg +
+                            Log.d(TAG, "🪟 Found blocked app in multi-window: " + pkg +
                                     " | Window type: " + window.getType());
 
                             // Try to dismiss freeform/PIP windows directly via Accessibility
@@ -1255,7 +1254,7 @@ public class BlockService extends AccessibilityService {
         public long lastSyncTime = 0;
         public long lastReconcileTime = 0;
 
-        // For 5-minute re-notification cadence tracking (while child actively uses expired app)
+        // For 5-minute re-notification cadence tracking (while child actively uses an app after timer expiry)
         public long accumulatedActiveMs = 0;
         public long lastNotifIntervalCount = 0;
     }
@@ -1306,58 +1305,17 @@ public class BlockService extends AccessibilityService {
     }
 
     /**
-     * Returns true if {@code packageName} should be blocked right now — either
-     * because the parent manually blocked it (via the "blocked_apps" SharedPreferences)
-     * OR because its daily timer has expired (state read from AppTimerLocalStore).
-     *
-     * This is the single gate used by every foreground / window / event check so
-     * that adding a new blocking mechanism only requires touching this one method.
+     * Returns true if {@code packageName} should be blocked right now by a
+     * blocking policy. Timers are intentionally excluded: timer expiry only
+     * sends notifications and must not block the app automatically.
      */
-    private boolean isManuallyBlockedOrExpired(String packageName) {
+    private boolean isBlockedByActivePolicy(String packageName) {
         if (packageName == null || packageName.isEmpty()) return false;
-        // 1. Manual block via SharedPreferences
         SharedPreferences freshPrefs = getSharedPreferences("blocked_apps", MODE_PRIVATE);
         if (freshPrefs.getBoolean(packageName, false)) {
             return true;
         }
-        // 2. Study Mode block, maintained locally by RemoteBlockService.
         SharedPreferences studyPrefs = getSharedPreferences("study_mode_blocks", MODE_PRIVATE);
-        if (studyPrefs.getBoolean(packageName, false)) {
-            return true;
-        }
-        // 3. Timer-expired block via AppTimerLocalStore (populated by AppTimerService)
-        return isTimerExpired(packageName);
-    }
-
-    /**
-     * Reads the cached timer execution state written by {@link online.monarchlabs.sentinel.services.AppTimerService}
-     * and returns true when the package's daily timer has expired.
-     *
-     * Because both services share the same app process and the same
-     * {@link AppTimerLocalStore} SharedPreferences, no IPC or network call is
-     * needed — the check is instant.
-     */
-    private boolean isTimerExpired(String packageName) {
-        if (isParentDevice) return false;
-        String childId = sessionManager != null ? sessionManager.getChildDeviceId() : null;
-        if (childId == null || childId.isEmpty()) return false;
-        try {
-            java.util.List<AppTimerLocalStore.TimerRecord> records =
-                    AppTimerLocalStore.load(this, childId);
-            for (AppTimerLocalStore.TimerRecord record : records) {
-                if (packageName.equals(record.packageName)) {
-                    // Expired when:
-                    //   a) the dedicated boolean flag is set, OR
-                    //   b) state is "EXPIRED", OR
-                    //   c) timer is active but budget is exhausted
-                    return record.expired
-                            || "EXPIRED".equalsIgnoreCase(record.state)
-                            || (record.active && record.remainingTimeMillis <= 0);
-                }
-            }
-        } catch (Exception e) {
-            Log.w(TAG, "isTimerExpired: error reading local store: " + e.getMessage());
-        }
-        return false;
+        return studyPrefs.getBoolean(packageName, false);
     }
 }

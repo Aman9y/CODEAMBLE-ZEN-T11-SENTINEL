@@ -50,6 +50,103 @@ public final class StudyModeScheduleEvaluator {
         return false;
     }
 
+
+    public static String currentSessionKey(StudyModePolicy policy) {
+        long now = System.currentTimeMillis();
+        String timezone = policy != null && policy.timezone != null && !policy.timezone.isEmpty()
+                ? policy.timezone
+                : StudyModeContract.DEFAULT_TIMEZONE;
+        return sessionKeyAt(policy, now, TimeZone.getTimeZone(timezone));
+    }
+
+    public static String sessionKeyAt(StudyModePolicy policy, long timestampMillis, TimeZone zone) {
+        if (policy == null || !policy.enabled || policy.days == null
+                || policy.days.isEmpty() || policy.timeSlots == null
+                || policy.timeSlots.isEmpty()) {
+            return null;
+        }
+
+        Calendar calendar = Calendar.getInstance(zone != null ? zone : TimeZone.getDefault());
+        calendar.setTimeInMillis(timestampMillis);
+        if (!selectedDays(policy.days).contains(dayCode(calendar))) {
+            return null;
+        }
+
+        int minuteOfDay = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE);
+        int checked = 0;
+        for (StudyModePolicy.TimeSlot slot : policy.timeSlots) {
+            if (checked >= StudyModeContract.MAX_TIME_SLOTS) {
+                break;
+            }
+            checked++;
+            if (slotContains(slot, minuteOfDay)) {
+                return String.format(Locale.US, "%04d-%02d-%02d_%s_%s",
+                        calendar.get(Calendar.YEAR),
+                        calendar.get(Calendar.MONTH) + 1,
+                        calendar.get(Calendar.DAY_OF_MONTH),
+                        slot.start,
+                        slot.end);
+            }
+        }
+        return null;
+    }
+
+    public static long millisUntilNextTransition(StudyModePolicy policy, long timestampMillis) {
+        if (policy == null || !policy.enabled || policy.days == null
+                || policy.days.isEmpty() || policy.timeSlots == null
+                || policy.timeSlots.isEmpty()) {
+            return -1L;
+        }
+
+        String timezone = policy.timezone != null && !policy.timezone.isEmpty()
+                ? policy.timezone
+                : StudyModeContract.DEFAULT_TIMEZONE;
+        TimeZone zone = TimeZone.getTimeZone(timezone);
+        Set<String> selected = selectedDays(policy.days);
+        long bestTransition = Long.MAX_VALUE;
+
+        Calendar dayStart = Calendar.getInstance(zone);
+        dayStart.setTimeInMillis(timestampMillis);
+        dayStart.set(Calendar.HOUR_OF_DAY, 0);
+        dayStart.set(Calendar.MINUTE, 0);
+        dayStart.set(Calendar.SECOND, 0);
+        dayStart.set(Calendar.MILLISECOND, 0);
+
+        for (int dayOffset = 0; dayOffset <= 7; dayOffset++) {
+            Calendar day = (Calendar) dayStart.clone();
+            day.add(Calendar.DAY_OF_YEAR, dayOffset);
+            if (!selected.contains(dayCode(day))) {
+                continue;
+            }
+
+            int checked = 0;
+            for (StudyModePolicy.TimeSlot slot : policy.timeSlots) {
+                if (checked >= StudyModeContract.MAX_TIME_SLOTS) {
+                    break;
+                }
+                checked++;
+                if (!isValidSameDaySlot(slot)) {
+                    continue;
+                }
+
+                long startMillis = day.getTimeInMillis()
+                        + parseMinutes(slot.start) * 60_000L;
+                long endMillis = day.getTimeInMillis()
+                        + parseMinutes(slot.end) * 60_000L;
+                if (startMillis > timestampMillis) {
+                    bestTransition = Math.min(bestTransition, startMillis);
+                }
+                if (endMillis > timestampMillis) {
+                    bestTransition = Math.min(bestTransition, endMillis);
+                }
+            }
+        }
+
+        return bestTransition == Long.MAX_VALUE
+                ? -1L
+                : Math.max(0L, bestTransition - timestampMillis);
+    }
+
     public static boolean hasOverlappingSlots(List<StudyModePolicy.TimeSlot> slots) {
         if (slots == null) {
             return false;

@@ -1,16 +1,25 @@
 package online.monarchlabs.sentinel;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Base64;
 import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -47,6 +56,7 @@ public class StudyModeEditActivity extends BaseActivity {
 
     private static final String[] DAY_VALUES = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
     private static final String[] DAY_LABELS = {"S", "M", "T", "W", "T", "F", "S"};
+    private static final int MAX_PREVIEW_APPS = 5;
 
     private final Map<String, List<CategoryApp>> categoryApps = new LinkedHashMap<>();
 
@@ -99,6 +109,7 @@ public class StudyModeEditActivity extends BaseActivity {
         }
 
         ensureCategoryState();
+        migrateLegacySelectionDefaultsIfNeeded();
         renderAll();
         loadRemotePolicy();
         loadChildInventory();
@@ -112,10 +123,19 @@ public class StudyModeEditActivity extends BaseActivity {
                 .addOnSuccessListener(snapshot -> {
                     StudyModePolicy remotePolicy = StudyModePolicyRepository.fromSnapshot(snapshot);
                     if (remotePolicy == null) {
+                        StudyModeDraftStore.clear(this, childDeviceId);
+                        policy = StudyModePolicy.createDefault();
+                        ensureCategoryState();
+                        if (switchStudyEnabled != null) {
+                            switchStudyEnabled.setChecked(policy.enabled);
+                        }
+                        syncEnabledCategoriesWithInventory();
+                        renderAll();
                         return;
                     }
                     policy = remotePolicy;
                     ensureCategoryState();
+                    migrateLegacySelectionDefaultsIfNeeded();
                     if (switchStudyEnabled != null) {
                         switchStudyEnabled.setChecked(policy.enabled);
                     }
@@ -147,10 +167,10 @@ public class StudyModeEditActivity extends BaseActivity {
                             continue;
                         }
                         String categoryId = toStudyCategoryId(app.category, app.packageName, app.name);
-                        if (categoryId == null) {
-                            continue;
+                        List<CategoryApp> apps = categoryApps.get(categoryId);
+                        if (apps != null) {
+                            apps.add(app);
                         }
-                        categoryApps.get(categoryId).add(app);
                     }
                     sortCategoryApps();
                     inventoryLoaded = true;
@@ -219,7 +239,7 @@ public class StudyModeEditActivity extends BaseActivity {
             case ENTERTAINMENT:
                 return StudyModeContract.CATEGORY_ENTERTAINMENT;
             default:
-                return null;
+                return StudyModeContract.CATEGORY_OTHER;
         }
     }
 
@@ -252,27 +272,17 @@ public class StudyModeEditActivity extends BaseActivity {
         StudyModePolicy.TimeSlot slot = policy.timeSlots.get(index);
         boolean showDelete = policy.timeSlots.size() > 1;
 
-        LinearLayout container = new LinearLayout(this);
-        container.setOrientation(LinearLayout.VERTICAL);
-        container.setPadding(0, index == 0 ? 0 : dp(12), 0, 0);
-
-        LinearLayout labelRow = new LinearLayout(this);
-        labelRow.setOrientation(LinearLayout.HORIZONTAL);
-        labelRow.setGravity(Gravity.CENTER_VERTICAL);
-        labelRow.addView(createTimeLabel("START"), new LinearLayout.LayoutParams(0,
-                LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-        labelRow.addView(new View(this), new LinearLayout.LayoutParams(dp(36), 1));
-        labelRow.addView(createTimeLabel("END"), new LinearLayout.LayoutParams(0,
-                LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-        if (showDelete) {
-            labelRow.addView(new View(this), new LinearLayout.LayoutParams(dp(42), 1));
-        }
-        container.addView(labelRow);
-
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(0, dp(6), 0, 0);
+        row.setPadding(0, index == 0 ? 0 : dp(12), 0, 0);
+
+        ImageView clock = new ImageView(this);
+        clock.setImageResource(R.drawable.ic_time);
+        clock.setColorFilter(getColor(R.color.modern_grey_500));
+        LinearLayout.LayoutParams clockParams = new LinearLayout.LayoutParams(dp(24), dp(24));
+        clockParams.setMargins(0, 0, dp(10), 0);
+        row.addView(clock, clockParams);
 
         TextView start = createTimeButton(formatTime(slot.start));
         start.setOnClickListener(v -> pickTime(slot.start, value -> {
@@ -280,14 +290,14 @@ public class StudyModeEditActivity extends BaseActivity {
             renderSlots();
             renderReview();
         }));
-
-        TextView arrow = new TextView(this);
-        arrow.setText("->");
-        arrow.setGravity(Gravity.CENTER);
-        arrow.setTextColor(getColor(R.color.modern_grey_600));
-        arrow.setTextSize(18);
         row.addView(start, new LinearLayout.LayoutParams(0, dp(44), 1));
-        row.addView(arrow, new LinearLayout.LayoutParams(dp(36), dp(44)));
+
+        TextView dash = new TextView(this);
+        dash.setText("-");
+        dash.setGravity(Gravity.CENTER);
+        dash.setTextColor(getColor(R.color.modern_grey_500));
+        dash.setTextSize(18);
+        row.addView(dash, new LinearLayout.LayoutParams(dp(30), dp(44)));
 
         TextView end = createTimeButton(formatTime(slot.end));
         end.setOnClickListener(v -> pickTime(slot.end, value -> {
@@ -297,23 +307,26 @@ public class StudyModeEditActivity extends BaseActivity {
         }));
         row.addView(end, new LinearLayout.LayoutParams(0, dp(44), 1));
 
-        if (showDelete) {
-            ImageButton delete = new ImageButton(this);
-            delete.setImageResource(R.drawable.ic_delete);
-            delete.setColorFilter(getColor(R.color.modern_red_500));
-            delete.setBackgroundColor(getColor(android.R.color.transparent));
-            delete.setContentDescription("Delete time slot");
-            delete.setOnClickListener(v -> {
-                policy.timeSlots.remove(index);
-                renderSlots();
-                renderReview();
-            });
-            row.addView(delete, new LinearLayout.LayoutParams(dp(42), dp(44)));
-        }
-        container.addView(row);
-        return container;
+        ImageButton delete = new ImageButton(this);
+        delete.setImageResource(R.drawable.ic_delete);
+        delete.setColorFilter(getColor(showDelete ? R.color.modern_grey_500 : R.color.modern_grey_300));
+        delete.setBackgroundResource(R.drawable.bg_study_picker_row);
+        delete.setContentDescription("Delete time slot");
+        delete.setEnabled(showDelete);
+        delete.setAlpha(showDelete ? 1f : 0.35f);
+        delete.setOnClickListener(v -> {
+            if (!showDelete) {
+                return;
+            }
+            policy.timeSlots.remove(index);
+            renderSlots();
+            renderReview();
+        });
+        LinearLayout.LayoutParams deleteParams = new LinearLayout.LayoutParams(dp(42), dp(44));
+        deleteParams.setMargins(dp(10), 0, 0, 0);
+        row.addView(delete, deleteParams);
+        return row;
     }
-
     private TextView createTimeLabel(String label) {
         TextView view = new TextView(this);
         view.setGravity(Gravity.CENTER);
@@ -326,7 +339,7 @@ public class StudyModeEditActivity extends BaseActivity {
 
     private TextView createTimeButton(String time) {
         TextView view = new TextView(this);
-        view.setBackgroundResource(R.drawable.bg_mode_time_pill);
+        view.setBackgroundResource(R.drawable.bg_study_picker_row);
         view.setGravity(Gravity.CENTER);
         view.setText(time);
         view.setTextColor(getColor(R.color.modern_blue_700));
@@ -381,133 +394,515 @@ public class StudyModeEditActivity extends BaseActivity {
 
     private void renderRestrictions() {
         layoutRestrictions.removeAllViews();
-        addCategoryRow(StudyModeContract.CATEGORY_SOCIAL, "Block Social Media",
-                categorySubtitle(StudyModeContract.CATEGORY_SOCIAL));
-        addCategoryRow(StudyModeContract.CATEGORY_GAMES, "Block Games",
-                categorySubtitle(StudyModeContract.CATEGORY_GAMES));
-        addCategoryRow(StudyModeContract.CATEGORY_ENTERTAINMENT, "Block Entertainment",
-                categorySubtitle(StudyModeContract.CATEGORY_ENTERTAINMENT));
+        addRestrictionGroup("Blocked apps",
+                "These apps will be blocked during Study Mode.",
+                new String[] {
+                        StudyModeContract.CATEGORY_SOCIAL,
+                        StudyModeContract.CATEGORY_GAMES,
+                        StudyModeContract.CATEGORY_ENTERTAINMENT
+                },
+                new String[] {"Social media", "Games", "Entertainment"},
+                new String[] {
+                        "Apps selected by default during study time",
+                        "Apps selected by default during study time",
+                        "Entertainment apps selected by default"
+                });
+        addRestrictionGroup("Unblocked apps",
+                "Tap + to add apps to the blocklist.",
+                new String[] {StudyModeContract.CATEGORY_OTHER},
+                new String[] {"Others"},
+                new String[] {"Add extra apps only if needed"});
     }
 
-    private String categorySubtitle(String categoryId) {
-        List<CategoryApp> apps = categoryApps.get(categoryId);
-        if (!inventoryLoaded) {
-            return "Loading child apps...";
-        }
-        if (apps == null || apps.isEmpty()) {
-            return "No matching apps installed yet";
-        }
-        if (apps.size() == 1) {
-            return apps.get(0).name;
-        }
-        return apps.size() + " apps found";
-    }
+    private void addRestrictionGroup(String title, String subtitle, String[] categoryIds,
+                                     String[] categoryTitles, String[] helperTexts) {
+        LinearLayout group = new LinearLayout(this);
+        group.setOrientation(LinearLayout.VERTICAL);
+        group.setPadding(dp(12), dp(12), dp(12), dp(12));
+        group.setBackgroundResource(R.drawable.bg_study_picker_row);
 
-    private void addCategoryRow(String categoryId, String title, String subtitle) {
-        StudyModePolicy.CategorySelection selection = policy.categories.get(categoryId);
-        boolean enabled = selection != null && selection.enabled;
-
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(0, layoutRestrictions.getChildCount() == 0 ? 0 : dp(14), 0, 0);
-        row.setOnClickListener(v -> showCategoryAppsDialog(categoryId, title));
-
-        FrameLayout iconWrap = new FrameLayout(this);
-        iconWrap.setBackgroundResource(R.drawable.bg_mode_icon_blue);
-        ImageView icon = new ImageView(this);
-        icon.setImageResource(categoryId.equals(StudyModeContract.CATEGORY_GAMES)
-                ? R.drawable.ic_gamepad
-                : R.drawable.ic_share_nodes);
-        icon.setColorFilter(getColor(R.color.modern_blue_700));
-        iconWrap.addView(icon, centeredParams(22, 22));
-        row.addView(iconWrap, new LinearLayout.LayoutParams(dp(44), dp(44)));
-
-        LinearLayout textCol = new LinearLayout(this);
-        textCol.setOrientation(LinearLayout.VERTICAL);
-        textCol.setPadding(dp(12), 0, dp(12), 0);
+        LinearLayout.LayoutParams groupParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        groupParams.setMargins(0, layoutRestrictions.getChildCount() == 0 ? 0 : dp(14), 0, 0);
 
         TextView titleView = new TextView(this);
         titleView.setText(title);
         titleView.setTextColor(getColor(R.color.modern_grey_900));
         titleView.setTextSize(15);
         titleView.setTypeface(Typeface.DEFAULT_BOLD);
-        textCol.addView(titleView);
+        group.addView(titleView);
 
         TextView subtitleView = new TextView(this);
         subtitleView.setText(subtitle);
         subtitleView.setTextColor(getColor(R.color.modern_grey_600));
         subtitleView.setTextSize(12);
-        textCol.addView(subtitleView);
-        row.addView(textCol, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+        LinearLayout.LayoutParams subtitleParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        subtitleParams.setMargins(0, dp(2), 0, 0);
+        group.addView(subtitleView, subtitleParams);
 
-        SwitchCompat toggle = new SwitchCompat(this);
-        toggle.setChecked(enabled);
-        toggle.setOnClickListener(v -> {
-            setCategoryEnabled(categoryId, toggle.isChecked());
-            renderRestrictions();
-            renderReview();
-        });
-        row.addView(toggle);
+        for (int i = 0; i < categoryIds.length; i++) {
+            addCategorySection(group, categoryIds[i], categoryTitles[i], helperTexts[i], i == 0);
+        }
 
-        layoutRestrictions.addView(row);
+        layoutRestrictions.addView(group, groupParams);
     }
+
+    private void addCategorySection(LinearLayout parent, String categoryId, String title,
+                                    String helperText, boolean firstInGroup) {
+        List<CategoryApp> apps = categoryApps.get(categoryId);
+        if (apps == null) {
+            apps = new ArrayList<>();
+        }
+
+        LinearLayout section = new LinearLayout(this);
+        section.setOrientation(LinearLayout.VERTICAL);
+        section.setPadding(0, firstInGroup ? dp(12) : dp(18), 0, 0);
+
+        LinearLayout header = new LinearLayout(this);
+        header.setOrientation(LinearLayout.HORIZONTAL);
+        header.setGravity(Gravity.CENTER_VERTICAL);
+
+
+        LinearLayout titleCol = new LinearLayout(this);
+        titleCol.setOrientation(LinearLayout.VERTICAL);
+
+        TextView titleView = new TextView(this);
+        titleView.setText(title);
+        titleView.setTextColor(getColor(R.color.modern_grey_900));
+        titleView.setTextSize(15);
+        titleView.setTypeface(Typeface.DEFAULT_BOLD);
+        titleCol.addView(titleView);
+
+        TextView subtitleView = new TextView(this);
+        subtitleView.setText(categorySummary(categoryId, apps, helperText));
+        subtitleView.setTextColor(getColor(R.color.modern_grey_600));
+        subtitleView.setTextSize(12);
+        titleCol.addView(subtitleView);
+        header.addView(titleCol, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+
+        TextView viewAll = new TextView(this);
+        viewAll.setText("View all");
+        viewAll.setTextColor(getColor(R.color.modern_blue_700));
+        viewAll.setTextSize(13);
+        viewAll.setTypeface(Typeface.DEFAULT_BOLD);
+        viewAll.setGravity(Gravity.CENTER);
+        viewAll.setPadding(dp(10), dp(6), 0, dp(6));
+        viewAll.setOnClickListener(v -> showCategoryAppsDialog(categoryId, title));
+        header.addView(viewAll);
+        section.addView(header);
+
+        View strip = createCategoryStrip(categoryId, apps);
+        LinearLayout.LayoutParams stripParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        stripParams.setMargins(0, dp(8), 0, 0);
+        section.addView(strip, stripParams);
+
+        parent.addView(section);
+    }
+    private String categorySummary(String categoryId, List<CategoryApp> apps, String helperText) {
+        if (!inventoryLoaded) {
+            return "Loading child apps...";
+        }
+        if (apps == null || apps.isEmpty()) {
+            return "No apps found";
+        }
+        int selected = selectedCount(apps);
+        if (StudyModeContract.CATEGORY_OTHER.equals(categoryId)) {
+            if (selected == 0) {
+                return apps.size() + " apps available to add";
+            }
+            return selected + " selected, " + Math.max(0, apps.size() - selected) + " available";
+        }
+        return selected + " selected of " + apps.size();
+    }
+
+    private View createCategoryStrip(String categoryId, List<CategoryApp> apps) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(0, 0, dp(4), 0);
+
+        if (!inventoryLoaded) {
+            row.addView(createEmptyStripText("Loading apps..."));
+        } else if (apps == null || apps.isEmpty()) {
+            row.addView(createEmptyStripText("No apps in this category"));
+        } else {
+            List<CategoryApp> preview = previewAppsForCategory(categoryId, apps);
+            if (preview.isEmpty()) {
+                row.addView(createEmptyStripText("No apps selected. Tap View all to choose."));
+            } else {
+                for (CategoryApp app : preview) {
+                    row.addView(createAppPreviewChip(app));
+                }
+                int hiddenCount = previewCandidateCount(categoryId, apps) - preview.size();
+                if (hiddenCount > 0) {
+                    row.addView(createMoreAppsChip(hiddenCount));
+                }
+            }
+        }
+
+        HorizontalScrollView scrollView = new HorizontalScrollView(this);
+        scrollView.setHorizontalScrollBarEnabled(false);
+        scrollView.addView(row);
+        return scrollView;
+    }
+
+    private TextView createEmptyStripText(String message) {
+        TextView view = new TextView(this);
+        view.setText(message);
+        view.setTextColor(getColor(R.color.modern_grey_500));
+        view.setTextSize(13);
+        view.setPadding(0, dp(4), 0, dp(4));
+        return view;
+    }
+
+    private List<CategoryApp> previewAppsForCategory(String categoryId, List<CategoryApp> apps) {
+        List<CategoryApp> selected = new ArrayList<>();
+        List<CategoryApp> unselected = new ArrayList<>();
+        for (CategoryApp app : apps) {
+            if (isAppSelected(app)) {
+                selected.add(app);
+            } else {
+                unselected.add(app);
+            }
+        }
+
+        List<CategoryApp> result = new ArrayList<>();
+        if (StudyModeContract.CATEGORY_OTHER.equals(categoryId)) {
+            result.addAll(selected);
+            result.addAll(unselected);
+        } else {
+            result.addAll(selected);
+        }
+        if (result.size() > MAX_PREVIEW_APPS) {
+            return new ArrayList<>(result.subList(0, MAX_PREVIEW_APPS));
+        }
+        return result;
+    }
+
+    private int previewCandidateCount(String categoryId, List<CategoryApp> apps) {
+        if (apps == null) {
+            return 0;
+        }
+        if (StudyModeContract.CATEGORY_OTHER.equals(categoryId)) {
+            return apps.size();
+        }
+        int count = 0;
+        for (CategoryApp app : apps) {
+            if (isAppSelected(app)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private View createAppPreviewChip(CategoryApp app) {
+        boolean selected = isAppSelected(app);
+        LinearLayout item = new LinearLayout(this);
+        item.setOrientation(LinearLayout.VERTICAL);
+        item.setGravity(Gravity.CENTER_HORIZONTAL);
+        item.setOnClickListener(v -> toggleAppSelection(app));
+        item.setContentDescription((selected ? "Remove " : "Add ") + app.name);
+
+        FrameLayout iconWrap = new FrameLayout(this);
+        ImageView icon = createAppIcon(app, 40);
+        iconWrap.addView(icon, centeredParams(40, 40));
+
+        TextView badge = new TextView(this);
+        badge.setText(selected ? "-" : "+");
+        badge.setGravity(Gravity.CENTER);
+        badge.setTextSize(12);
+        badge.setTypeface(Typeface.DEFAULT_BOLD);
+        badge.setTextColor(getColor(selected ? R.color.modern_red_500 : R.color.white));
+        badge.setBackgroundResource(selected ? R.drawable.bg_remove_badge : R.drawable.bg_mode_review_block);
+        FrameLayout.LayoutParams badgeParams = new FrameLayout.LayoutParams(dp(18), dp(18));
+        badgeParams.gravity = Gravity.TOP | Gravity.END;
+        badgeParams.setMargins(0, 0, dp(3), 0);
+        iconWrap.addView(badge, badgeParams);
+        item.addView(iconWrap, new LinearLayout.LayoutParams(dp(48), dp(44)));
+
+        TextView name = new TextView(this);
+        name.setText(app.name);
+        name.setGravity(Gravity.CENTER);
+        name.setTextColor(getColor(R.color.modern_grey_700));
+        name.setTextSize(10);
+        name.setMaxLines(1);
+        name.setEllipsize(TextUtils.TruncateAt.END);
+        LinearLayout.LayoutParams nameParams = new LinearLayout.LayoutParams(dp(58), LinearLayout.LayoutParams.WRAP_CONTENT);
+        nameParams.setMargins(0, dp(3), 0, 0);
+        item.addView(name, nameParams);
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(dp(62), LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(0, 0, dp(6), 0);
+        item.setLayoutParams(params);
+        return item;
+    }
+
+    private View createMoreAppsChip(int hiddenCount) {
+        TextView chip = new TextView(this);
+        chip.setText("+" + hiddenCount + " more");
+        chip.setTextColor(getColor(R.color.modern_blue_700));
+        chip.setTextSize(12);
+        chip.setTypeface(Typeface.DEFAULT_BOLD);
+        chip.setGravity(Gravity.CENTER);
+        chip.setBackgroundResource(R.drawable.bg_mode_day_unselected);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(dp(74), dp(34));
+        params.setMargins(dp(2), 0, 0, 0);
+        chip.setLayoutParams(params);
+        return chip;
+    }
+
+    private ImageView createAppIcon(CategoryApp app, int sizeDp) {
+        ImageView appIcon = new ImageView(this);
+        Bitmap bitmap = decodeIcon(app.iconBase64);
+        if (bitmap != null) {
+            appIcon.setImageBitmap(bitmap);
+            appIcon.clearColorFilter();
+        } else {
+            appIcon.setImageResource(R.drawable.ic_app);
+            appIcon.setColorFilter(getColor(R.color.modern_blue_700));
+        }
+        appIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        appIcon.setPadding(dp(2), dp(2), dp(2), dp(2));
+        appIcon.setBackgroundResource(R.drawable.bg_mode_icon_soft);
+        return appIcon;
+    }
+
+    private void toggleAppSelection(CategoryApp app) {
+        setAppSelected(app, !isAppSelected(app));
+        renderRestrictions();
+        renderReview();
+    }
+
+    private int selectedCount(List<CategoryApp> apps) {
+        int count = 0;
+        if (apps == null) {
+            return 0;
+        }
+        for (CategoryApp app : apps) {
+            if (isAppSelected(app)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     private void showCategoryAppsDialog(String categoryId, String title) {
         List<CategoryApp> apps = categoryApps.get(categoryId);
         if (apps == null || apps.isEmpty()) {
             new AlertDialog.Builder(this)
                     .setTitle(title)
-                    .setMessage("No installed apps found in this category. If this category stays ON, future matching apps will still be blocked during Study Mode.")
+                    .setMessage(inventoryLoaded ? "No installed apps found in this category." : "Apps are still loading.")
                     .setPositiveButton("OK", null)
                     .show();
             return;
         }
 
-        LinearLayout content = new LinearLayout(this);
-        content.setOrientation(LinearLayout.VERTICAL);
-        content.setPadding(dp(8), dp(6), dp(8), 0);
+        Dialog dialog = new Dialog(this);
+        dialog.setCanceledOnTouchOutside(true);
 
-        for (CategoryApp app : apps) {
-            LinearLayout row = new LinearLayout(this);
-            row.setOrientation(LinearLayout.HORIZONTAL);
-            row.setGravity(Gravity.CENTER_VERTICAL);
-            row.setPadding(0, dp(6), 0, dp(6));
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackgroundResource(R.drawable.bg_study_dialog_surface);
+        root.setPadding(dp(12), dp(10), dp(12), dp(12));
 
-            ImageView appIcon = new ImageView(this);
-            Bitmap bitmap = decodeIcon(app.iconBase64);
-            if (bitmap != null) {
-                appIcon.setImageBitmap(bitmap);
-            } else {
-                appIcon.setImageResource(R.drawable.ic_app);
-                appIcon.setColorFilter(getColor(R.color.modern_blue_700));
-            }
-            appIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(dp(36), dp(36));
-            iconParams.setMargins(0, 0, dp(10), 0);
-            row.addView(appIcon, iconParams);
+        LinearLayout header = new LinearLayout(this);
+        header.setOrientation(LinearLayout.HORIZONTAL);
+        header.setGravity(Gravity.CENTER_VERTICAL);
 
-            CheckBox checkBox = new CheckBox(this);
-            checkBox.setText(app.name);
-            checkBox.setTextSize(15);
-            checkBox.setTextColor(getColor(R.color.modern_grey_900));
-            checkBox.setChecked(isAppSelected(app));
-            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                setAppSelected(app, isChecked);
-                renderReview();
-            });
-            row.addView(checkBox, new LinearLayout.LayoutParams(
-                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-            content.addView(row);
-        }
+        TextView close = new TextView(this);
+        close.setText("X");
+        close.setGravity(Gravity.CENTER);
+        close.setTextSize(18);
+        close.setTextColor(getColor(R.color.modern_grey_900));
+        close.setOnClickListener(v -> dialog.dismiss());
+        header.addView(close, new LinearLayout.LayoutParams(dp(36), dp(36)));
+
+        TextView titleView = new TextView(this);
+        titleView.setText(categoryDialogTitle(categoryId, title));
+        titleView.setGravity(Gravity.CENTER);
+        titleView.setTextColor(getColor(R.color.modern_grey_900));
+        titleView.setTextSize(15);
+        titleView.setTypeface(Typeface.DEFAULT_BOLD);
+        header.addView(titleView, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+        header.addView(new View(this), new LinearLayout.LayoutParams(dp(36), dp(36)));
+        root.addView(header);
+
+        LinearLayout searchWrap = new LinearLayout(this);
+        searchWrap.setOrientation(LinearLayout.HORIZONTAL);
+        searchWrap.setGravity(Gravity.CENTER_VERTICAL);
+        searchWrap.setBackgroundResource(R.drawable.bg_study_search_pill);
+        searchWrap.setPadding(dp(12), 0, dp(12), 0);
+        LinearLayout.LayoutParams searchParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, dp(44));
+        searchParams.setMargins(0, dp(10), 0, dp(12));
+
+        ImageView searchIcon = new ImageView(this);
+        searchIcon.setImageResource(android.R.drawable.ic_menu_search);
+        searchIcon.setColorFilter(getColor(R.color.modern_grey_500));
+        searchWrap.addView(searchIcon, new LinearLayout.LayoutParams(dp(20), dp(20)));
+
+        EditText searchInput = new EditText(this);
+        searchInput.setHint("Search apps...");
+        searchInput.setSingleLine(true);
+        searchInput.setTextSize(14);
+        searchInput.setTextColor(getColor(R.color.modern_grey_900));
+        searchInput.setHintTextColor(getColor(R.color.modern_grey_500));
+        searchInput.setBackgroundColor(Color.TRANSPARENT);
+        searchInput.setPadding(dp(10), 0, 0, 0);
+        searchWrap.addView(searchInput, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+        root.addView(searchWrap, searchParams);
+
+        LinearLayout rows = new LinearLayout(this);
+        rows.setOrientation(LinearLayout.VERTICAL);
 
         ScrollView scrollView = new ScrollView(this);
-        scrollView.addView(content);
+        scrollView.setFillViewport(false);
+        scrollView.addView(rows);
+        root.addView(scrollView, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
 
-        new AlertDialog.Builder(this)
-                .setTitle(title)
-                .setView(scrollView)
-                .setPositiveButton("Done", (dialog, which) -> renderReview())
-                .show();
+        TextView done = new TextView(this);
+        done.setText("Done");
+        done.setGravity(Gravity.CENTER);
+        done.setTextColor(getColor(R.color.white));
+        done.setTextSize(14);
+        done.setTypeface(Typeface.DEFAULT_BOLD);
+        done.setBackgroundResource(R.drawable.bg_primary_pill);
+        done.setOnClickListener(v -> {
+            renderRestrictions();
+            renderReview();
+            dialog.dismiss();
+        });
+        LinearLayout.LayoutParams doneParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, dp(48));
+        doneParams.setMargins(0, dp(14), 0, 0);
+        root.addView(done, doneParams);
+
+        Runnable renderRows = () -> renderCategoryDialogRows(rows, apps, searchInput.getText().toString(), categoryId);
+        renderRows.run();
+        searchInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                renderRows.run();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        dialog.setContentView(root);
+        dialog.show();
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.92f);
+            int height = (int) (getResources().getDisplayMetrics().heightPixels * 0.82f);
+            window.setLayout(width, height);
+        }
+    }
+
+    private void renderCategoryDialogRows(LinearLayout rows, List<CategoryApp> apps, String query, String categoryId) {
+        rows.removeAllViews();
+        int shown = 0;
+        for (CategoryApp app : apps) {
+            if (!matchesCategorySearch(app, query)) {
+                continue;
+            }
+            LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, dp(66));
+            rowParams.setMargins(0, 0, 0, dp(8));
+            rows.addView(createCategoryDialogRow(app, categoryId), rowParams);
+            shown++;
+        }
+        if (shown == 0) {
+            TextView empty = new TextView(this);
+            empty.setText("No apps found");
+            empty.setGravity(Gravity.CENTER);
+            empty.setTextColor(getColor(R.color.modern_grey_500));
+            empty.setTextSize(14);
+            rows.addView(empty, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, dp(120)));
+        }
+    }
+
+    private View createCategoryDialogRow(CategoryApp app, String categoryId) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(dp(12), 0, dp(8), 0);
+        row.setBackgroundResource(R.drawable.bg_study_picker_row);
+
+        ImageView appIcon = createAppIcon(app, 42);
+        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(dp(42), dp(42));
+        iconParams.setMargins(0, 0, dp(12), 0);
+        row.addView(appIcon, iconParams);
+
+        LinearLayout textColumn = new LinearLayout(this);
+        textColumn.setOrientation(LinearLayout.VERTICAL);
+        textColumn.setGravity(Gravity.CENTER_VERTICAL);
+
+        TextView name = new TextView(this);
+        name.setText(app.name);
+        name.setTextSize(14);
+        name.setTypeface(Typeface.DEFAULT_BOLD);
+        name.setTextColor(getColor(R.color.modern_grey_900));
+        name.setMaxLines(1);
+        name.setEllipsize(TextUtils.TruncateAt.END);
+        textColumn.addView(name);
+
+        TextView category = new TextView(this);
+        category.setText(categoryDisplayName(categoryId));
+        category.setTextSize(12);
+        category.setTextColor(getColor(R.color.modern_grey_600));
+        category.setMaxLines(1);
+        textColumn.addView(category);
+
+        row.addView(textColumn, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+
+        CheckBox checkBox = new CheckBox(this);
+        checkBox.setChecked(isAppSelected(app));
+        checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> setAppSelected(app, isChecked));
+        row.setOnClickListener(v -> checkBox.setChecked(!checkBox.isChecked()));
+        row.addView(checkBox, new LinearLayout.LayoutParams(dp(48), dp(48)));
+        return row;
+    }
+
+    private boolean matchesCategorySearch(CategoryApp app, String query) {
+        if (app == null) {
+            return false;
+        }
+        if (isBlank(query)) {
+            return true;
+        }
+        String normalized = query.toLowerCase(Locale.US).trim();
+        return app.name.toLowerCase(Locale.US).contains(normalized);
+    }
+
+    private String categoryDialogTitle(String categoryId, String fallback) {
+        return categoryDisplayName(categoryId) + " Apps";
+    }
+
+    private String categoryDisplayName(String categoryId) {
+        if (StudyModeContract.CATEGORY_SOCIAL.equals(categoryId)) {
+            return "Social Media";
+        }
+        if (StudyModeContract.CATEGORY_GAMES.equals(categoryId)) {
+            return "Games";
+        }
+        if (StudyModeContract.CATEGORY_ENTERTAINMENT.equals(categoryId)) {
+            return "Entertainment";
+        }
+        if (StudyModeContract.CATEGORY_OTHER.equals(categoryId)) {
+            return "Others";
+        }
+        return "Apps";
     }
 
     private void renderReview() {
@@ -626,15 +1021,23 @@ public class StudyModeEditActivity extends BaseActivity {
             row.addView(name, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
 
             TextView status = new TextView(this);
-            status.setText(blocked ? "Blocked" : "Allowed");
+            status.setText(blocked ? "Remove" : "Allowed");
             status.setGravity(Gravity.CENTER);
-            status.setTextColor(getColor(blocked ? R.color.modern_blue_700 : R.color.modern_grey_700));
+            status.setTextColor(getColor(blocked ? R.color.white : R.color.modern_grey_700));
             status.setTextSize(11);
             status.setTypeface(Typeface.DEFAULT_BOLD);
             status.setBackgroundResource(blocked
-                    ? R.drawable.bg_mode_icon_blue
+                    ? R.drawable.bg_mode_review_allow
                     : R.drawable.bg_mode_day_unselected);
-            row.addView(status, new LinearLayout.LayoutParams(dp(72), dp(28)));
+            if (blocked) {
+                status.setContentDescription("Remove " + app.name + " from Study Mode blocklist");
+                status.setOnClickListener(v -> {
+                    setAppSelected(app, false);
+                    renderRestrictions();
+                    renderReview();
+                });
+            }
+            row.addView(status, new LinearLayout.LayoutParams(dp(78), dp(28)));
             layoutReview.addView(row);
         }
     }
@@ -730,12 +1133,20 @@ public class StudyModeEditActivity extends BaseActivity {
     }
 
     private void setAppSelected(CategoryApp app, boolean selected) {
+        if (app == null || isBlank(app.packageName)) {
+            return;
+        }
+        String categoryId = toStudyCategoryId(app.category, app.packageName, app.name);
         if (selected) {
             policy.blockedPackages.put(app.packageName, true);
             policy.allowedOverrides.put(app.packageName, false);
         } else {
             policy.blockedPackages.remove(app.packageName);
-            policy.allowedOverrides.put(app.packageName, true);
+            if (isDefaultBlockedCategory(categoryId)) {
+                policy.allowedOverrides.put(app.packageName, true);
+            } else {
+                policy.allowedOverrides.remove(app.packageName);
+            }
         }
     }
 
@@ -780,14 +1191,81 @@ public class StudyModeEditActivity extends BaseActivity {
         if (policy.allowedOverrides == null) {
             policy.allowedOverrides = new LinkedHashMap<>();
         }
+        if (policy.sessionAllowedPackages == null) {
+            policy.sessionAllowedPackages = new LinkedHashMap<>();
+        }
+        for (String category : Arrays.asList(
+                StudyModeContract.CATEGORY_SOCIAL,
+                StudyModeContract.CATEGORY_GAMES,
+                StudyModeContract.CATEGORY_ENTERTAINMENT,
+                StudyModeContract.CATEGORY_OTHER)) {
+            if (!policy.categories.containsKey(category)) {
+                policy.categories.put(category,
+                        new StudyModePolicy.CategorySelection(isDefaultBlockedCategory(category)));
+            }
+        }
+    }
+
+    private void applyDefaultSelectionsIfEmpty() {
+        boolean hasExplicitBlocks = hasTrueValue(policy.blockedPackages);
+        boolean hasExplicitAllows = hasTrueValue(policy.allowedOverrides);
+        boolean hasEnabledCategory = false;
+        if (policy.categories != null) {
+            for (StudyModePolicy.CategorySelection selection : policy.categories.values()) {
+                if (selection != null && selection.enabled) {
+                    hasEnabledCategory = true;
+                    break;
+                }
+            }
+        }
+        if (hasExplicitBlocks || hasExplicitAllows || hasEnabledCategory) {
+            return;
+        }
+        enableDefaultStudyCategories();
+    }
+
+    private void migrateLegacySelectionDefaultsIfNeeded() {
+        if (policy == null || policy.schemaVersion >= StudyModeContract.POLICY_SCHEMA_VERSION) {
+            applyDefaultSelectionsIfEmpty();
+            return;
+        }
+        enableDefaultStudyCategories();
+        if (policy.allowedOverrides != null) {
+            policy.allowedOverrides.clear();
+        }
+        policy.schemaVersion = StudyModeContract.POLICY_SCHEMA_VERSION;
+    }
+
+    private boolean hasTrueValue(Map<String, Boolean> values) {
+        if (values == null || values.isEmpty()) {
+            return false;
+        }
+        for (Boolean value : values.values()) {
+            if (Boolean.TRUE.equals(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void enableDefaultStudyCategories() {
         for (String category : Arrays.asList(
                 StudyModeContract.CATEGORY_SOCIAL,
                 StudyModeContract.CATEGORY_GAMES,
                 StudyModeContract.CATEGORY_ENTERTAINMENT)) {
-            if (!policy.categories.containsKey(category)) {
-                policy.categories.put(category, new StudyModePolicy.CategorySelection(false));
+            StudyModePolicy.CategorySelection selection = policy.categories.get(category);
+            if (selection == null) {
+                selection = new StudyModePolicy.CategorySelection(true);
+                policy.categories.put(category, selection);
             }
+            selection.enabled = true;
         }
+    }
+
+    private boolean isDefaultBlockedCategory(String categoryId) {
+        return StudyModeContract.CATEGORY_SOCIAL.equals(categoryId)
+                || StudyModeContract.CATEGORY_GAMES.equals(categoryId)
+                || StudyModeContract.CATEGORY_ENTERTAINMENT.equals(categoryId);
     }
 
     private void initializeCategoryApps() {
@@ -795,6 +1273,7 @@ public class StudyModeEditActivity extends BaseActivity {
         categoryApps.put(StudyModeContract.CATEGORY_SOCIAL, new ArrayList<>());
         categoryApps.put(StudyModeContract.CATEGORY_GAMES, new ArrayList<>());
         categoryApps.put(StudyModeContract.CATEGORY_ENTERTAINMENT, new ArrayList<>());
+        categoryApps.put(StudyModeContract.CATEGORY_OTHER, new ArrayList<>());
     }
 
     private void sortDays() {

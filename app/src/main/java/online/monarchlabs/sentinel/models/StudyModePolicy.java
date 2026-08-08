@@ -21,6 +21,8 @@ public class StudyModePolicy {
     public Map<String, CategorySelection> categories;
     public Map<String, Boolean> blockedPackages;
     public Map<String, Boolean> allowedOverrides;
+    public Map<String, String> sessionAllowedPackages;
+    public int schemaVersion;
     public long updatedAt;
 
     public StudyModePolicy() {
@@ -30,6 +32,8 @@ public class StudyModePolicy {
         categories = defaultCategories();
         blockedPackages = new LinkedHashMap<>();
         allowedOverrides = new LinkedHashMap<>();
+        sessionAllowedPackages = new LinkedHashMap<>();
+        schemaVersion = StudyModeContract.POLICY_SCHEMA_VERSION;
     }
 
     public static StudyModePolicy createDefault() {
@@ -67,6 +71,7 @@ public class StudyModePolicy {
         map.put("categories", categoriesToMap());
         map.put("blockedPackages", blockedPackages != null ? blockedPackages : new HashMap<>());
         map.put("allowedOverrides", allowedOverrides != null ? allowedOverrides : new HashMap<>());
+        map.put("schemaVersion", schemaVersion);
         map.put("updatedAt", updatedAt);
         return map;
     }
@@ -105,9 +110,10 @@ public class StudyModePolicy {
 
     private static Map<String, CategorySelection> defaultCategories() {
         Map<String, CategorySelection> result = new LinkedHashMap<>();
-        result.put(StudyModeContract.CATEGORY_SOCIAL, new CategorySelection(false));
-        result.put(StudyModeContract.CATEGORY_GAMES, new CategorySelection(false));
-        result.put(StudyModeContract.CATEGORY_ENTERTAINMENT, new CategorySelection(false));
+        result.put(StudyModeContract.CATEGORY_SOCIAL, new CategorySelection(true));
+        result.put(StudyModeContract.CATEGORY_GAMES, new CategorySelection(true));
+        result.put(StudyModeContract.CATEGORY_ENTERTAINMENT, new CategorySelection(true));
+        result.put(StudyModeContract.CATEGORY_OTHER, new CategorySelection(false));
         return result;
     }
 

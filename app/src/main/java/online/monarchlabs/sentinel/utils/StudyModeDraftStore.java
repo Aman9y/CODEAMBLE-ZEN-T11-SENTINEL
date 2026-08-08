@@ -19,17 +19,18 @@ public final class StudyModeDraftStore {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         String json = prefs.getString(key(deviceId), null);
         if (json == null || json.trim().isEmpty()) {
-            StudyModePolicy policy = StudyModePolicy.createDefault();
-            policy.enabled = true;
-            return policy;
+            return StudyModePolicy.createDefault();
         }
         try {
+            boolean hasSchemaVersion = json.contains("\"schemaVersion\"");
             StudyModePolicy policy = new Gson().fromJson(json, StudyModePolicy.class);
-            return normalize(policy);
-        } catch (Exception ignored) {
-            StudyModePolicy policy = StudyModePolicy.createDefault();
-            policy.enabled = true;
+            policy = normalize(policy);
+            if (!hasSchemaVersion) {
+                policy.schemaVersion = 1;
+            }
             return policy;
+        } catch (Exception ignored) {
+            return StudyModePolicy.createDefault();
         }
     }
 
@@ -44,10 +45,16 @@ public final class StudyModeDraftStore {
                 .apply();
     }
 
+    public static void clear(Context context, String deviceId) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .edit()
+                .remove(key(deviceId))
+                .apply();
+    }
+
     private static StudyModePolicy normalize(StudyModePolicy policy) {
         if (policy == null) {
             policy = StudyModePolicy.createDefault();
-            policy.enabled = true;
         }
         StudyModePolicy defaults = StudyModePolicy.createDefault();
         if (policy.timezone == null || policy.timezone.trim().isEmpty()) {
@@ -67,6 +74,9 @@ public final class StudyModeDraftStore {
         }
         if (policy.allowedOverrides == null) {
             policy.allowedOverrides = defaults.allowedOverrides;
+        }
+        if (policy.sessionAllowedPackages == null) {
+            policy.sessionAllowedPackages = defaults.sessionAllowedPackages;
         }
         return policy;
     }

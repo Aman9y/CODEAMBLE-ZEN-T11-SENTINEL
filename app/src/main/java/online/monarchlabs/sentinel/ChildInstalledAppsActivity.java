@@ -37,11 +37,17 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.SwitchCompat;
 
 
 import online.monarchlabs.sentinel.models.AppWithUsage;
+import online.monarchlabs.sentinel.models.StudyModePolicy;
 import online.monarchlabs.sentinel.data.FirebaseSchemaV2Repository;
+import online.monarchlabs.sentinel.data.StudyModeContract;
+import online.monarchlabs.sentinel.data.StudyModePolicyRepository;
 import online.monarchlabs.sentinel.data.ParentAppInventoryCache;
+import online.monarchlabs.sentinel.utils.AppCategorizer;
+import online.monarchlabs.sentinel.utils.StudyModeScheduleEvaluator;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -74,6 +80,9 @@ public class ChildInstalledAppsActivity extends BaseActivity {
     public static final String EXTRA_CHILD_NAME = "childName";
     public static final String EXTRA_IS_PARENT_CONTEXT = "is_parent_context";
     public static final String EXTRA_RETURN_TO_TIMER_STATUS = "return_to_timer_status";
+    private static final long STUDY_MODE_UI_MIN_REFRESH_MS = 1_000L;
+    private static final long STUDY_MODE_UI_BOUNDARY_GRACE_MS = 750L;
+    private static final long STUDY_MODE_UI_FALLBACK_REFRESH_MS = 15 * 60_000L;
 
     private String childDeviceId;
     private String childName;
@@ -119,6 +128,11 @@ public class ChildInstalledAppsActivity extends BaseActivity {
     private DatabaseReference usageRef;
     private DatabaseReference blockPoliciesRef;
     private ChildEventListener blockPolicyListener;
+    private DatabaseReference studyModeRef;
+    private ValueEventListener studyModeListener;
+    private StudyModePolicy activeStudyModePolicy;
+    private String activeStudyModeSessionKey;
+    private final java.util.Set<String> activeStudyModeBlocks = new java.util.HashSet<>();
     private boolean useV2BlockPolicies = true;
     private String parentCacheScope;
     private ParentAppInventoryCache.Entry inventoryCacheEntry;
@@ -131,6 +145,23 @@ public class ChildInstalledAppsActivity extends BaseActivity {
     private final Runnable usageReadyAfterFirstBatchRunnable = () -> {
         initialUsageReady = true;
         updateInitialContentVisibility();
+    };
+    private final Runnable studyModeUiRefreshRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (activeStudyModePolicy != null) {
+                java.util.Set<String> previousBlocks = new java.util.HashSet<>(activeStudyModeBlocks);
+                String previousSessionKey = activeStudyModeSessionKey;
+                refreshStudyModeState();
+                if (!previousBlocks.equals(activeStudyModeBlocks)
+                        || !java.util.Objects.equals(previousSessionKey, activeStudyModeSessionKey)) {
+                    if (adapter != null) {
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            }
+            scheduleStudyModeUiRefresh();
+        }
     };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -769,6 +800,7 @@ public class ChildInstalledAppsActivity extends BaseActivity {
 
                 AppWithUsage app = new AppWithUsage(
                         this, packageName, appName, iconBase64, isSystemApp);
+                app.setCategory(resolveInventoryCategory(asString(appData.get("category")), packageName, appName));
                 Long usageTime = getUsageForPackage(packageName);
                 if (usageTime != null) {
                     app.setUsageTimeMs(usageTime);
@@ -783,6 +815,7 @@ public class ChildInstalledAppsActivity extends BaseActivity {
                 Log.w(TAG, "Error parsing cached app", error);
             }
         }
+        refreshStudyModeState();
         rebuildDisplayList();
     }
 
@@ -938,7 +971,9 @@ public class ChildInstalledAppsActivity extends BaseActivity {
         listenForApps();
         listenForTimers();
         listenForBlockPolicies();
+        listenForStudyModePolicy();
         listenForUsageData();
+        scheduleStudyModeUiRefresh();
     }
 
     @Override
@@ -950,9 +985,11 @@ public class ChildInstalledAppsActivity extends BaseActivity {
         timersListener = null;
         timersRef = null;
         detachBlockPolicyListener();
+        detachStudyModePolicyListener();
         detachUsageListener();
         displayRefreshHandler.removeCallbacks(initialUsageFallbackRunnable);
         displayRefreshHandler.removeCallbacks(usageReadyAfterFirstBatchRunnable);
+        displayRefreshHandler.removeCallbacks(studyModeUiRefreshRunnable);
         super.onStop();
     }
     @Override
@@ -964,10 +1001,12 @@ public class ChildInstalledAppsActivity extends BaseActivity {
             timersRef.removeEventListener(timersListener);
         }
         detachBlockPolicyListener();
+        detachStudyModePolicyListener();
         detachUsageListener();
         displayRefreshHandler.removeCallbacks(displayRefreshRunnable);
         displayRefreshHandler.removeCallbacks(initialUsageFallbackRunnable);
         displayRefreshHandler.removeCallbacks(usageReadyAfterFirstBatchRunnable);
+        displayRefreshHandler.removeCallbacks(studyModeUiRefreshRunnable);
         iconDecodeExecutor.shutdownNow();
         iconCache.evictAll();
 
@@ -986,14 +1025,20 @@ public class ChildInstalledAppsActivity extends BaseActivity {
     // Blocking functionality
 
     private boolean isAppBlocked(String packageName) {
+        return isAppManuallyBlocked(packageName) || isStudyModeBlocked(packageName);
+    }
+
+    private boolean isAppManuallyBlocked(String packageName) {
         if (AppBlockingPolicy.isUnblockable(packageName)) {
             return false;
         }
-        // Check if app is in blocked_apps SharedPreferences (device specific)
         android.content.SharedPreferences prefs = getSharedPreferences("blocked_apps_" + childDeviceId, MODE_PRIVATE);
         return prefs.getBoolean(packageName, false);
     }
 
+    private boolean isStudyModeBlocked(String packageName) {
+        return packageName != null && activeStudyModeBlocks.contains(packageName);
+    }
     private void blockApp(String packageName, String appName) {
         if (AppBlockingPolicy.isUnblockable(packageName)) {
             cacheBlockStatus(packageName, false);
@@ -1051,6 +1096,43 @@ public class ChildInstalledAppsActivity extends BaseActivity {
         prefs.edit().putBoolean(packageName, isBlocked).apply();
     }
 
+    private void handleBlockSwitchClick(AppWithUsage app, SwitchCompat switchBlock, boolean canBlock) {
+        if (!canBlock) {
+            switchBlock.setChecked(false);
+            Toast.makeText(this, "Android Settings must remain accessible", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String packageName = app.getPackageName();
+        boolean manuallyBlocked = isAppManuallyBlocked(packageName);
+        boolean studyBlocked = isStudyModeBlocked(packageName);
+        boolean currentlyBlocked = manuallyBlocked || studyBlocked;
+        switchBlock.setChecked(currentlyBlocked);
+
+        if (studyBlocked && !manuallyBlocked) {
+            showStudyModeSessionUnblockConfirmation(packageName, app.getAppName(),
+                    () -> switchBlock.setChecked(false),
+                    () -> switchBlock.setChecked(true));
+        } else if (currentlyBlocked) {
+            showUnblockConfirmation(packageName, app.getAppName(),
+                    () -> {
+                        unblockApp(packageName);
+                        switchBlock.setChecked(isStudyModeBlocked(packageName));
+                    },
+                    () -> switchBlock.setChecked(true));
+        } else {
+            showBlockConfirmation(packageName, app.getAppName(),
+                    () -> {
+                        blockApp(packageName, app.getAppName());
+                        switchBlock.setChecked(true);
+                    },
+                    () -> {
+                        blockAppDelayed(packageName, app.getAppName(), 300000);
+                        switchBlock.setChecked(true);
+                    },
+                    () -> switchBlock.setChecked(false));
+        }
+    }
     private void showBlockConfirmation(String packageName, String appName, Runnable onConfirmImmediate, Runnable onConfirmDelayed, Runnable onCancel) {
         // Create context with forced light theme to prevent dark mode text issues
         android.view.ContextThemeWrapper themedContext = new android.view.ContextThemeWrapper(this,
@@ -1095,6 +1177,68 @@ public class ChildInstalledAppsActivity extends BaseActivity {
                 .show();
     }
 
+    private void showStudyModeSessionUnblockConfirmation(String packageName, String appName,
+            Runnable onConfirm, Runnable onCancel) {
+        android.view.ContextThemeWrapper themedContext = new android.view.ContextThemeWrapper(this,
+                R.style.AlertDialogCustom);
+        new androidx.appcompat.app.AlertDialog.Builder(themedContext)
+                .setTitle("Unblock for this session?")
+                .setMessage(appName + " is currently blocked by Study Mode. If you continue, it will be unblocked for this Study Mode session only. It may be blocked again the next time Study Mode becomes active.")
+                .setPositiveButton("Unblock", (dialog, which) -> {
+                    allowStudyModePackageForCurrentSession(packageName, appName, onConfirm);
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    if (onCancel != null) {
+                        onCancel.run();
+                    }
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+    private void allowStudyModePackageForCurrentSession(String packageName, String appName,
+            Runnable onSuccess) {
+        if (activeStudyModePolicy == null || activeStudyModeSessionKey == null) {
+            Toast.makeText(this, "Study Mode is not active right now", Toast.LENGTH_SHORT).show();
+            if (onSuccess != null) {
+                onSuccess.run();
+            }
+            return;
+        }
+
+        Map<String, Object> allow = new HashMap<>();
+        allow.put("packageName", packageName);
+        allow.put("allowed", true);
+        allow.put("sessionKey", activeStudyModeSessionKey);
+        allow.put("updatedAt", ServerValue.TIMESTAMP);
+
+        FirebaseDatabase.getInstance()
+                .getReference("v2")
+                .child("device_modes")
+                .child(childDeviceId)
+                .child(StudyModeContract.MODE_ID)
+                .child("sessionAllows")
+                .child(sanitizeAppKey(packageName))
+                .setValue(allow)
+                .addOnSuccessListener(ignored -> {
+                    if (activeStudyModePolicy.sessionAllowedPackages == null) {
+                        activeStudyModePolicy.sessionAllowedPackages = new HashMap<>();
+                    }
+                    activeStudyModePolicy.sessionAllowedPackages.put(packageName, activeStudyModeSessionKey);
+                    refreshStudyModeState();
+                    if (adapter != null) {
+                        adapter.notifyDataSetChanged();
+                    }
+                    Toast.makeText(this, appName + " unblocked for this Study Mode session", Toast.LENGTH_SHORT).show();
+                    if (onSuccess != null) {
+                        onSuccess.run();
+                    }
+                })
+                .addOnFailureListener(error -> {
+                    Log.e(TAG, "Failed to allow Study Mode session exception", error);
+                    Toast.makeText(this, "Failed to unblock Study Mode app", Toast.LENGTH_SHORT).show();
+                });
+    }
     // \ud83c\udd95 Enhanced Adapter with multiple view types
     class EnhancedAppsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private static final int VIEW_TYPE_HEADER = 0;
@@ -1259,48 +1403,7 @@ public class ChildInstalledAppsActivity extends BaseActivity {
                     return true;
                 });
 
-                switchBlock.setOnClickListener(v -> {
-                    if (!canBlock) {
-                        switchBlock.setChecked(false);
-                        Toast.makeText(ChildInstalledAppsActivity.this,
-                                "Android Settings must remain accessible",
-                                Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    // CRITICAL: Read actual state from cache IMMEDIATELY, not from switch visual
-                    final boolean currentlyBlocked = isAppBlocked(app.getPackageName());
-
-                    // Prevent switch from changing until user confirms
-                    switchBlock.setChecked(currentlyBlocked);
-
-                    if (currentlyBlocked) {
-                        // Currently blocked -> User wants to UNBLOCK
-                        showUnblockConfirmation(app.getPackageName(), app.getAppName(),
-                                () -> {
-                                    unblockApp(app.getPackageName());
-                                    switchBlock.setChecked(false);
-                                },
-                                () -> {
-                                    // User cancelled - keep in blocked state
-                                    switchBlock.setChecked(true);
-                                });
-                    } else {
-                        // Currently unblocked -> User wants to BLOCK
-                        showBlockConfirmation(app.getPackageName(), app.getAppName(),
-                                () -> {
-                                    blockApp(app.getPackageName(), app.getAppName());
-                                    switchBlock.setChecked(true);
-                                },
-                                () -> {
-                                    blockAppDelayed(app.getPackageName(), app.getAppName(), 300000);
-                                    switchBlock.setChecked(true);
-                                },
-                                () -> {
-                                    // User cancelled - keep in unblocked state
-                                    switchBlock.setChecked(false);
-                                });
-                    }
-                });
+                switchBlock.setOnClickListener(v -> handleBlockSwitchClick(app, switchBlock, canBlock));
             }
         }
 
@@ -1366,48 +1469,7 @@ public class ChildInstalledAppsActivity extends BaseActivity {
                     return true;
                 });
 
-                switchBlock.setOnClickListener(v -> {
-                    if (!canBlock) {
-                        switchBlock.setChecked(false);
-                        Toast.makeText(ChildInstalledAppsActivity.this,
-                                "Android Settings must remain accessible",
-                                Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    // CRITICAL: Read actual state from cache IMMEDIATELY, not from switch visual
-                    final boolean currentlyBlocked = isAppBlocked(app.getPackageName());
-
-                    // Prevent switch from changing until user confirms
-                    switchBlock.setChecked(currentlyBlocked);
-
-                    if (currentlyBlocked) {
-                        // Currently blocked -> User wants to UNBLOCK
-                        showUnblockConfirmation(app.getPackageName(), app.getAppName(),
-                                () -> {
-                                    unblockApp(app.getPackageName());
-                                    switchBlock.setChecked(false);
-                                },
-                                () -> {
-                                    // User cancelled - keep in blocked state
-                                    switchBlock.setChecked(true);
-                                });
-                    } else {
-                        // Currently unblocked -> User wants to BLOCK
-                        showBlockConfirmation(app.getPackageName(), app.getAppName(),
-                                () -> {
-                                    blockApp(app.getPackageName(), app.getAppName());
-                                    switchBlock.setChecked(true);
-                                },
-                                () -> {
-                                    blockAppDelayed(app.getPackageName(), app.getAppName(), 300000);
-                                    switchBlock.setChecked(true);
-                                },
-                                () -> {
-                                    // User cancelled - keep in unblocked state
-                                    switchBlock.setChecked(false);
-                                });
-                    }
-                });
+                switchBlock.setOnClickListener(v -> handleBlockSwitchClick(app, switchBlock, canBlock));
             }
         }
     }
@@ -1487,6 +1549,185 @@ public class ChildInstalledAppsActivity extends BaseActivity {
         dialog.show();
     }
 
+    private void listenForStudyModePolicy() {
+        if (studyModeListener != null) {
+            return;
+        }
+        studyModeRef = FirebaseDatabase.getInstance()
+                .getReference("v2")
+                .child("device_modes")
+                .child(childDeviceId)
+                .child(StudyModeContract.MODE_ID);
+        studyModeListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                activeStudyModePolicy = StudyModePolicyRepository.fromSnapshot(snapshot);
+                refreshStudyModeState();
+                if (adapter != null) {
+                    adapter.notifyDataSetChanged();
+                }
+                scheduleStudyModeUiRefresh();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.w(TAG, "Study Mode listener cancelled: " + error.getMessage());
+            }
+        };
+        studyModeRef.addValueEventListener(studyModeListener);
+    }
+
+    private void scheduleStudyModeUiRefresh() {
+        displayRefreshHandler.removeCallbacks(studyModeUiRefreshRunnable);
+        StudyModePolicy policy = activeStudyModePolicy;
+        if (policy == null || !policy.enabled) {
+            return;
+        }
+        long transitionDelay = StudyModeScheduleEvaluator.millisUntilNextTransition(
+                policy, System.currentTimeMillis());
+        long delayMs = transitionDelay >= 0L
+                ? Math.max(STUDY_MODE_UI_MIN_REFRESH_MS,
+                        Math.min(STUDY_MODE_UI_FALLBACK_REFRESH_MS,
+                                transitionDelay + STUDY_MODE_UI_BOUNDARY_GRACE_MS))
+                : STUDY_MODE_UI_FALLBACK_REFRESH_MS;
+        displayRefreshHandler.postDelayed(studyModeUiRefreshRunnable, delayMs);
+    }
+
+    private void refreshStudyModeState() {
+        activeStudyModeBlocks.clear();
+        activeStudyModeSessionKey = null;
+        StudyModePolicy policy = activeStudyModePolicy;
+        if (policy == null || !policy.enabled || !StudyModeScheduleEvaluator.isActiveNow(policy)) {
+            return;
+        }
+        activeStudyModeSessionKey = StudyModeScheduleEvaluator.currentSessionKey(policy);
+
+        java.util.Set<String> explicitBlocks = policy.getEffectiveBlockedPackages();
+        for (String packageName : explicitBlocks) {
+            if (packageName != null
+                    && packageName.contains(".")
+                    && !AppBlockingPolicy.isUnblockable(packageName)
+                    && !isStudyModeSessionAllowed(policy, packageName)) {
+                activeStudyModeBlocks.add(packageName);
+            }
+        }
+        for (AppWithUsage app : allAppsWithUsage) {
+            if (app == null || app.getPackageName() == null) {
+                continue;
+            }
+            String packageName = app.getPackageName();
+            if (matchesPackageReference(explicitBlocks, packageName)
+                    && !AppBlockingPolicy.isUnblockable(packageName)
+                    && !isStudyModeSessionAllowed(policy, packageName)
+                    && !isStudyAllowedOverride(policy, packageName)) {
+                activeStudyModeBlocks.add(packageName);
+            }
+        }
+        addStudyModeCategoryBlocks(policy);
+    }
+
+    private void addStudyModeCategoryBlocks(StudyModePolicy policy) {
+        if (policy == null || policy.categories == null || allAppsWithUsage == null) {
+            return;
+        }
+        boolean social = isStudyCategoryEnabled(policy, StudyModeContract.CATEGORY_SOCIAL);
+        boolean games = isStudyCategoryEnabled(policy, StudyModeContract.CATEGORY_GAMES);
+        boolean entertainment = isStudyCategoryEnabled(policy, StudyModeContract.CATEGORY_ENTERTAINMENT);
+        if (!social && !games && !entertainment) {
+            return;
+        }
+
+        for (AppWithUsage app : allAppsWithUsage) {
+            if (app == null || AppBlockingPolicy.isUnblockable(app.getPackageName())) {
+                continue;
+            }
+            String packageName = app.getPackageName();
+            if (isStudyModeSessionAllowed(policy, packageName)) {
+                continue;
+            }
+            if (isStudyAllowedOverride(policy, packageName)) {
+                continue;
+            }
+            if (matchesStudyModeCategory(app.getCategory(), social, games, entertainment)) {
+                activeStudyModeBlocks.add(packageName);
+            }
+        }
+    }
+
+    private boolean isStudyCategoryEnabled(StudyModePolicy policy, String categoryId) {
+        if (policy == null || policy.categories == null) {
+            return false;
+        }
+        StudyModePolicy.CategorySelection selection = policy.categories.get(categoryId);
+        return selection != null && selection.enabled;
+    }
+
+    private boolean matchesStudyModeCategory(AppCategorizer.AppCategory category,
+            boolean social, boolean games, boolean entertainment) {
+        if (category == null) {
+            return false;
+        }
+        switch (category) {
+            case SOCIAL:
+            case COMMUNICATION:
+                return social;
+            case GAMES:
+                return games;
+            case ENTERTAINMENT:
+                return entertainment;
+            default:
+                return false;
+        }
+    }
+
+    private boolean isStudyModeSessionAllowed(StudyModePolicy policy, String packageName) {
+        if (policy == null || packageName == null || policy.sessionAllowedPackages == null) {
+            return false;
+        }
+        String sessionKey = activeStudyModeSessionKey != null
+                ? activeStudyModeSessionKey
+                : StudyModeScheduleEvaluator.currentSessionKey(policy);
+        if (sessionKey == null) {
+            return false;
+        }
+        return sessionKey.equals(policy.sessionAllowedPackages.get(packageName))
+                || sessionKey.equals(policy.sessionAllowedPackages.get(sanitizeAppKey(packageName)));
+    }
+
+    private boolean isStudyAllowedOverride(StudyModePolicy policy, String packageName) {
+        return policy != null && policy.allowedOverrides != null && packageName != null
+                && (Boolean.TRUE.equals(policy.allowedOverrides.get(packageName))
+                || Boolean.TRUE.equals(policy.allowedOverrides.get(sanitizeAppKey(packageName))));
+    }
+
+    private boolean matchesPackageReference(java.util.Set<String> references, String packageName) {
+        return references != null && packageName != null
+                && (references.contains(packageName) || references.contains(sanitizeAppKey(packageName)));
+    }
+
+    private void detachStudyModePolicyListener() {
+        if (studyModeRef != null && studyModeListener != null) {
+            studyModeRef.removeEventListener(studyModeListener);
+        }
+        studyModeRef = null;
+        studyModeListener = null;
+        activeStudyModePolicy = null;
+        activeStudyModeSessionKey = null;
+        activeStudyModeBlocks.clear();
+    }
+
+    private AppCategorizer.AppCategory resolveInventoryCategory(
+            String categoryName, String packageName, String appName) {
+        if (categoryName != null) {
+            for (AppCategorizer.AppCategory category : AppCategorizer.AppCategory.values()) {
+                if (categoryName.equalsIgnoreCase(category.name())
+                        || categoryName.equalsIgnoreCase(category.getDisplayName())) {
+                    return category;
+                }
+            }
+        }
+        return AppCategorizer.getCategory(packageName, appName);
+    }
     // Use a one-time legacy migration only after v2 support is confirmed.
     private void loadAppLimitsCapability() {
         useV2BlockPolicies = true;
@@ -1553,3 +1794,5 @@ public class ChildInstalledAppsActivity extends BaseActivity {
     }
 
 }
+
+

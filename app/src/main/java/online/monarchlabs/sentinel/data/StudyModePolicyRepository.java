@@ -73,6 +73,8 @@ public final class StudyModePolicyRepository {
         policy.categories = parseCategories(map.get("categories"));
         policy.blockedPackages = parseBooleanMap(map.get("blockedPackages"));
         policy.allowedOverrides = parseBooleanMap(map.get("allowedOverrides"));
+        policy.sessionAllowedPackages = parseSessionAllows(map.get("sessionAllows"));
+        policy.schemaVersion = intValue(map.get("schemaVersion"), 1);
         policy.updatedAt = longValue(map.get("updatedAt"), 0L);
         return policy;
     }
@@ -163,6 +165,35 @@ public final class StudyModePolicyRepository {
         return result;
     }
 
+
+    private static Map<String, String> parseSessionAllows(Object value) {
+        Map<String, String> result = new LinkedHashMap<>();
+        if (!(value instanceof Map)) {
+            return result;
+        }
+        for (Map.Entry<?, ?> entry : ((Map<?, ?>) value).entrySet()) {
+            String packageName = decodePackageKey(stringValue(entry.getKey(), ""));
+            String sessionKey = "";
+            boolean allowed = false;
+            Object rawValue = entry.getValue();
+            if (rawValue instanceof Map) {
+                Map<?, ?> map = (Map<?, ?>) rawValue;
+                packageName = stringValue(map.get("packageName"), packageName);
+                sessionKey = stringValue(map.get("sessionKey"), "");
+                allowed = boolValue(map.get("allowed"), true);
+            } else if (rawValue instanceof String) {
+                sessionKey = stringValue(rawValue, "");
+                allowed = true;
+            } else {
+                allowed = boolValue(rawValue, false);
+            }
+            if (allowed && !isBlank(packageName) && !isBlank(sessionKey)) {
+                result.put(packageName, sessionKey);
+            }
+        }
+        return result;
+    }
+
     private static Map<String, Boolean> encodeBooleanMap(Map<String, Boolean> source) {
         Map<String, Boolean> result = new LinkedHashMap<>();
         if (source == null) {
@@ -233,6 +264,20 @@ public final class StudyModePolicyRepository {
         if (value instanceof String) {
             try {
                 return Long.parseLong((String) value);
+            } catch (NumberFormatException ignored) {
+                return fallback;
+            }
+        }
+        return fallback;
+    }
+
+    private static int intValue(Object value, int fallback) {
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+        if (value instanceof String) {
+            try {
+                return Integer.parseInt((String) value);
             } catch (NumberFormatException ignored) {
                 return fallback;
             }

@@ -18,6 +18,7 @@ public class ModesActivity extends BaseActivity {
     private String childDeviceId;
     private TextView tvStudyStatus;
     private TextView tvStudySchedule;
+    private View cardStudyMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +34,7 @@ public class ModesActivity extends BaseActivity {
             btnBack.setOnClickListener(v -> finish());
         }
 
-        View cardStudyMode = findViewById(R.id.cardStudyMode);
+        cardStudyMode = findViewById(R.id.cardStudyMode);
         if (cardStudyMode != null) {
             cardStudyMode.setOnClickListener(v -> {
                 Intent intent = new Intent(this, StudyModeEditActivity.class);
@@ -63,6 +64,9 @@ public class ModesActivity extends BaseActivity {
                     if (remotePolicy != null) {
                         StudyModeDraftStore.save(this, childDeviceId, remotePolicy);
                         renderStudySummary(remotePolicy);
+                    } else {
+                        StudyModeDraftStore.clear(this, childDeviceId);
+                        renderStudySummary(StudyModePolicy.createDefault());
                     }
                 });
     }
@@ -70,7 +74,6 @@ public class ModesActivity extends BaseActivity {
     private void renderStudySummary(StudyModePolicy policy) {
         if (policy == null) {
             policy = StudyModePolicy.createDefault();
-            policy.enabled = true;
         }
         if (tvStudyStatus != null) {
             tvStudyStatus.setText(policy.enabled ? "SCHEDULED" : "OFF");
@@ -81,8 +84,13 @@ public class ModesActivity extends BaseActivity {
                     ? R.color.modern_blue_700
                     : R.color.modern_grey_600));
         }
+        if (cardStudyMode != null) {
+            cardStudyMode.setBackgroundResource(policy.enabled
+                    ? R.drawable.bg_mode_card_selected
+                    : R.drawable.bg_card_glass);
+        }
         if (tvStudySchedule != null) {
-            tvStudySchedule.setText(buildScheduleSummary(policy));
+            tvStudySchedule.setText(policy.enabled ? buildScheduleSummary(policy) : "Not scheduled");
         }
     }
 

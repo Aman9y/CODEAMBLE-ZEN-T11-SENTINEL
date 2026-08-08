@@ -13,6 +13,10 @@ import online.monarchlabs.sentinel.utils.AppInventoryDeltaSync;
 import online.monarchlabs.sentinel.workers.AppInventoryUpdateWorker;
 
 public class AppInstallUninstallReceiver extends BroadcastReceiver {
+    public static final String ACTION_APP_INVENTORY_CHANGED =
+            "online.monarchlabs.sentinel.APP_INVENTORY_CHANGED";
+    public static final String EXTRA_PACKAGE_NAME = "package_name";
+    public static final String EXTRA_OPERATION = "operation";
     private static final String TAG = "AppInstallReceiver";
 
     @Override
@@ -57,6 +61,13 @@ public class AppInstallUninstallReceiver extends BroadcastReceiver {
                 + (eventAction.isEmpty() ? operation : eventAction);
         WorkManager.getInstance(context.getApplicationContext())
                 .enqueueUniqueWork(uniqueName, ExistingWorkPolicy.REPLACE, request);
+
+        Intent changed = new Intent(ACTION_APP_INVENTORY_CHANGED);
+        changed.setPackage(context.getPackageName());
+        changed.putExtra(EXTRA_PACKAGE_NAME, packageName);
+        changed.putExtra(EXTRA_OPERATION, operation);
+        context.sendBroadcast(changed);
+
         Log.d(TAG, "Queued app inventory delta for " + packageName);
     }
 }
