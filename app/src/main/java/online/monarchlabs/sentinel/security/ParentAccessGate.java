@@ -1,10 +1,13 @@
 package online.monarchlabs.sentinel.security;
 
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
@@ -29,9 +32,7 @@ public final class ParentAccessGate {
                 | BiometricManager.Authenticators.DEVICE_CREDENTIAL;
         int canAuthenticate = BiometricManager.from(activity).canAuthenticate(authenticators);
         if (canAuthenticate != BiometricManager.BIOMETRIC_SUCCESS) {
-            Toast.makeText(activity,
-                    "Set a screen lock on this phone to protect parent controls.",
-                    Toast.LENGTH_LONG).show();
+            showScreenLockRequired(activity);
             return;
         }
 
@@ -69,6 +70,35 @@ public final class ParentAccessGate {
                 .setAllowedAuthenticators(authenticators)
                 .build();
         prompt.authenticate(promptInfo);
+    }
+
+    private static void showScreenLockRequired(AppCompatActivity activity) {
+        promptShowing = true;
+        new AlertDialog.Builder(activity)
+                .setTitle("Parent Lock Required")
+                .setMessage("Set a phone screen lock to protect Sentinel parent controls from unauthorized changes.")
+                .setPositiveButton("Open Security Settings", (dialog, which) -> {
+                    promptShowing = false;
+                    openSecuritySettings(activity);
+                    activity.finish();
+                })
+                .setNegativeButton("Close", (dialog, which) -> {
+                    promptShowing = false;
+                    activity.finish();
+                })
+                .setOnCancelListener(dialog -> {
+                    promptShowing = false;
+                    activity.finish();
+                })
+                .show();
+    }
+
+    private static void openSecuritySettings(AppCompatActivity activity) {
+        try {
+            activity.startActivity(new Intent(Settings.ACTION_SECURITY_SETTINGS));
+        } catch (Exception ignored) {
+            activity.startActivity(new Intent(Settings.ACTION_SETTINGS));
+        }
     }
 
     public static boolean hasFreshVerification() {
