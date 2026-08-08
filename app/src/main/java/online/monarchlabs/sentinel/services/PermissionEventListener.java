@@ -45,6 +45,8 @@ public class PermissionEventListener extends Service {
 
     private SessionManager sessionManager;
     private DatabaseReference permissionEventsRef;
+    private DatabaseReference sosEventsRef;
+    private ChildEventListener sosEventsListener;
     private Map<String, ChildEventListener> childListeners = new HashMap<>();
     private Map<String, DatabaseReference> childEventRefs = new HashMap<>();
     private Map<String, String> childNames = new HashMap<>(); // deviceId -> childName
@@ -82,6 +84,7 @@ public class PermissionEventListener extends Service {
         }
 
         setupFirebaseListeners(parentUserId);
+        setupSosListener(parentUserId);
     }
 
     private void createNotificationChannels() {
@@ -230,6 +233,59 @@ public class PermissionEventListener extends Service {
         Log.d(TAG, "Ã¢Å“â€¦ Now listening to events for: " + childDeviceId);
     }
 
+    private void setupSosListener(String parentUserId) {
+        sosEventsRef = FirebaseDatabase.getInstance()
+                .getReference("v2")
+                .child("sos_events")
+                .child(parentUserId);
+        sosEventsListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot snapshot, String previousChildKey) {
+                handleSosEvent(snapshot);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot snapshot, String previousChildKey) {
+                handleSosEvent(snapshot);
+            }
+
+            @Override public void onChildRemoved(DataSnapshot snapshot) {}
+            @Override public void onChildMoved(DataSnapshot snapshot, String previousChildKey) {}
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                Log.e(TAG, "SOS listener cancelled: " + error.getMessage());
+            }
+        };
+        sosEventsRef.addChildEventListener(sosEventsListener);
+        Log.d(TAG, "SOS listener attached for parent: " + parentUserId);
+    }
+
+    private void handleSosEvent(DataSnapshot snapshot) {
+        String status = snapshot.child("status").getValue(String.class);
+        if (!"active".equals(status)) {
+            return;
+        }
+        String eventId = snapshot.child("eventId").getValue(String.class);
+        if (eventId == null || eventId.isEmpty()) {
+            eventId = snapshot.getKey();
+        }
+        Long createdAt = snapshot.child("createdAt").getValue(Long.class);
+        long eventTime = createdAt != null ? createdAt : System.currentTimeMillis();
+        String deliveryKey = "sos_" + eventId;
+        long lastDelivered = deliveryPrefs.getLong(
+                deliveryKey,
+                serviceStartTime - INITIAL_EVENT_LOOKBACK_MS);
+        if (eventTime <= lastDelivered) {
+            return;
+        }
+        deliveryPrefs.edit().putLong(deliveryKey, eventTime).apply();
+
+        String childName = snapshot.child("childName").getValue(String.class);
+        String reason = snapshot.child("reason").getValue(String.class);
+        showSosSystemNotification(eventId, childName, reason);
+    }
+
     private void stopListeningToChild(String childDeviceId) {
         ChildEventListener listener = childListeners.remove(childDeviceId);
         if (listener != null) {
@@ -312,6 +368,36 @@ public class PermissionEventListener extends Service {
         }
         return cleaned;
     }
+
+    private void showSosSystemNotification(String eventId, String childName, String reason) {
+        Intent intent = new Intent(this, ParentDashboardActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this,
+                eventId != null ? eventId.hashCode() : 9001,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        String name = childName != null && !childName.isEmpty() ? childName : "Child";
+        String message = reason != null && !reason.isEmpty() ? reason : "I need help";
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("SOS from " + name)
+                .setContentText(message)
+                .setSmallIcon(R.drawable.ic_warning)
+                .setColor(0xFFDC2626)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(message));
+
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        int notificationId = 900000
+                + ((eventId != null ? eventId : name).hashCode() & 0x7fffffff) % 100000;
+        notificationManager.notify(notificationId, builder.build());
+        Log.d(TAG, "SOS notification shown for: " + name);
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand called");
@@ -352,6 +438,11 @@ public class PermissionEventListener extends Service {
         }
         childListeners.clear();
         childEventRefs.clear();
+        if (sosEventsRef != null && sosEventsListener != null) {
+            sosEventsRef.removeEventListener(sosEventsListener);
+        }
+        sosEventsRef = null;
+        sosEventsListener = null;
 
         Log.d(TAG, "PermissionEventListener destroyed");
     }
