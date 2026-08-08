@@ -26,7 +26,6 @@ public class AssistantLiveStateRepository {
         public final java.util.Map<String, String> appNameToPackage = new java.util.HashMap<>();
         public final java.util.Map<String, Long> appUsageMillis = new java.util.HashMap<>();
         public final java.util.Map<String, String> packageToAppName = new java.util.HashMap<>();
-        public boolean focusModeActive;
         public String foregroundApp;
     }
 
@@ -60,10 +59,6 @@ public class AssistantLiveStateRepository {
                 "blocked_apps_prefs", Context.MODE_PRIVATE);
         collectBlocked(snapshot.blockedPackages, devicePrefs.getAll());
         collectBlocked(snapshot.blockedPackages, sharedPrefs.getAll());
-
-        SharedPreferences focusPrefs = appContext.getSharedPreferences(
-                "focus_mode_prefs", Context.MODE_PRIVATE);
-        snapshot.focusModeActive = focusPrefs.getBoolean("focus_mode_active_" + deviceId, false);
 
         Map<String, Object> request = new HashMap<>();
         request.put("requestId", "assistant_" + snapshot.refreshedAtMillis);

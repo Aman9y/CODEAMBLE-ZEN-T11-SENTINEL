@@ -1039,9 +1039,6 @@
             <Button android:id="@+id/btnRemoveDevice" android:visibility="gone" android:layout_width="0dp" android:layout_height="0dp"/>
             <ImageView android:id="@+id/btnPreviousDate" android:visibility="gone" android:layout_width="0dp" android:layout_height="0dp"/>
             <ImageView android:id="@+id/btnNextDate" android:visibility="gone" android:layout_width="0dp" android:layout_height="0dp"/>
-            <Switch android:id="@+id/switchFocusMode" android:visibility="gone" android:layout_width="0dp" android:layout_height="0dp"/>
-            <TextView android:id="@+id/tvFocusModeStatus" android:visibility="gone" android:layout_width="0dp" android:layout_height="0dp"/>
-            <Button android:id="@+id/btnEditAppList" android:visibility="gone" android:layout_width="0dp" android:layout_height="0dp"/>
             <Button android:id="@+id/btnShowQRFullscreen" android:visibility="gone" android:layout_width="0dp" android:layout_height="0dp"/>
             <TextView android:id="@+id/tvSelectedDate" android:visibility="gone" android:layout_width="0dp" android:layout_height="0dp"/>
             <Button android:id="@+id/btnViewInstalledApps" android:visibility="gone" android:layout_width="0dp" android:layout_height="0dp"/>

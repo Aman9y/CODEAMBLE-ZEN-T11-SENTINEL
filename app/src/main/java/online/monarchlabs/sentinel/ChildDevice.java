@@ -11,7 +11,6 @@ public class ChildDevice {
     public String connectionId;
     public long linkedAt;
     public List<AppInfo> apps;
-    public boolean focusModeActive;
 
     public ChildDevice() {
         // Default constructor for Firebase
@@ -23,6 +22,5 @@ public class ChildDevice {
         this.apps = apps;
         this.appCount = apps != null ? apps.size() : 0;
         this.lastConnected = System.currentTimeMillis();
-        this.focusModeActive = false;
     }
 }

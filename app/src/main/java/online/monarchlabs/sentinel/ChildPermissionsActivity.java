@@ -182,7 +182,7 @@ public class ChildPermissionsActivity extends BaseActivity {
 
         // Update Notification Permission with detailed explanation
         String notificationDescription = "• Shows ongoing monitoring and timer status notices\n" +
-                "• Alerts when focus mode starts or ends\n" +
+                "• Alerts for monitoring and restriction status\n" +
                 "• Does not read notifications from other apps\n\n" +
                 "How to enable: Tap Grant Permission > choose Allow when Android asks.";
         updatePermissionUI(
@@ -367,7 +367,7 @@ public class ChildPermissionsActivity extends BaseActivity {
             if (shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("🔔 Enable Notifications")
-                        .setMessage("Sentinel uses notifications to show ongoing monitoring status, timer status, focus-mode changes, and important parental-control alerts.\n\n" +
+                        .setMessage("Sentinel uses notifications to show ongoing monitoring status, timer status, restriction changes, and important parental-control alerts.\n\n" +
                                 "This permission lets Sentinel send its own notifications. It does not let Sentinel read notifications from other apps.\n\n" +
                                 "⚠️ This permission is REQUIRED for the app to function properly.")
                         .setPositiveButton("Grant Permission", (dialog, which) -> {
@@ -476,7 +476,7 @@ public class ChildPermissionsActivity extends BaseActivity {
                         "1. Tap Grant Permission.\n" +
                         "2. When Android asks, tap Allow.\n" +
                         "3. Return to Sentinel.\n\n" +
-                        "Notifications are used for monitoring status, timer alerts, and focus-mode updates.")
+                        "Notifications are used for monitoring status, timer alerts, and restriction updates.")
                 .setPositiveButton("Grant Permission", (dialog, which) -> requestNotificationPermission())
                 .setNegativeButton("Cancel", null)
                 .show();

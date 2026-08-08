@@ -5,7 +5,7 @@
 
     <!-- Welcome screen -->
     <string name="welcome_title">Manage Family Devices and Screen Time</string>
-    <string name="welcome_description">Empower healthy digital habits with real-time monitoring, smart focus modes, and gentle guidance that brings families closer together.</string>
+    <string name="welcome_description">Empower healthy digital habits with real-time monitoring, scheduled routines, and gentle guidance that brings families closer together.</string>
     <string name="get_started">Get Started</string>
 
     <!-- Login type selection -->
@@ -27,7 +27,6 @@
 
     <!-- Dashboard -->
     <string name="usage_overview">Digital Wellness Overview</string>
-    <string name="focus_mode">Focus Time</string>
     <string name="smart_controls">Smart Controls</string>
     <string name="family_insights">Family Insights</string>
 
@@ -36,7 +35,6 @@
     <string name="inactive">Inactive</string>
     <string name="online">Online</string>
     <string name="offline">Offline</string>
-    <string name="focused">In Focus Mode</string>
     <string name="screen_time">Screen Time</string>
 
     <!-- QR Code connectivity -->
@@ -48,16 +46,10 @@
     <!-- Features -->
     <string name="real_time_monitoring">Real-time Monitoring</string>
     <string name="real_time_monitoring_desc">Track app usage and screen time instantly</string>
-    <string name="smart_focus_modes">Smart Focus Modes</string>
-    <string name="smart_focus_modes_desc">Custom presets for study time and sleep</string>
     <string name="secure_private">Linked Parent Access</string>
     <string name="secure_private_desc">Child-device data is available to the linked parent account</string>
 
     <!-- Preset management -->
-    <string name="create_preset">Create Focus Mode</string>
-    <string name="manage_presets">Manage Focus Modes</string>
-    <string name="preset_name">Focus Mode Name</string>
-    <string name="preset_duration">Duration</string>
     <string name="allowed_apps">Allowed Apps</string>
     <string name="blocked_apps">Restricted Apps</string>
 
@@ -86,8 +78,6 @@
 
     <!-- Notifications and messages -->
     <string name="notification_title">Sentinel</string>
-    <string name="focus_mode_started">Focus mode activated</string>
-    <string name="focus_mode_ended">Focus mode completed</string>
     <string name="time_limit_warning">5 minutes remaining</string>
     <string name="app_blocked_message">This app is currently restricted</string>
 
@@ -107,7 +97,6 @@
 
     <!-- Success messages -->
     <string name="success_device_connected">Device connected successfully</string>
-    <string name="success_preset_created">Focus mode created</string>
     <string name="success_settings_saved">Settings saved</string>
 
     <!-- Common actions -->

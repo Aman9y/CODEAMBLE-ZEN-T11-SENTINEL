@@ -162,7 +162,6 @@ public final class ChildDeviceManager {
         device.lastConnected = linkedAt == null ? 0L : linkedAt;
         device.apps = new ArrayList<>();
         device.appCount = 0;
-        device.focusModeActive = false;
         return device;
     }
 

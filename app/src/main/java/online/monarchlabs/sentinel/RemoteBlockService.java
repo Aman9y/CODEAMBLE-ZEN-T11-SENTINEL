@@ -63,7 +63,7 @@ public class RemoteBlockService extends Service {
     private static final String TAG = "RemoteBlockService";
     private static final String PREF_NAME = "blocked_apps";
 
-    // 🔧 OEM COMPATIBILITY: Wake lock for aggressive OEMs
+    // ðŸ”§ OEM COMPATIBILITY: Wake lock for aggressive OEMs
     private PowerManager.WakeLock wakeLock;
     private OEMCompatibilityManager oemManager;
 
@@ -152,7 +152,7 @@ public class RemoteBlockService extends Service {
                 int serviceType = android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE;
                 if (hasFine || hasCoarse) {
                     serviceType |= android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
-                    Log.d(TAG, "📍 Including LOCATION type in foreground service");
+                    Log.d(TAG, "ðŸ“ Including LOCATION type in foreground service");
                 } else {
                     Log.w(TAG, "Location permission not granted - using parental-control service type only");
                 }
@@ -164,9 +164,9 @@ public class RemoteBlockService extends Service {
                 startForeground(1, notification);
             }
 
-            Log.d(TAG, "✅ High-priority foreground service promoted/updated");
+            Log.d(TAG, "âœ… High-priority foreground service promoted/updated");
         } catch (Exception e) {
-            Log.e(TAG, "❌ Failed to promote/update foreground: " + e.getMessage());
+            Log.e(TAG, "âŒ Failed to promote/update foreground: " + e.getMessage());
         }
     }
 
@@ -178,20 +178,20 @@ public class RemoteBlockService extends Service {
             stopSelf();
             return;
         }
-        Log.d(TAG, "🛡️ RemoteBlockService created - BULLETPROOF MODE");
+        Log.d(TAG, "ðŸ›¡ï¸ RemoteBlockService created - BULLETPROOF MODE");
 
-        // 🛡️ BULLETPROOF: Wrap everything in try-catch to prevent crashes
+        // ðŸ›¡ï¸ BULLETPROOF: Wrap everything in try-catch to prevent crashes
         try {
-            // 🔧 OEM COMPATIBILITY: Initialize OEM manager and wake lock
+            // ðŸ”§ OEM COMPATIBILITY: Initialize OEM manager and wake lock
             oemManager = new OEMCompatibilityManager(this);
             oemManager.logOEMInfo();
             acquireOEMWakeLock();
         } catch (Exception e) {
-            Log.e(TAG, "❌ Failed to initialize OEM manager: " + e.getMessage());
+            Log.e(TAG, "âŒ Failed to initialize OEM manager: " + e.getMessage());
         }
 
-        // 🛡️ DEVICE OWNER: Protections removed as requested
-        Log.d(TAG, "🛡️ Device Owner checks disabled");
+        // ðŸ›¡ï¸ DEVICE OWNER: Protections removed as requested
+        Log.d(TAG, "ðŸ›¡ï¸ Device Owner checks disabled");
 
         // Create notification channel & promote to foreground (CRITICAL)
         promoteToForeground();
@@ -218,25 +218,25 @@ public class RemoteBlockService extends Service {
             // Push the current block list to Firebase so the parent dashboard is immediately up-to-date
             syncBlockedAppsToFirebase();
         } catch (Exception e) {
-            Log.e(TAG, "❌ Failed to initialize core components: " + e.getMessage());
+            Log.e(TAG, "âŒ Failed to initialize core components: " + e.getMessage());
         }
 
-        // 🚫 DISABLED: SmartUsageTracker - now using BulletproofUsageTracker in
+        // ðŸš« DISABLED: SmartUsageTracker - now using BulletproofUsageTracker in
         // ChildDashboardActivity
-        Log.d(TAG, "ℹ️ SmartUsageTracker DISABLED - using BulletproofUsageTracker instead");
+        Log.d(TAG, "â„¹ï¸ SmartUsageTracker DISABLED - using BulletproofUsageTracker instead");
 
         try {
             FirebaseDatabase database = FirebaseDatabase.getInstance();
             recoverAuthoritativeParentOwnership(database);
         } catch (Exception e) {
-            Log.e(TAG, "❌ Failed to get Firebase reference: " + e.getMessage());
+            Log.e(TAG, "âŒ Failed to get Firebase reference: " + e.getMessage());
         }
 
         // Initialize device status manager with error handling
         try {
             deviceStatusManager = new DeviceStatusManager(this);
         } catch (Exception e) {
-            Log.e(TAG, "❌ Failed to start device status manager: " + e.getMessage());
+            Log.e(TAG, "âŒ Failed to start device status manager: " + e.getMessage());
         }
 
         // Setup AuthStateListener to handle auth state transitions and dynamically bind listeners
@@ -244,10 +244,10 @@ public class RemoteBlockService extends Service {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 if (firebaseAuth.getCurrentUser() != null) {
-                    Log.d(TAG, "🔒 Firebase Auth State Changed: USER SIGNED IN");
+                    Log.d(TAG, "ðŸ”’ Firebase Auth State Changed: USER SIGNED IN");
                     updateDeviceIdAndListeners();
                 } else {
-                    Log.d(TAG, "🔒 Firebase Auth State Changed: USER SIGNED OUT");
+                    Log.d(TAG, "ðŸ”’ Firebase Auth State Changed: USER SIGNED OUT");
                     removeAllListeners();
                 }
             }
@@ -259,30 +259,30 @@ public class RemoteBlockService extends Service {
             try {
                 // AUTO-REFRESH: Upload latest app list to Firebase
                 refreshDeviceAppList();
-                Log.d(TAG, "✅ Device app list refreshed");
+                Log.d(TAG, "âœ… Device app list refreshed");
             } catch (Exception e) {
-                Log.e(TAG, "❌ Failed to refresh device app list: " + e.getMessage());
+                Log.e(TAG, "âŒ Failed to refresh device app list: " + e.getMessage());
             }
 
             try {
-                // 🔧 DB CONNECTION FIX: Enable Firebase persistence and keepAlive
+                // ðŸ”§ DB CONNECTION FIX: Enable Firebase persistence and keepAlive
                 enableFirebaseConnectionStability();
-                Log.d(TAG, "✅ Firebase connection stability enabled");
+                Log.d(TAG, "âœ… Firebase connection stability enabled");
             } catch (Exception e) {
-                Log.e(TAG, "❌ Failed to enable Firebase stability: " + e.getMessage());
+                Log.e(TAG, "âŒ Failed to enable Firebase stability: " + e.getMessage());
             }
 
             try {
                 registerGpsProviderReceiver();
             } catch (Exception e) {
-                Log.e(TAG, "❌ Failed to register GPS provider receiver: " + e.getMessage());
+                Log.e(TAG, "âŒ Failed to register GPS provider receiver: " + e.getMessage());
             }
         }, 3000); // 3 second delay
 
-        Log.d(TAG, "✅ RemoteBlockService onCreate completed - BULLETPROOF");
+        Log.d(TAG, "âœ… RemoteBlockService onCreate completed - BULLETPROOF");
     }
 
-    // ── Location tracking ──────────────────────────────────────────────────────
+    // â”€â”€ Location tracking â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private void recoverAuthoritativeParentOwnership(FirebaseDatabase database) {
         if (myDeviceId == null || myDeviceId.isEmpty() || sessionManager == null) {
@@ -378,7 +378,7 @@ public class RemoteBlockService extends Service {
         boolean hasCoarse = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
 
         if (!hasFine && !hasCoarse) {
-            Log.d(TAG, "⚠️ Location permission not granted — skipping location uploads");
+            Log.d(TAG, "âš ï¸ Location permission not granted â€” skipping location uploads");
             uploadPermissionDeniedToFirebase();
             return;
         }
@@ -388,7 +388,7 @@ public class RemoteBlockService extends Service {
 
         // Check whether location services are enabled on the device.
         if (!isGpsEnabled()) {
-            Log.d(TAG, "⚠️ Location services are disabled on child device");
+            Log.d(TAG, "âš ï¸ Location services are disabled on child device");
             uploadGpsOffToFirebase();
             // Still set up the listener so we can react when parent requests location
             if (isGooglePlayServicesAvailable()) {
@@ -419,14 +419,14 @@ public class RemoteBlockService extends Service {
                 };
                 fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback,
                         Looper.getMainLooper());
-                Log.d(TAG, "✅ Location updates started (displacement: 30m)");
+                Log.d(TAG, "âœ… Location updates started (displacement: 30m)");
 
                 // Upload the best last-known fix immediately so the parent sees something straight away.
                 fusedLocationClient.getLastLocation().addOnSuccessListener(loc -> {
                     if (loc != null) {
                         checkAndUploadLocation(loc, false);
                     } else {
-                        Log.d(TAG, "📍 No cached location yet - requesting fresh fix with timeout");
+                        Log.d(TAG, "ðŸ“ No cached location yet - requesting fresh fix with timeout");
                         fetchAndUploadCurrentLocationWithTimeout(false);
                     }
                 });
@@ -437,7 +437,7 @@ public class RemoteBlockService extends Service {
             // Listen for on-demand location requests from parent (blue button press)
             startLocationRequestListener();
         } catch (Exception e) {
-            Log.e(TAG, "❌ Failed to start location updates: " + e.getMessage());
+            Log.e(TAG, "âŒ Failed to start location updates: " + e.getMessage());
             // Fallback on failure
             startNativeLocationUpdates();
         }
@@ -455,7 +455,7 @@ public class RemoteBlockService extends Service {
     }
 
     private void startNativeLocationUpdates() {
-        Log.d(TAG, "🔄 Starting native LocationManager updates (Fallback)...");
+        Log.d(TAG, "ðŸ”„ Starting native LocationManager updates (Fallback)...");
         try {
             LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             if (lm == null) return;
@@ -470,7 +470,7 @@ public class RemoteBlockService extends Service {
             }
 
             if (provider == null) {
-                Log.d(TAG, "⚠️ No location providers enabled for native updates");
+                Log.d(TAG, "âš ï¸ No location providers enabled for native updates");
                 uploadGpsOffToFirebase();
                 return;
             }
@@ -497,20 +497,20 @@ public class RemoteBlockService extends Service {
             };
 
             lm.requestLocationUpdates(provider, 5 * 60 * 1000L, 30f, nativeLocationListener, Looper.getMainLooper());
-            Log.d(TAG, "✅ Native LocationManager updates started using provider: " + provider + " (displacement: 30m)");
+            Log.d(TAG, "âœ… Native LocationManager updates started using provider: " + provider + " (displacement: 30m)");
 
             Location lastKnown = lm.getLastKnownLocation(provider);
             if (lastKnown != null) {
                 checkAndUploadLocation(lastKnown, false);
             } else {
-                Log.d(TAG, "📍 No native cached location, requesting one-time update...");
+                Log.d(TAG, "ðŸ“ No native cached location, requesting one-time update...");
                 lm.requestSingleUpdate(provider, nativeLocationListener, Looper.getMainLooper());
             }
         } catch (SecurityException se) {
-            Log.e(TAG, "❌ Native location permission missing: " + se.getMessage());
+            Log.e(TAG, "âŒ Native location permission missing: " + se.getMessage());
             uploadPermissionDeniedToFirebase();
         } catch (Exception e) {
-            Log.e(TAG, "❌ Failed to start native location updates: " + e.getMessage());
+            Log.e(TAG, "âŒ Failed to start native location updates: " + e.getMessage());
         }
     }
 
@@ -539,7 +539,7 @@ public class RemoteBlockService extends Service {
                 .addOnFailureListener(error ->
                         Log.w(TAG, "v2 location status update failed: "
                                 + error.getMessage()));
-        Log.d(TAG, "📍 Uploaded gps_off=true to Firebase");
+        Log.d(TAG, "ðŸ“ Uploaded gps_off=true to Firebase");
     }
 
     private void uploadPermissionDeniedToFirebase() {
@@ -553,7 +553,7 @@ public class RemoteBlockService extends Service {
                 .addOnFailureListener(error ->
                         Log.w(TAG, "v2 location status update failed: "
                                 + error.getMessage()));
-        Log.d(TAG, "📍 Uploaded permission_denied status to Firebase");
+        Log.d(TAG, "ðŸ“ Uploaded permission_denied status to Firebase");
     }
 
     /** Clears any GPS-off warning without claiming a valid fix exists yet. */
@@ -568,7 +568,7 @@ public class RemoteBlockService extends Service {
                 .addOnFailureListener(error ->
                         Log.w(TAG, "v2 location status update failed: "
                                 + error.getMessage()));
-        Log.d(TAG, "📍 Cleared gps_off flag while waiting for a usable location fix");
+        Log.d(TAG, "ðŸ“ Cleared gps_off flag while waiting for a usable location fix");
     }
 
     /** Listen for one owner-scoped v2 manual location request. */
@@ -679,7 +679,7 @@ public class RemoteBlockService extends Service {
         }
 
         if (!isGooglePlayServicesAvailable() || fusedLocationClient == null) {
-            Log.d(TAG, "📍 Play Services not available or client null — fetching native location for timeout");
+            Log.d(TAG, "ðŸ“ Play Services not available or client null â€” fetching native location for timeout");
             try {
                 LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                 if (lm != null) {
@@ -703,7 +703,7 @@ public class RemoteBlockService extends Service {
                     }
                 }
             } catch (Exception e) {
-                Log.e(TAG, "❌ Failed to fetch native location for timeout: " + e.getMessage());
+                Log.e(TAG, "âŒ Failed to fetch native location for timeout: " + e.getMessage());
             }
             return;
         }
@@ -722,9 +722,9 @@ public class RemoteBlockService extends Service {
                     if (task.isSuccessful() && task.getResult() != null) {
                         Location loc = task.getResult();
                         checkAndUploadLocation(loc, force);
-                        Log.d(TAG, "✅ High-accuracy location uploaded: " + loc.getLatitude() + ", " + loc.getLongitude());
+                        Log.d(TAG, "âœ… High-accuracy location uploaded: " + loc.getLatitude() + ", " + loc.getLongitude());
                     } else {
-                        Log.d(TAG, "📍 High-accuracy location failed or timed out, trying last known location...");
+                        Log.d(TAG, "ðŸ“ High-accuracy location failed or timed out, trying last known location...");
                         try {
                             fusedLocationClient.getLastLocation()
                                     .addOnSuccessListener(l -> {
@@ -740,7 +740,7 @@ public class RemoteBlockService extends Service {
     }
 
     /**
-     * 🔧 DB CONNECTION FIX: Enable Firebase connection stability features
+     * ðŸ”§ DB CONNECTION FIX: Enable Firebase connection stability features
      * This helps prevent disconnections on OEM devices
      */
     private void enableFirebaseConnectionStability() {
@@ -748,11 +748,11 @@ public class RemoteBlockService extends Service {
             // Enable disk persistence for offline support
             FirebaseDatabase database = FirebaseDatabase.getInstance();
 
-            // 🔧 FIX: Don't call keepSynced on .info paths - they don't support it
+            // ðŸ”§ FIX: Don't call keepSynced on .info paths - they don't support it
             // Keep important DATA paths synced instead (not .info paths)
             if (myDeviceId != null && !myDeviceId.isEmpty()) {
                 database.getReference("v2").child("device_status").child(myDeviceId).keepSynced(true);
-                Log.d(TAG, "✅ Firebase paths kept synced for device: " + myDeviceId);
+                Log.d(TAG, "âœ… Firebase paths kept synced for device: " + myDeviceId);
             }
 
             // Setup connection state listener
@@ -763,17 +763,17 @@ public class RemoteBlockService extends Service {
                     Boolean connected = snapshot.getValue(Boolean.class);
                     if (connected != null) {
                         if (connected) {
-                            Log.d(TAG, "✅ Firebase CONNECTED - Database is online");
+                            Log.d(TAG, "âœ… Firebase CONNECTED - Database is online");
                             // Device status is automatically updated by DeviceStatusManager's own listener
                         } else {
-                            Log.w(TAG, "⚠️ Firebase DISCONNECTED - Will auto-reconnect");
+                            Log.w(TAG, "âš ï¸ Firebase DISCONNECTED - Will auto-reconnect");
 
                             // Try to force reconnect on aggressive OEMs
                             if (oemManager != null && oemManager.isAggressiveOEM()) {
-                                Log.d(TAG, "🔄 Aggressive OEM detected - scheduling reconnect attempt");
+                                Log.d(TAG, "ðŸ”„ Aggressive OEM detected - scheduling reconnect attempt");
                                 new Handler(Looper.getMainLooper()).postDelayed(() -> {
                                     database.goOnline();
-                                    Log.d(TAG, "🔄 Forced Firebase reconnection attempt");
+                                    Log.d(TAG, "ðŸ”„ Forced Firebase reconnection attempt");
                                 }, 5000); // 5 second delay
                             }
                         }
@@ -782,14 +782,14 @@ public class RemoteBlockService extends Service {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    Log.e(TAG, "❌ Firebase connection listener cancelled: " + error.getMessage());
+                    Log.e(TAG, "âŒ Firebase connection listener cancelled: " + error.getMessage());
                 }
             });
 
-            Log.d(TAG, "✅ Firebase connection stability enabled");
+            Log.d(TAG, "âœ… Firebase connection stability enabled");
 
         } catch (Exception e) {
-            Log.e(TAG, "❌ Error enabling Firebase stability: " + e.getMessage());
+            Log.e(TAG, "âŒ Error enabling Firebase stability: " + e.getMessage());
         }
     }
 
@@ -886,7 +886,7 @@ public class RemoteBlockService extends Service {
      * Setup listener for usage data refresh commands from parent
      */
     private void setupUsageRefreshListener() {
-        Log.d(TAG, "🔄 Setting up usage refresh command listener for device: " + myDeviceId);
+        Log.d(TAG, "ðŸ”„ Setting up usage refresh command listener for device: " + myDeviceId);
 
         if (usageRefreshListener != null && usageRefreshRef != null) {
             try {
@@ -909,7 +909,7 @@ public class RemoteBlockService extends Service {
                 if (!dataSnapshot.exists())
                     return;
 
-                Log.d(TAG, "📥 Usage refresh command received");
+                Log.d(TAG, "ðŸ“¥ Usage refresh command received");
 
                 try {
                     String command = dataSnapshot.child("command").getValue(String.class);
@@ -923,7 +923,7 @@ public class RemoteBlockService extends Service {
                         long commandAge = currentTime - timestamp;
 
                         if (commandAge < 300000) { // 5 minutes
-                            Log.d(TAG, "🚀 Processing usage refresh command (priority: " + priority + ")");
+                            Log.d(TAG, "ðŸš€ Processing usage refresh command (priority: " + priority + ")");
 
                             // Force immediate usage snapshot upload
                             if (hasUsageStatsPermission()) {
@@ -933,33 +933,33 @@ public class RemoteBlockService extends Service {
                                 } catch (Exception e) {
                                     Log.e(TAG, "Failed to upload SUSAGE data: " + e.getMessage());
                                 }
-                                Log.d(TAG, "✅ Immediate usage snapshot uploaded");
+                                Log.d(TAG, "âœ… Immediate usage snapshot uploaded");
                             } else {
-                                Log.w(TAG, "❌ Cannot upload usage data - missing permission");
+                                Log.w(TAG, "âŒ Cannot upload usage data - missing permission");
                             }
 
                             // Clear the command to prevent re-processing
                             usageRefreshRef.child("status").setValue("processed")
-                                    .addOnSuccessListener(aVoid -> Log.d(TAG, "✅ Refresh command cleared"))
+                                    .addOnSuccessListener(aVoid -> Log.d(TAG, "âœ… Refresh command cleared"))
                                     .addOnFailureListener(
-                                            e -> Log.e(TAG, "❌ Failed to clear refresh command: " + e.getMessage()));
+                                            e -> Log.e(TAG, "âŒ Failed to clear refresh command: " + e.getMessage()));
                         } else {
-                            Log.w(TAG, "⏰ Ignoring old refresh command (age: " + (commandAge / 1000) + " seconds)");
+                            Log.w(TAG, "â° Ignoring old refresh command (age: " + (commandAge / 1000) + " seconds)");
                         }
                     }
                 } catch (Exception e) {
-                    Log.e(TAG, "❌ Error processing refresh command: " + e.getMessage());
+                    Log.e(TAG, "âŒ Error processing refresh command: " + e.getMessage());
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e(TAG, "❌ Usage refresh listener cancelled: " + databaseError.getMessage());
+                Log.e(TAG, "âŒ Usage refresh listener cancelled: " + databaseError.getMessage());
             }
         };
 
         usageRefreshRef.addValueEventListener(usageRefreshListener);
-        Log.d(TAG, "✅ Usage refresh listener setup complete");
+        Log.d(TAG, "âœ… Usage refresh listener setup complete");
     }
 
     /**
@@ -968,7 +968,7 @@ public class RemoteBlockService extends Service {
      * collection and upload
      */
     private void setupSUsageUpdateListener() {
-        Log.d(TAG, "🔄 Setting up SUSAGE update request listener for device: " + myDeviceId);
+        Log.d(TAG, "ðŸ”„ Setting up SUSAGE update request listener for device: " + myDeviceId);
 
         if (susageUpdateListener != null && susageRequestRef != null) {
             try {
@@ -994,10 +994,10 @@ public class RemoteBlockService extends Service {
                 Boolean requestUpdate = dataSnapshot.child("requestUpdate").getValue(Boolean.class);
 
                 if (Boolean.TRUE.equals(requestUpdate)) {
-                    Log.d(TAG, "📥 SUSAGE update request received from parent!");
+                    Log.d(TAG, "ðŸ“¥ SUSAGE update request received from parent!");
 
                     if (hasUsageStatsPermission()) {
-                        Log.d(TAG, "🚀 Collecting and uploading SUSAGE data...");
+                        Log.d(TAG, "ðŸš€ Collecting and uploading SUSAGE data...");
 
                         // Use SUsageDataManager to collect and upload data
                         try {
@@ -1008,24 +1008,24 @@ public class RemoteBlockService extends Service {
                                     new online.monarchlabs.sentinel.utils.SUsageDataManager.OnUploadCompleteListener() {
                                         @Override
                                         public void onSuccess() {
-                                            Log.d(TAG, "✅ SUSAGE data uploaded successfully");
+                                            Log.d(TAG, "âœ… SUSAGE data uploaded successfully");
                                             // Clear the request flag
                                             susageRequestRef.child("requestUpdate").setValue(false);
                                         }
 
                                         @Override
                                         public void onError(String error) {
-                                            Log.e(TAG, "❌ SUSAGE upload failed: " + error);
+                                            Log.e(TAG, "âŒ SUSAGE upload failed: " + error);
                                             // Clear the request flag even on error
                                             susageRequestRef.child("requestUpdate").setValue(false);
                                         }
                                     });
                         } catch (Exception e) {
-                            Log.e(TAG, "❌ Error uploading SUSAGE data: " + e.getMessage());
+                            Log.e(TAG, "âŒ Error uploading SUSAGE data: " + e.getMessage());
                             susageRequestRef.child("requestUpdate").setValue(false);
                         }
                     } else {
-                        Log.w(TAG, "❌ Cannot upload SUSAGE data - missing UsageStats permission");
+                        Log.w(TAG, "âŒ Cannot upload SUSAGE data - missing UsageStats permission");
                         susageRequestRef.child("requestUpdate").setValue(false);
                     }
                 }
@@ -1033,12 +1033,12 @@ public class RemoteBlockService extends Service {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e(TAG, "❌ SUSAGE update listener cancelled: " + databaseError.getMessage());
+                Log.e(TAG, "âŒ SUSAGE update listener cancelled: " + databaseError.getMessage());
             }
         };
 
         susageRequestRef.addValueEventListener(susageUpdateListener);
-        Log.d(TAG, "✅ SUSAGE update listener setup complete");
+        Log.d(TAG, "âœ… SUSAGE update listener setup complete");
     }
 
     private void startListeningForBlockCommands() {
@@ -1176,7 +1176,7 @@ public class RemoteBlockService extends Service {
                     android.app.AlarmManager.RTC_WAKEUP,
                     triggerTime,
                     pendingIntent);
-            Log.d(TAG, "⏰ Delayed block alarm scheduled for: " + packageName + " at triggerTime=" + triggerTime);
+            Log.d(TAG, "â° Delayed block alarm scheduled for: " + packageName + " at triggerTime=" + triggerTime);
         } catch (Exception e) {
             Log.e(TAG, "Failed to schedule delayed block alarm: " + e.getMessage());
         }
@@ -1202,7 +1202,7 @@ public class RemoteBlockService extends Service {
                 if (pendingIntent != null) {
                     alarmManager.cancel(pendingIntent);
                     pendingIntent.cancel();
-                    Log.d(TAG, "🚫 Cancelled delayed block alarm for: " + packageName);
+                    Log.d(TAG, "ðŸš« Cancelled delayed block alarm for: " + packageName);
                 }
             }
         } catch (Exception e) {
@@ -1220,7 +1220,7 @@ public class RemoteBlockService extends Service {
                 return;
             }
 
-            Log.w(TAG, "⏰ Delayed block alarm triggered for: " + packageName);
+            Log.w(TAG, "â° Delayed block alarm triggered for: " + packageName);
 
             // Commit block
             blockedAppsPrefs.edit().putBoolean(packageName, true).apply();
@@ -1286,7 +1286,7 @@ public class RemoteBlockService extends Service {
     }
 
     /**
-     * 🔧 IMMEDIATE UPDATE: Broadcast to BlockService that blocked apps list changed
+     * ðŸ”§ IMMEDIATE UPDATE: Broadcast to BlockService that blocked apps list changed
      */
     private void broadcastBlockedAppsUpdate() {
         broadcastBlockedAppsUpdate(null);
@@ -1312,18 +1312,18 @@ public class RemoteBlockService extends Service {
             broadcastIntent.setPackage(getPackageName()); // Explicit package for security
             sendBroadcast(broadcastIntent);
 
-            Log.d(TAG, "📡 Broadcasted blocked apps update - count: " + blockedCount);
+            Log.d(TAG, "ðŸ“¡ Broadcasted blocked apps update - count: " + blockedCount);
         } catch (Exception e) {
-            Log.e(TAG, "❌ Failed to broadcast update: " + e.getMessage());
+            Log.e(TAG, "âŒ Failed to broadcast update: " + e.getMessage());
         }
     }
 
     /**
-     * 🔔 Show system notification for block/unblock (works when app is closed)
+     * ðŸ”” Show system notification for block/unblock (works when app is closed)
      */
     private void showBlockNotification(String appName, boolean blocked) {
         try {
-            String title = blocked ? "🚫 App Blocked" : "✅ App Unblocked";
+            String title = blocked ? "ðŸš« App Blocked" : "âœ… App Unblocked";
             String message = appName + " has been " + (blocked ? "blocked" : "unblocked") + " by parent";
 
             android.app.NotificationManager notificationManager = (android.app.NotificationManager) getSystemService(
@@ -1351,196 +1351,24 @@ public class RemoteBlockService extends Service {
             int notificationId = 6000
                     + (appName != null ? (appName.hashCode() & 0x7fffffff) % 100000 : 0);
             notificationManager.notify(notificationId, notification);
-            Log.d(TAG, "🔔 Block notification shown: " + message);
+            Log.d(TAG, "ðŸ”” Block notification shown: " + message);
 
         } catch (Exception e) {
-            Log.e(TAG, "❌ Failed to show notification: " + e.getMessage());
+            Log.e(TAG, "âŒ Failed to show notification: " + e.getMessage());
         }
     }
 
     /**
-     * 🔔 Show system notification for Focus Mode (works when app is closed)
      */
-    private void showFocusModeNotification(boolean activated, int appCount) {
-        try {
-            String title = activated ? "🎯 Focus Mode Activated" : "✅ Focus Mode Deactivated";
-            String message = activated ? appCount + " apps are now blocked by parent" : "All apps have been unblocked";
-
-            android.app.NotificationManager notificationManager = (android.app.NotificationManager) getSystemService(
-                    Context.NOTIFICATION_SERVICE);
-
-            // Create notification channel for Android 8+
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                android.app.NotificationChannel channel = new android.app.NotificationChannel(
-                        "focus_mode_notifications",
-                        "Focus Mode Notifications",
-                        android.app.NotificationManager.IMPORTANCE_HIGH);
-                channel.setDescription("Notifications for focus mode changes");
-                notificationManager.createNotificationChannel(channel);
-            }
-
-            android.app.Notification notification = new android.app.Notification.Builder(this,
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? "focus_mode_notifications" : null)
-                    .setContentTitle(title)
-                    .setContentText(message)
-                    .setSmallIcon(R.drawable.ic_shield)
-                    .setAutoCancel(true)
-                    .setPriority(android.app.Notification.PRIORITY_HIGH)
-                    .build();
-
-            // Use a fixed ID for focus mode so it replaces previous notifications
-            notificationManager.notify(9001, notification);
-            Log.d(TAG, "🔔 Focus mode notification shown: " + title);
-
-        } catch (Exception e) {
-            Log.e(TAG, "❌ Failed to show focus mode notification: " + e.getMessage());
-        }
-    }
-
-    private void handleFocusModeCommand(Map<String, Object> commandData, String commandKey) {
-        try {
-            Boolean enabled = (Boolean) commandData.get("enabled");
-            if (enabled == null) {
-                Log.e(TAG, "Focus mode command missing 'enabled' field");
-                return;
-            }
-
-            Log.d(TAG, "Focus mode command: " + (enabled ? "ACTIVATE" : "DEACTIVATE"));
-
-            if (enabled) {
-                // Get custom app list from parent, or use default if not provided
-                List<String> appsToBlock = (List<String>) commandData.get("apps");
-                if (appsToBlock == null || appsToBlock.isEmpty()) {
-                    Log.d(TAG, "No custom apps provided, using basic focus mode");
-                    activateBasicFocusMode();
-                } else {
-                    Log.d(TAG, "Custom apps provided: " + appsToBlock.size() + " apps");
-                    // Log the apps being blocked for debugging
-                    for (String pkg : appsToBlock) {
-                        Log.d(TAG, "Blocking app: " + pkg);
-                    }
-                    activateCustomFocusMode(appsToBlock);
-                }
-
-                // 🔧 IMMEDIATE UPDATE: Broadcast to BlockService
-                broadcastBlockedAppsUpdate();
-
-                // Verify the apps are actually blocked
-                verifyAppsBlocked();
-
-                // Show system notification (works when app is closed)
-                showFocusModeNotification(true, appsToBlock != null ? appsToBlock.size() : 0);
-            } else {
-                // Deactivate focus mode - unblock all apps
-                deactivateBasicFocusMode();
-
-                // 🔧 IMMEDIATE UPDATE: Broadcast to BlockService
-                broadcastBlockedAppsUpdate();
-
-                // Show system notification
-                showFocusModeNotification(false, 0);
-            }
-
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error handling focus mode command: " + e.getMessage());
-            Toast.makeText(this, "❌ Error processing focus mode command", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void activateBasicFocusMode() {
-        // Block common distracting apps
-        String[] distractingApps = {
-                "com.instagram.android",
-                "com.snapchat.android",
-                "com.tiktok.android",
-                "com.facebook.katana",
-                "com.twitter.android",
-                "com.whatsapp",
-                "com.spotify.music",
-                "com.netflix.mediaclient",
-                "com.youtube.android",
-                "com.reddit.frontpage",
-                "com.discord"
-        };
-
-        for (String packageName : distractingApps) {
-            blockedAppsPrefs.edit().putBoolean(packageName, true).apply();
-            Log.d(TAG, "Blocked app: " + packageName);
-        }
-
-        // CRITICAL FIX: Notify BlockService to reload blocked apps immediately
-        Intent intent = new Intent("online.monarchlabs.sentinel.BLOCKED_APPS_UPDATED");
-        intent.putExtra("blocked_count", distractingApps.length);
-        sendBroadcast(intent);
-
-        Log.d(TAG, "Basic focus mode activated - blocked " + distractingApps.length + " common distracting apps");
-    }
-
-    private void activateCustomFocusMode(List<String> appsToBlock) {
-        // Block custom list of apps provided by parent
-        int blockedCount = 0;
-        for (String packageName : appsToBlock) {
-            if (packageName != null && !packageName.trim().isEmpty()
-                    && !AppBlockingPolicy.isUnblockable(packageName)) {
-                blockedAppsPrefs.edit().putBoolean(packageName, true).apply();
-                Log.d(TAG, "Blocked custom app: " + packageName);
-                blockedCount++;
-            } else {
-                Log.w(TAG, "Skipping invalid package name: " + packageName);
-            }
-        }
-
-        // CRITICAL FIX: Notify BlockService to reload blocked apps immediately
-        Intent intent = new Intent("online.monarchlabs.sentinel.BLOCKED_APPS_UPDATED");
-        intent.putExtra("blocked_count", blockedCount);
-        sendBroadcast(intent);
-
-        Log.d(TAG, "Custom focus mode activated - blocked " + blockedCount + " apps from parent");
-    }
-
-    private void deactivateBasicFocusMode() {
-        // Unblock all apps by clearing preferences
-        blockedAppsPrefs.edit().clear().apply();
-
-        // CRITICAL FIX: Notify BlockService to reload blocked apps immediately
-        Intent intent = new Intent("online.monarchlabs.sentinel.BLOCKED_APPS_UPDATED");
-        intent.putExtra("blocked_count", 0);
-        sendBroadcast(intent);
-
-        Log.d(TAG, "Basic focus mode deactivated - all apps unblocked");
-    }
-
-    private void verifyAppsBlocked() {
-        // Log all currently blocked apps for debugging
-        Map<String, ?> allPrefs = blockedAppsPrefs.getAll();
-        int blockedCount = 0;
-
-        Log.d(TAG, "=== BLOCKED APPS VERIFICATION ===");
-        for (Map.Entry<String, ?> entry : allPrefs.entrySet()) {
-            if (entry.getValue() instanceof Boolean && (Boolean) entry.getValue()) {
-                Log.d(TAG, "BLOCKED: " + entry.getKey());
-                blockedCount++;
-            }
-        }
-        Log.d(TAG, "Total blocked apps: " + blockedCount);
-        Log.d(TAG, "=== END VERIFICATION ===");
-
-        if (blockedCount == 0) {
-            Log.w(TAG, "WARNING: No apps are currently blocked!");
-            Toast.makeText(this, "⚠️ Warning: No apps are blocked", Toast.LENGTH_SHORT).show();
-        }
-    }
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // 🛡️ CRITICAL FIX: Call startForeground IMMEDIATELY to prevent crash
+        // ðŸ›¡ï¸ CRITICAL FIX: Call startForeground IMMEDIATELY to prevent crash
         // This must be done before any other logic
         try {
             promoteToForeground();
-            Log.d(TAG, "✅ startForeground called in onStartCommand");
+            Log.d(TAG, "âœ… startForeground called in onStartCommand");
         } catch (Exception e) {
-            Log.e(TAG, "❌ Failed to start foreground: " + e.getMessage());
+            Log.e(TAG, "âŒ Failed to start foreground: " + e.getMessage());
         }
 
         try {
@@ -1562,7 +1390,7 @@ public class RemoteBlockService extends Service {
 
             // Handle refresh logout listener request
             if (intent != null && "refresh_logout_listener".equals(intent.getStringExtra("action"))) {
-                Log.d(TAG, "🔄 Received refresh logout listener request");
+                Log.d(TAG, "ðŸ”„ Received refresh logout listener request");
 
                 try {
                     // Remove existing listener first
@@ -1577,7 +1405,7 @@ public class RemoteBlockService extends Service {
                     // Show toast confirmation
                     new Handler(Looper.getMainLooper()).post(() -> {
                         try {
-                            Toast.makeText(this, "🔄 Logout listener refreshed", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "ðŸ”„ Logout listener refreshed", Toast.LENGTH_SHORT).show();
                         } catch (Exception e) {
                             Log.e(TAG, "Error showing toast: " + e.getMessage());
                         }
@@ -1589,12 +1417,12 @@ public class RemoteBlockService extends Service {
 
             // Handle immediate usage data collection refresh
             if (intent != null && "refresh_usage_collection".equals(intent.getStringExtra("action"))) {
-                Log.d(TAG, "🚀 Received immediate SUSAGE collection refresh request");
+                Log.d(TAG, "ðŸš€ Received immediate SUSAGE collection refresh request");
 
                 try {
                     // Trigger immediate SUSAGE upload if permission is available
                     if (hasUsageStatsPermission()) {
-                        Log.d(TAG, "✅ Usage permission available - triggering SUSAGE upload");
+                        Log.d(TAG, "âœ… Usage permission available - triggering SUSAGE upload");
 
                         // Use SUSAGE data manager for upload
                         new Thread(() -> {
@@ -1606,11 +1434,11 @@ public class RemoteBlockService extends Service {
                                         new online.monarchlabs.sentinel.utils.SUsageDataManager.OnUploadCompleteListener() {
                                             @Override
                                             public void onSuccess() {
-                                                Log.d(TAG, "✅ SUSAGE data refreshed successfully");
+                                                Log.d(TAG, "âœ… SUSAGE data refreshed successfully");
                                                 new Handler(Looper.getMainLooper()).post(() -> {
                                                     try {
                                                         Toast.makeText(RemoteBlockService.this,
-                                                                "📊 Usage data refreshed", Toast.LENGTH_SHORT).show();
+                                                                "ðŸ“Š Usage data refreshed", Toast.LENGTH_SHORT).show();
                                                     } catch (Exception e) {
                                                         Log.e(TAG, "Error showing toast: " + e.getMessage());
                                                     }
@@ -1619,7 +1447,7 @@ public class RemoteBlockService extends Service {
 
                                             @Override
                                             public void onError(String error) {
-                                                Log.e(TAG, "❌ SUSAGE refresh failed: " + error);
+                                                Log.e(TAG, "âŒ SUSAGE refresh failed: " + error);
                                             }
                                         });
                             } catch (Exception e) {
@@ -1627,10 +1455,10 @@ public class RemoteBlockService extends Service {
                             }
                         }).start();
                     } else {
-                        Log.w(TAG, "❌ Usage permission not available");
+                        Log.w(TAG, "âŒ Usage permission not available");
                         new Handler(Looper.getMainLooper()).post(() -> {
                             try {
-                                Toast.makeText(this, "❌ Usage permission required",
+                                Toast.makeText(this, "âŒ Usage permission required",
                                         Toast.LENGTH_SHORT).show();
                             } catch (Exception e) {
                                 Log.e(TAG, "Error showing toast: " + e.getMessage());
@@ -1644,12 +1472,12 @@ public class RemoteBlockService extends Service {
 
             // Handle parent-triggered upload request
             if (intent != null && "UPLOAD_USAGE_DATA".equals(intent.getAction())) {
-                Log.d(TAG, "🔄 Received parent-triggered SUSAGE upload request");
+                Log.d(TAG, "ðŸ”„ Received parent-triggered SUSAGE upload request");
 
                 try {
                     // Trigger immediate SUSAGE upload if permission is available
                     if (hasUsageStatsPermission()) {
-                        Log.d(TAG, "✅ Usage permission available - triggering parent-requested SUSAGE upload");
+                        Log.d(TAG, "âœ… Usage permission available - triggering parent-requested SUSAGE upload");
 
                         // Use SUSAGE data manager for upload
                         new Thread(() -> {
@@ -1661,11 +1489,11 @@ public class RemoteBlockService extends Service {
                                         new online.monarchlabs.sentinel.utils.SUsageDataManager.OnUploadCompleteListener() {
                                             @Override
                                             public void onSuccess() {
-                                                Log.d(TAG, "✅ Parent-requested SUSAGE upload successful");
+                                                Log.d(TAG, "âœ… Parent-requested SUSAGE upload successful");
                                                 new Handler(Looper.getMainLooper()).post(() -> {
                                                     try {
                                                         Toast.makeText(RemoteBlockService.this,
-                                                                "📤 Data uploaded for parent", Toast.LENGTH_SHORT)
+                                                                "ðŸ“¤ Data uploaded for parent", Toast.LENGTH_SHORT)
                                                                 .show();
                                                     } catch (Exception e) {
                                                         Log.e(TAG, "Error showing toast: " + e.getMessage());
@@ -1675,7 +1503,7 @@ public class RemoteBlockService extends Service {
 
                                             @Override
                                             public void onError(String error) {
-                                                Log.e(TAG, "❌ Parent-requested SUSAGE upload failed: " + error);
+                                                Log.e(TAG, "âŒ Parent-requested SUSAGE upload failed: " + error);
                                             }
                                         });
                             } catch (Exception e) {
@@ -1683,10 +1511,10 @@ public class RemoteBlockService extends Service {
                             }
                         }).start();
                     } else {
-                        Log.w(TAG, "❌ Usage permission not available");
+                        Log.w(TAG, "âŒ Usage permission not available");
                         new Handler(Looper.getMainLooper()).post(() -> {
                             try {
-                                Toast.makeText(this, "❌ Usage permission required for data upload", Toast.LENGTH_SHORT)
+                                Toast.makeText(this, "âŒ Usage permission required for data upload", Toast.LENGTH_SHORT)
                                         .show();
                             } catch (Exception e) {
                                 Log.e(TAG, "Error showing toast: " + e.getMessage());
@@ -1705,7 +1533,7 @@ public class RemoteBlockService extends Service {
                 Log.e(TAG, "Error starting location uploads in onStartCommand: " + e.getMessage());
             }
 
-            // 🛡️ BULLETPROOF: Always return START_STICKY to auto-restart
+            // ðŸ›¡ï¸ BULLETPROOF: Always return START_STICKY to auto-restart
             return START_STICKY;
         } catch (Exception e) {
             Log.e(TAG, "Critical error in onStartCommand: " + e.getMessage());
@@ -1716,11 +1544,11 @@ public class RemoteBlockService extends Service {
     }
 
     /**
-     * 🔧 BULLETPROOF: Schedule service restart if it crashes
+     * ðŸ”§ BULLETPROOF: Schedule service restart if it crashes
      */
     private void scheduleServiceRestart() {
         try {
-            Log.d(TAG, "🔄 Scheduling service restart...");
+            Log.d(TAG, "ðŸ”„ Scheduling service restart...");
 
             android.app.AlarmManager alarmManager = (android.app.AlarmManager) getSystemService(Context.ALARM_SERVICE);
             if (alarmManager == null)
@@ -1745,10 +1573,10 @@ public class RemoteBlockService extends Service {
                     restartTime,
                     pendingIntent);
 
-            Log.d(TAG, "✅ Service restart scheduled in 3 seconds");
+            Log.d(TAG, "âœ… Service restart scheduled in 3 seconds");
 
         } catch (Exception e) {
-            Log.e(TAG, "❌ Failed to schedule restart: " + e.getMessage());
+            Log.e(TAG, "âŒ Failed to schedule restart: " + e.getMessage());
         }
     }
 
@@ -1760,7 +1588,7 @@ public class RemoteBlockService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "⚠️ RemoteBlockService being destroyed!");
+        Log.d(TAG, "âš ï¸ RemoteBlockService being destroyed!");
 
         if (authStateListener != null) {
             try {
@@ -1776,7 +1604,7 @@ public class RemoteBlockService extends Service {
         try {
             unregisterGpsProviderReceiver();
         } catch (Exception e) {
-            Log.e(TAG, "❌ Failed to unregister GPS provider receiver: " + e.getMessage());
+            Log.e(TAG, "âŒ Failed to unregister GPS provider receiver: " + e.getMessage());
         }
 
         // Stop location updates
@@ -1808,15 +1636,15 @@ public class RemoteBlockService extends Service {
             }
         }
 
-        // 🔧 OEM COMPATIBILITY: Release wake lock
+        // ðŸ”§ OEM COMPATIBILITY: Release wake lock
         releaseOEMWakeLock();
 
-        // 🛡️ BULLETPROOF: Schedule service restart when destroyed
+        // ðŸ›¡ï¸ BULLETPROOF: Schedule service restart when destroyed
         // This ensures the service comes back even if killed by OEM
         try {
             SessionManager sm = new SessionManager(this);
             if (sm.isLoggedIn() && "child".equals(sm.getUserType())) {
-                Log.d(TAG, "🔄 Service destroyed - scheduling automatic restart...");
+                Log.d(TAG, "ðŸ”„ Service destroyed - scheduling automatic restart...");
                 scheduleServiceRestart();
 
                 // Also notify the watchdog
@@ -1844,7 +1672,7 @@ public class RemoteBlockService extends Service {
         // Cap maximum usage per session to 3 hours to avoid unrealistic values
         long maxSessionTime = 3 * 60 * 60 * 1000; // 3 hours
         if (millis > maxSessionTime) {
-            Log.d(TAG, "⚠️ Capping unrealistic usage session from " + formatDuration(millis) + " to "
+            Log.d(TAG, "âš ï¸ Capping unrealistic usage session from " + formatDuration(millis) + " to "
                     + formatDuration(maxSessionTime));
             millis = maxSessionTime;
         }
@@ -1936,12 +1764,12 @@ public class RemoteBlockService extends Service {
                         lower.contains("gallery") || lower.contains("player") || lower.contains("browser") ||
                         lower.contains("calculator") || lower.contains("calendar") || lower.contains("clock") ||
                         lower.contains("messenger") || lower.contains("email") || lower.contains("maps")) {
-                    Log.d(TAG, "✅ Allowing system app with user interaction: " + pkgName);
+                    Log.d(TAG, "âœ… Allowing system app with user interaction: " + pkgName);
                     return false;
                 }
 
                 // Skip other system apps
-                Log.v(TAG, "⏭️ Skipping system app: " + pkgName);
+                Log.v(TAG, "â­ï¸ Skipping system app: " + pkgName);
                 return true;
             }
         } catch (Exception e) {
@@ -1977,7 +1805,7 @@ public class RemoteBlockService extends Service {
                 if (eventType == UsageEvents.Event.ACTIVITY_RESUMED) {
                     // App came to foreground
                     resumeTimes.put(pkg, timestamp);
-                    Log.v(TAG, "🚀 App resumed: " + pkg + " at " + new Date(timestamp));
+                    Log.v(TAG, "ðŸš€ App resumed: " + pkg + " at " + new Date(timestamp));
 
                 } else if (eventType == UsageEvents.Event.ACTIVITY_PAUSED) {
                     // App left foreground
@@ -1988,11 +1816,11 @@ public class RemoteBlockService extends Service {
                         // session)
                         if (dur >= 1000 && dur <= 7200000) {
                             usage.put(pkg, dur + usage.getOrDefault(pkg, 0L));
-                            Log.v(TAG, "⏸️ App paused: " + pkg + " - " + formatDuration(dur));
+                            Log.v(TAG, "â¸ï¸ App paused: " + pkg + " - " + formatDuration(dur));
                         } else if (dur < 1000) {
-                            Log.v(TAG, "⚡ Skipped very short session: " + pkg + " - " + dur + "ms");
+                            Log.v(TAG, "âš¡ Skipped very short session: " + pkg + " - " + dur + "ms");
                         } else {
-                            Log.v(TAG, "⏰ Skipped unrealistic session: " + pkg + " - " + formatDuration(dur));
+                            Log.v(TAG, "â° Skipped unrealistic session: " + pkg + " - " + formatDuration(dur));
                         }
                     }
                 }
@@ -2007,7 +1835,7 @@ public class RemoteBlockService extends Service {
                     // Only count realistic foreground time
                     if (dur >= 1000 && dur <= 7200000) {
                         usage.put(pkg, dur + usage.getOrDefault(pkg, 0L));
-                        Log.v(TAG, "⏳ Session ended - " + pkg + ": " + formatDuration(dur));
+                        Log.v(TAG, "â³ Session ended - " + pkg + ": " + formatDuration(dur));
                     }
                 }
             }
@@ -2053,7 +1881,7 @@ public class RemoteBlockService extends Service {
 
     // Also add this method to manually trigger logout listener setup
     public void manualSetupLogoutListener() {
-        Log.d(TAG, "🔧 Manual logout listener setup requested");
+        Log.d(TAG, "ðŸ”§ Manual logout listener setup requested");
         setupLogoutListener();
     }
 
@@ -2079,7 +1907,7 @@ public class RemoteBlockService extends Service {
     }
 
     /**
-     * 🔧 OEM COMPATIBILITY: Acquire wake lock based on OEM aggressiveness
+     * ðŸ”§ OEM COMPATIBILITY: Acquire wake lock based on OEM aggressiveness
      * This helps keep the service alive on MIUI, Vivo, OPPO devices
      */
     private void acquireOEMWakeLock() {
@@ -2101,26 +1929,26 @@ public class RemoteBlockService extends Service {
                         10 * 60 * 60 * 1000L; // 10 hours for normal OEMs
 
                 wakeLock.acquire(wakeLockDuration);
-                Log.d(TAG, "🔋 OEM Wake lock acquired for " + (wakeLockDuration / (60 * 60 * 1000)) + " hours");
-                Log.d(TAG, "🔋 OEM Type: " + oemManager.getOEMType().name() +
+                Log.d(TAG, "ðŸ”‹ OEM Wake lock acquired for " + (wakeLockDuration / (60 * 60 * 1000)) + " hours");
+                Log.d(TAG, "ðŸ”‹ OEM Type: " + oemManager.getOEMType().name() +
                         " (Aggressive: " + oemManager.isAggressiveOEM() + ")");
             }
         } catch (Exception e) {
-            Log.e(TAG, "❌ Failed to acquire OEM wake lock: " + e.getMessage());
+            Log.e(TAG, "âŒ Failed to acquire OEM wake lock: " + e.getMessage());
         }
     }
 
     /**
-     * 🔧 OEM COMPATIBILITY: Release wake lock safely
+     * ðŸ”§ OEM COMPATIBILITY: Release wake lock safely
      */
     private void releaseOEMWakeLock() {
         try {
             if (wakeLock != null && wakeLock.isHeld()) {
                 wakeLock.release();
-                Log.d(TAG, "🔋 OEM Wake lock released");
+                Log.d(TAG, "ðŸ”‹ OEM Wake lock released");
             }
         } catch (Exception e) {
-            Log.e(TAG, "❌ Error releasing wake lock: " + e.getMessage());
+            Log.e(TAG, "âŒ Error releasing wake lock: " + e.getMessage());
         }
     }
 
@@ -2136,7 +1964,7 @@ public class RemoteBlockService extends Service {
         try {
             if (fusedLocationClient != null && locationCallback != null) {
                 fusedLocationClient.removeLocationUpdates(locationCallback);
-                Log.d(TAG, "📍 Stopped FusedLocationProviderClient updates");
+                Log.d(TAG, "ðŸ“ Stopped FusedLocationProviderClient updates");
             }
         } catch (Exception e) {
             Log.e(TAG, "Error stopping fused location updates: " + e.getMessage());
@@ -2145,7 +1973,7 @@ public class RemoteBlockService extends Service {
             LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             if (lm != null && nativeLocationListener != null) {
                 lm.removeUpdates(nativeLocationListener);
-                Log.d(TAG, "📍 Stopped native LocationManager updates");
+                Log.d(TAG, "ðŸ“ Stopped native LocationManager updates");
             }
         } catch (Exception e) {
             Log.e(TAG, "Error stopping native location updates: " + e.getMessage());
@@ -2158,7 +1986,7 @@ public class RemoteBlockService extends Service {
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     if (LocationManager.PROVIDERS_CHANGED_ACTION.equals(intent.getAction())) {
-                        Log.d(TAG, "📍 Location provider state changed (GPS toggle detected)");
+                        Log.d(TAG, "ðŸ“ Location provider state changed (GPS toggle detected)");
                         // Re-evaluate location tracking state
                         startLocationUploads();
                     }
@@ -2166,7 +1994,7 @@ public class RemoteBlockService extends Service {
             };
             IntentFilter filter = new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION);
             registerReceiver(gpsProviderReceiver, filter);
-            Log.d(TAG, "✅ Registered GPS provider change receiver");
+            Log.d(TAG, "âœ… Registered GPS provider change receiver");
         }
     }
 
@@ -2206,7 +2034,7 @@ public class RemoteBlockService extends Service {
                 || locationRequestListener == null;
 
         if (deviceIdChanged || connectionChanged || listenersMissing) {
-            Log.d(TAG, "🔄 updateDeviceIdAndListeners: deviceIdChanged="
+            Log.d(TAG, "ðŸ”„ updateDeviceIdAndListeners: deviceIdChanged="
                     + deviceIdChanged + ", connectionChanged=" + connectionChanged
                     + ", listenersMissing=" + listenersMissing
                     + ". Re-binding listeners.");
@@ -2237,7 +2065,7 @@ public class RemoteBlockService extends Service {
                 setupV2CommandsListener();
                 startLocationUploads();
                 setupRealTimeBlockedAppsListener();
-                Log.d(TAG, "✅ All listeners dynamically re-bound to device ID: " + myDeviceId);
+                Log.d(TAG, "âœ… All listeners dynamically re-bound to device ID: " + myDeviceId);
             } catch (Exception e) {
                 Log.e(TAG, "Error registering listeners: " + e.getMessage());
             }
@@ -2280,7 +2108,7 @@ public class RemoteBlockService extends Service {
                     }
                 }
                 editor.apply();
-                Log.d(TAG, "🔄 Synced blocked apps down from Firebase to local prefs: " + snapshot.getChildrenCount());
+                Log.d(TAG, "ðŸ”„ Synced blocked apps down from Firebase to local prefs: " + snapshot.getChildrenCount());
                 broadcastBlockedAppsUpdate(null);
             }
 

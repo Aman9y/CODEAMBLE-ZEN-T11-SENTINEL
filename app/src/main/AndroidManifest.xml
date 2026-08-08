@@ -252,13 +252,7 @@
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="fullSensor"
             tools:replace="screenOrientation" />
-
-        <!-- New activities for QR code and preset functionality -->
-        <activity
-            android:name=".PresetCreationActivity"
-            android:exported="false"
-            android:label="Create Focus Mode Preset"
-            android:theme="@style/Theme.Master2.NoActionBar" />
+        <!-- QR code display -->
 
         <activity
             android:name=".QRDisplayActivity"

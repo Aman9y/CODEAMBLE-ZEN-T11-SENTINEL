@@ -103,7 +103,7 @@ public class ParentDashboardActivity extends BaseActivity {
     private ValueEventListener limiterListener;
     private DatabaseReference currentLimiterDeviceRef; // Tracks the device-specific limiter ref for listener lifecycle
 
-    // 🔧 MULTI-DEVICE FIX: Track active listeners for cleanup when switching
+    // Ã°Å¸â€Â§ MULTI-DEVICE FIX: Track active listeners for cleanup when switching
     // devices
     private ValueEventListener activeLimiterListener;
     private DatabaseReference activeLimiterRef;
@@ -126,28 +126,21 @@ public class ParentDashboardActivity extends BaseActivity {
     private boolean dateSetByUser = false; // Flag to prevent automatic date resets
     private SimpleDateFormat usageDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
-    // 🔍 DATE TRACE: Log initial values
+    // Ã°Å¸â€Â DATE TRACE: Log initial values
     {
         String initialDate = usageDateFormat.format(currentUsageDate.getTime());
-        Log.d(TAG, "🔍 DATE_TRACE_INIT: currentUsageDate initialized at field declaration");
-        Log.d(TAG, "🔍 DATE_TRACE_INIT: Initial value = " + initialDate);
-        Log.d(TAG, "🔍 DATE_TRACE_INIT: dateSetByUser = false (initial)");
-        Log.d(TAG, "🔍 DATE_TRACE_INIT: Thread = " + Thread.currentThread().getName());
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_INIT: currentUsageDate initialized at field declaration");
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_INIT: Initial value = " + initialDate);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_INIT: dateSetByUser = false (initial)");
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_INIT: Thread = " + Thread.currentThread().getName());
     }
 
-    // Flag to prevent multiple preset creation
-    private boolean isCreatingPreset = false;
 
     // Fresh login state flag
     private boolean isFreshLoginSession = false;
 
     // Focus mode components
-    private TextView tvFocusModeStatus;
-    private Button btnEditAppList;
-    private boolean isFocusModeActive = false;
-    private List<AppInfo> focusModeApps = new ArrayList<>();
-    private SharedPreferences focusModePrefs;
-    private SharedPreferences usageCachePrefs; // 📦 PERSISTENT CACHE STORAGE
+    private SharedPreferences usageCachePrefs; // Ã°Å¸â€œÂ¦ PERSISTENT CACHE STORAGE
 
     private Button btnViewUsage;
     private Button btnSelectDays;
@@ -218,7 +211,6 @@ public class ParentDashboardActivity extends BaseActivity {
     private static final long RECENT_CONNECTION_TOAST_WINDOW_MS = 2 * 60 * 1000L;
     private long locationRequestStartTime = 0L;
     private Map<String, Long> cachedUsageData = new HashMap<>();
-    private PresetManager presetManager;
     private EditText etLimiterHours;
     private EditText etLimiterMinutes;
     private TextView tvLimiterTimer;
@@ -235,7 +227,7 @@ public class ParentDashboardActivity extends BaseActivity {
     private static final String MAP_BUNDLE_KEY = "MapViewBundleKey";
 
     /**
-     * 🔍 Helper method to get caller method name for trace logs
+     * Ã°Å¸â€Â Helper method to get caller method name for trace logs
      */
     private String getCallerMethodName() {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
@@ -246,7 +238,7 @@ public class ParentDashboardActivity extends BaseActivity {
         return "Unknown";
     }
 
-    // 🚨 UNINSTALL DETECTION
+    // Ã°Å¸Å¡Â¨ UNINSTALL DETECTION
     private UninstallDetectionManager uninstallDetectionManager;
     private LinearLayout layoutUninstallWarning;
     private TextView tvUninstallWarningTitle;
@@ -267,14 +259,13 @@ public class ParentDashboardActivity extends BaseActivity {
 
     // Request codes
     private static final int REQUEST_APP_SELECTION = 1001;
-    private static final int REQUEST_FOCUS_MODE_APPS = 1002;
     private static final int REQUEST_NOTIFICATIONS = 1004;
 
     private FirebaseAuth mAuth;
 
     private String deviceIdJustRemoved = null;
 
-    // 💓 PARENT HEARTBEAT: Timer to keep session alive and detect if app is deleted
+    // Ã°Å¸â€™â€œ PARENT HEARTBEAT: Timer to keep session alive and detect if app is deleted
     private java.util.Timer parentHeartbeatTimer;
     private static final long HEARTBEAT_INTERVAL = 5 * 60 * 1000;
 
@@ -325,61 +316,59 @@ public class ParentDashboardActivity extends BaseActivity {
             // Update session activity
             sessionManager.updateLastActivity();
 
-            // Initialize focus mode preferences
-            focusModePrefs = getSharedPreferences("focus_mode_prefs", MODE_PRIVATE);
 
-            // 📦 Initialize usage cache preferences
+            // Ã°Å¸â€œÂ¦ Initialize usage cache preferences
             usageCachePrefs = getSharedPreferences("usage_data_cache_prefs", MODE_PRIVATE);
 
-            // 🔍 DATE TRACE: Log date state after basic initialization
+            // Ã°Å¸â€Â DATE TRACE: Log date state after basic initialization
             String dateAfterPrefs = usageDateFormat.format(currentUsageDate.getTime());
-            Log.d(TAG, "🔍 DATE_TRACE_ONCREATE_1: After preferences init");
-            Log.d(TAG, "🔍 DATE_TRACE_ONCREATE_1: currentUsageDate = " + dateAfterPrefs);
-            Log.d(TAG, "🔍 DATE_TRACE_ONCREATE_1: dateSetByUser = " + dateSetByUser);
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ONCREATE_1: After preferences init");
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ONCREATE_1: currentUsageDate = " + dateAfterPrefs);
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ONCREATE_1: dateSetByUser = " + dateSetByUser);
 
-            // 🔍 DATE TRACE: Before initializeViews
+            // Ã°Å¸â€Â DATE TRACE: Before initializeViews
             String dateBeforeViews = usageDateFormat.format(currentUsageDate.getTime());
-            Log.d(TAG, "🔍 DATE_TRACE_ONCREATE_2: BEFORE initializeViews()");
-            Log.d(TAG, "🔍 DATE_TRACE_ONCREATE_2: currentUsageDate = " + dateBeforeViews);
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ONCREATE_2: BEFORE initializeViews()");
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ONCREATE_2: currentUsageDate = " + dateBeforeViews);
 
             initializeViews();
 
-            // 🔍 DATE TRACE: After initializeViews
+            // Ã°Å¸â€Â DATE TRACE: After initializeViews
             String dateAfterViews = usageDateFormat.format(currentUsageDate.getTime());
-            Log.d(TAG, "🔍 DATE_TRACE_ONCREATE_3: AFTER initializeViews()");
-            Log.d(TAG, "🔍 DATE_TRACE_ONCREATE_3: currentUsageDate = " + dateAfterViews);
-            Log.d(TAG, "🔍 DATE_TRACE_ONCREATE_3: Changed? " + (!dateBeforeViews.equals(dateAfterViews)));
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ONCREATE_3: AFTER initializeViews()");
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ONCREATE_3: currentUsageDate = " + dateAfterViews);
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ONCREATE_3: Changed? " + (!dateBeforeViews.equals(dateAfterViews)));
 
             initializeManagers();
 
-            // 🔍 DATE TRACE: After initializeManagers
+            // Ã°Å¸â€Â DATE TRACE: After initializeManagers
             String dateAfterManagers = usageDateFormat.format(currentUsageDate.getTime());
-            Log.d(TAG, "🔍 DATE_TRACE_ONCREATE_4: AFTER initializeManagers()");
-            Log.d(TAG, "🔍 DATE_TRACE_ONCREATE_4: currentUsageDate = " + dateAfterManagers);
-            Log.d(TAG, "🔍 DATE_TRACE_ONCREATE_4: Changed? " + (!dateAfterViews.equals(dateAfterManagers)));
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ONCREATE_4: AFTER initializeManagers()");
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ONCREATE_4: currentUsageDate = " + dateAfterManagers);
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ONCREATE_4: Changed? " + (!dateAfterViews.equals(dateAfterManagers)));
 
-            // 🧹 FRESH LOGIN CHECK - Ensure clean slate for new login sessions
+            // Ã°Å¸Â§Â¹ FRESH LOGIN CHECK - Ensure clean slate for new login sessions
             // (Must be AFTER managers are initialized)
             boolean isFreshLogin = checkForFreshLoginAndCleanup();
             isFreshLoginSession = isFreshLogin; // Store for use in other methods
 
-            // 🔍 DATE TRACE: Before restoreLastSelectedChildOnStartup
+            // Ã°Å¸â€Â DATE TRACE: Before restoreLastSelectedChildOnStartup
             String dateBeforeRestore = usageDateFormat.format(currentUsageDate.getTime());
-            Log.d(TAG, "🔍 DATE_TRACE_ONCREATE_5: BEFORE restoreLastSelectedChildOnStartup()");
-            Log.d(TAG, "🔍 DATE_TRACE_ONCREATE_5: currentUsageDate = " + dateBeforeRestore);
-            Log.d(TAG, "🔍 DATE_TRACE_ONCREATE_5: isFreshLoginSession = " + isFreshLoginSession);
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ONCREATE_5: BEFORE restoreLastSelectedChildOnStartup()");
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ONCREATE_5: currentUsageDate = " + dateBeforeRestore);
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ONCREATE_5: isFreshLoginSession = " + isFreshLoginSession);
 
             if (!isFreshLoginSession) {
                 restoreLastSelectedChildOnStartup();
 
-                // 🔍 DATE TRACE: After restoreLastSelectedChildOnStartup
+                // Ã°Å¸â€Â DATE TRACE: After restoreLastSelectedChildOnStartup
                 String dateAfterRestore = usageDateFormat.format(currentUsageDate.getTime());
-                Log.d(TAG, "🔍 DATE_TRACE_ONCREATE_6: AFTER restoreLastSelectedChildOnStartup()");
-                Log.d(TAG, "🔍 DATE_TRACE_ONCREATE_6: currentUsageDate = " + dateAfterRestore);
-                Log.d(TAG, "🔍 DATE_TRACE_ONCREATE_6: dateSetByUser = " + dateSetByUser);
-                Log.d(TAG, "🔍 DATE_TRACE_ONCREATE_6: Changed? " + (!dateBeforeRestore.equals(dateAfterRestore)));
+                Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ONCREATE_6: AFTER restoreLastSelectedChildOnStartup()");
+                Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ONCREATE_6: currentUsageDate = " + dateAfterRestore);
+                Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ONCREATE_6: dateSetByUser = " + dateSetByUser);
+                Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ONCREATE_6: Changed? " + (!dateBeforeRestore.equals(dateAfterRestore)));
             } else {
-                Log.d(TAG, "🔍 DATE_TRACE_ONCREATE_6: SKIPPED restoreLastSelectedChildOnStartup (fresh login)");
+                Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ONCREATE_6: SKIPPED restoreLastSelectedChildOnStartup (fresh login)");
             }
 
             // Show welcome message with important information
@@ -390,30 +379,24 @@ public class ParentDashboardActivity extends BaseActivity {
             setupQRCodeGeneration();
             setupDeviceSwitcher();
 
-            // Restore Focus Mode state before clearing devices
-            restoreFocusModeStateAfterRestart();
 
-            // Setup Focus Mode AFTER restoration (so it doesn't get cleared)
-            setupFocusMode();
 
             setupChart();
 
-            // 🔔 START PERSISTENT TIMER NOTIFICATION SERVICE for parent devices
+            // Ã°Å¸â€â€ START PERSISTENT TIMER NOTIFICATION SERVICE for parent devices
             setupParentTimerExpiryListener();
 
-            // 📡 START PERMISSION EVENT LISTENER to monitor child device service status
+            // Ã°Å¸â€œÂ¡ START PERMISSION EVENT LISTENER to monitor child device service status
             startPermissionEventListener();
 
             // Only allow QR scan connections - user requirement
             Log.d(TAG, "Automatic device loading disabled - only QR scan connections allowed");
 
-            // Only clear devices if none were restored from Focus Mode
             if (connectedDevices.isEmpty()) {
                 Log.d(TAG, "No devices restored - showing empty state");
                 updateDeviceStatus();
                 updateTargetDeviceDisplay();
             } else {
-                Log.d(TAG, "Devices restored from Focus Mode - keeping current state");
             }
 
             // Listen only to canonical v2 links created by QR pairing.
@@ -421,11 +404,7 @@ public class ParentDashboardActivity extends BaseActivity {
             // Add settings buttons functionality
             addSettingsButtons();
 
-            // Force Focus Mode UI update to ensure status shows immediately
-            forceUpdateFocusModeUI();
 
-            // Auto-restore devices with Focus Mode data
-            autoRestoreDevicesWithFocusMode();
 
             // Show Home content by default
             bottomNavigation.setSelectedItemId(R.id.nav_home);
@@ -447,10 +426,10 @@ public class ParentDashboardActivity extends BaseActivity {
 
             setupCategorySummaryChart();
 
-            // 🔔 Setup notification bell badge
+            // Ã°Å¸â€â€ Setup notification bell badge
             setupNotificationBadge();
 
-            // 💓 Start parent heartbeat timer to keep session alive
+            // Ã°Å¸â€™â€œ Start parent heartbeat timer to keep session alive
             startParentHeartbeatTimer();
 
         } catch (Exception e) {
@@ -460,7 +439,7 @@ public class ParentDashboardActivity extends BaseActivity {
     }
 
     /**
-     * 💓 Start parent heartbeat timer to keep session alive
+     * Ã°Å¸â€™â€œ Start parent heartbeat timer to keep session alive
      * Other devices can check this heartbeat to know if the app was deleted
      */
     private void startParentHeartbeatTimer() {
@@ -490,13 +469,13 @@ public class ParentDashboardActivity extends BaseActivity {
     }
 
     /**
-     * 💓 Stop parent heartbeat timer
+     * Ã°Å¸â€™â€œ Stop parent heartbeat timer
      */
     private void stopParentHeartbeatTimer() {
         if (parentHeartbeatTimer != null) {
             parentHeartbeatTimer.cancel();
             parentHeartbeatTimer = null;
-            Log.d(TAG, "💓 Parent heartbeat timer stopped");
+            Log.d(TAG, "Ã°Å¸â€™â€œ Parent heartbeat timer stopped");
         }
     }
 
@@ -510,7 +489,7 @@ public class ParentDashboardActivity extends BaseActivity {
         // New Dashboard Views
         llDeviceList = findViewById(R.id.llDeviceList);
 
-        // ── Map card setup ──────────────────────────────────────────────────────
+        // Ã¢â€â‚¬Ã¢â€â‚¬ Map card setup Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
         cardMapContainer = findViewById(R.id.cardMapContainer);
         dashboardMapView = findViewById(R.id.dashboardMapView);
         mapBlurOverlay   = findViewById(R.id.mapBlurOverlay);
@@ -559,7 +538,7 @@ public class ParentDashboardActivity extends BaseActivity {
             mapCardInitialized = true;
         }
 
-        // Toggle icon button (top-right of card) → also opens full screen
+        // Toggle icon button (top-right of card) Ã¢â€ â€™ also opens full screen
         View btnToggle = findViewById(R.id.btnToggleMapSize);
         if (btnToggle != null) {
             btnToggle.setOnClickListener(v -> {
@@ -581,7 +560,7 @@ public class ParentDashboardActivity extends BaseActivity {
             });
         }
 
-        // My Location button — animate to child’s last known location
+        // My Location button Ã¢â‚¬â€ animate to childÃ¢â‚¬â„¢s last known location
         View btnMyLocCard = findViewById(R.id.btnMyLocationCard);
         if (btnMyLocCard != null) {
             btnMyLocCard.setOnClickListener(v -> {
@@ -604,7 +583,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 }
             });
         }
-        // ── End map card setup ─────────────────────────────────────────────────
+        // Ã¢â€â‚¬Ã¢â€â‚¬ End map card setup Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
         // Quick Actions
         // View cardQrAction = findViewById(R.id.cardQrAction); // Removed from XML
@@ -688,16 +667,13 @@ public class ParentDashboardActivity extends BaseActivity {
             btnAddDevice.setOnClickListener(v -> showQRScanner());
         }
 
-        // Initialize focus mode views (kept for compatibility with methods)
-        tvFocusModeStatus = findViewById(R.id.tvFocusModeStatus);
-        btnEditAppList = findViewById(R.id.btnEditAppList);
 
         // Greeter
         TextView tvGreeter = findViewById(R.id.tvGreeter);
         TextView tvParentName = findViewById(R.id.tvParentName); // Added reference
         TextView tvCurrentDate = findViewById(R.id.tvCurrentDate);
 
-        // 🔧 Manage Devices Click Listener (Disable click on tvDeviceStatus text view so that clicks bubble up to the parent layoutManageDeviceHeader)
+        // Ã°Å¸â€Â§ Manage Devices Click Listener (Disable click on tvDeviceStatus text view so that clicks bubble up to the parent layoutManageDeviceHeader)
         if (binding != null && binding.tvDeviceStatus != null) {
             binding.tvDeviceStatus.setOnClickListener(null);
             binding.tvDeviceStatus.setClickable(false);
@@ -710,7 +686,7 @@ public class ParentDashboardActivity extends BaseActivity {
             }
         }
 
-        // 📘 GUIDE BOOK BUTTON
+        // Ã°Å¸â€œËœ GUIDE BOOK BUTTON
         // Initialize the floating guide button and label container
         View btnGuideBook = findViewById(R.id.btnGuideBook);
         View fabGuide = findViewById(R.id.fabGuide);
@@ -725,7 +701,7 @@ public class ParentDashboardActivity extends BaseActivity {
             fabGuide.setOnClickListener(guideClickListener);
         setupGuideMotion(btnGuideBook, fabGuide);
 
-        // 🔧 Set Parent Name - Load from Firebase Database
+        // Ã°Å¸â€Â§ Set Parent Name - Load from Firebase Database
         final TextView tvParentNameRef = tvParentName;
         if (mAuth != null && mAuth.getCurrentUser() != null && tvParentNameRef != null) {
             String uid = mAuth.getCurrentUser().getUid();
@@ -812,7 +788,7 @@ public class ParentDashboardActivity extends BaseActivity {
             });
         }
 
-        // 🚨 UNINSTALL WARNING UI INITIALIZATION
+        // Ã°Å¸Å¡Â¨ UNINSTALL WARNING UI INITIALIZATION
         layoutUninstallWarning = findViewById(R.id.layoutUninstallWarning);
         tvUninstallWarningTitle = findViewById(R.id.tvUninstallWarningTitle);
         tvUninstallWarningMessage = findViewById(R.id.tvUninstallWarningMessage);
@@ -846,7 +822,7 @@ public class ParentDashboardActivity extends BaseActivity {
         };
         syncWarningHandler.post(syncWarningRunnable);
 
-        // 🛡️ Uninstall Protection Education Expand/Collapse
+        // Ã°Å¸â€ºÂ¡Ã¯Â¸Â Uninstall Protection Education Expand/Collapse
         android.view.ViewGroup cardUninstallProtectionContainer = (android.view.ViewGroup) findViewById(R.id.cardUninstallProtectionContainer);
         View layoutUninstallEducationTrigger = findViewById(R.id.layoutUninstallEducationTrigger);
         View layoutUninstallEducationContent = findViewById(R.id.layoutUninstallEducationContent);
@@ -898,7 +874,6 @@ public class ParentDashboardActivity extends BaseActivity {
             int itemId = item.getItemId();
             if (itemId == R.id.nav_home) {
                 // Home is always visible, just update UI
-                updateFocusModeUI();
                 return true;
             } else if (itemId == R.id.nav_timer_status) {
                 // Launch Timer Status Activity
@@ -936,7 +911,7 @@ public class ParentDashboardActivity extends BaseActivity {
     }
 
     /**
-     * 🔔 Setup notification badge on bell icon to show total unread count
+     * Ã°Å¸â€â€ Setup notification badge on bell icon to show total unread count
      */
     private TextView tvNotificationBadge;
     private ValueEventListener notificationLastReadListener;
@@ -997,7 +972,7 @@ public class ParentDashboardActivity extends BaseActivity {
         notificationLastReadTime = 0L;
         notificationPermissionUnreadCount = 0;
         notificationAppUnreadCount = 0;
-        Log.d(TAG, "🔔 Refreshing notification badge for device: " + badgeDeviceId);
+        Log.d(TAG, "Ã°Å¸â€â€ Refreshing notification badge for device: " + badgeDeviceId);
 
         notificationLastReadRef = FirebaseDatabase.getInstance()
                 .getReference("v2")
@@ -1119,10 +1094,10 @@ public class ParentDashboardActivity extends BaseActivity {
             if (totalCount > 0) {
                 tvNotificationBadge.setVisibility(View.VISIBLE);
                 tvNotificationBadge.setText(totalCount > 99 ? "99+" : String.valueOf(totalCount));
-                Log.d(TAG, "🔔 Badge showing: " + totalCount);
+                Log.d(TAG, "Ã°Å¸â€â€ Badge showing: " + totalCount);
             } else {
                 tvNotificationBadge.setVisibility(View.GONE);
-                Log.d(TAG, "🔔 Badge hidden (no unread)");
+                Log.d(TAG, "Ã°Å¸â€â€ Badge hidden (no unread)");
             }
         });
     }
@@ -1159,211 +1134,9 @@ public class ParentDashboardActivity extends BaseActivity {
 
     // Settings methods moved to ParentSettingsActivity
 
-    private void loadFocusModeApps() {
-        if (currentChildDeviceId == null)
-            return;
-
-        try {
-            String key = "focus_apps_" + currentChildDeviceId;
-            String appsJson = focusModePrefs.getString(key, "");
-
-            if (!appsJson.isEmpty()) {
-                Gson gson = new Gson();
-                Type listType = new TypeToken<List<AppInfo>>() {
-                }.getType();
-                List<AppInfo> savedApps = gson.fromJson(appsJson, listType);
-
-                if (savedApps != null) {
-                    focusModeApps.clear();
-                    focusModeApps.addAll(savedApps);
-                    Log.d(TAG, "📱 Loaded " + focusModeApps.size() + " focus mode apps for device "
-                            + currentChildDeviceId);
-
-                    // 🔧 DETAILED APP LIST LOGGING: Show which apps were loaded
-                    for (AppInfo app : focusModeApps) {
-                        Log.d(TAG, "   📱 Loaded app: " + (app.name != null ? app.name : app.packageName));
-                    }
-                }
-            }
-
-            // 🔧 PERSISTENCE FIX: Load Focus Mode active state
-            String stateKey = "focus_mode_active_" + currentChildDeviceId;
-            isFocusModeActive = focusModePrefs.getBoolean(stateKey, false);
-            Log.d(TAG, "🎯 Loaded Focus Mode state for device " + currentChildDeviceId + ": "
-                    + (isFocusModeActive ? "ACTIVE" : "INACTIVE"));
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error loading focus mode apps: " + e.getMessage());
-        }
-    }
-
-    private void saveFocusModeApps() {
-        if (currentChildDeviceId == null)
-            return;
-
-        try {
-            String key = "focus_apps_" + currentChildDeviceId;
-            Gson gson = new Gson();
-            String appsJson = gson.toJson(focusModeApps);
-
-            focusModePrefs.edit().putString(key, appsJson).apply();
-            Log.d(TAG, "Saved " + focusModeApps.size() + " focus mode apps for device " + currentChildDeviceId);
-
-            // 🔧 PERSISTENCE FIX: Save Focus Mode active state
-            String stateKey = "focus_mode_active_" + currentChildDeviceId;
-            focusModePrefs.edit().putBoolean(stateKey, isFocusModeActive).apply();
-            Log.d(TAG, "🎯 Saved Focus Mode state for device " + currentChildDeviceId + ": "
-                    + (isFocusModeActive ? "ACTIVE" : "INACTIVE"));
-
-            // 🔧 FORCE-CLOSE PERSISTENCE: Also save device name for restoration
-            String deviceNameKey = "device_name_" + currentChildDeviceId;
-            focusModePrefs.edit().putString(deviceNameKey, currentChildDeviceName).apply();
-            Log.d(TAG, "💾 Saved device name for " + currentChildDeviceId + ": " + currentChildDeviceName);
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error saving focus mode apps: " + e.getMessage());
-        }
-    }
-
-    private void activateFocusMode() {
-        isFocusModeActive = false;
-        if (binding != null && binding.switchFocusMode != null) {
-            binding.switchFocusMode.setChecked(false);
-        }
-        Toast.makeText(this, "Focus Mode is not available in this build.",
-                Toast.LENGTH_SHORT).show();
-        updateFocusModeUI();
-    }
-
-    private void deactivateFocusMode() {
-        isFocusModeActive = false;
-        saveFocusModeApps();
-        updateFocusModeUI();
-    }
-
-
     // ==============================================
     // UPDATED METHOD FOR MODERN DESIGN COLORS
     // ==============================================
-    private void updateFocusModeUI() {
-        try {
-            Log.d(TAG, "🔧 Updating Focus Mode UI: " + (isFocusModeActive ? "ACTIVE" : "INACTIVE") + " - "
-                    + focusModeApps.size() + " apps");
-
-            if (tvFocusModeStatus == null) {
-                Log.e(TAG, "❌ tvFocusModeStatus is NULL! Cannot update Focus Mode UI!");
-                // Try to reinitialize
-                tvFocusModeStatus = findViewById(R.id.tvFocusModeStatus);
-                if (tvFocusModeStatus == null) {
-                    Log.e(TAG, "❌ CRITICAL: tvFocusModeStatus still NULL after findViewById!");
-                    return;
-                }
-            }
-
-            // 🔧 FORCE VISIBILITY: Ensure the UI element is visible
-            tvFocusModeStatus.setVisibility(View.VISIBLE);
-            Log.d(TAG, "🔧 Forced tvFocusModeStatus visibility to VISIBLE");
-
-            if (isFocusModeActive) {
-                if (focusModeApps.isEmpty()) {
-                    tvFocusModeStatus.setText("Active (No apps selected)");
-                    tvFocusModeStatus.setTextColor(ContextCompat.getColor(this, R.color.warning_600)); // Modern orange
-                } else {
-                    tvFocusModeStatus.setText("Active - Blocking " + focusModeApps.size() + " apps");
-                    tvFocusModeStatus.setTextColor(ContextCompat.getColor(this, R.color.success_600)); // Modern green
-                }
-                if (binding != null && binding.switchFocusMode != null) {
-                    binding.switchFocusMode.setChecked(true);
-                }
-            } else {
-                if (focusModeApps.isEmpty()) {
-                    tvFocusModeStatus.setText("Inactive - No apps selected");
-                    tvFocusModeStatus.setTextColor(ContextCompat.getColor(this, R.color.neutral_600)); // Modern grey
-                } else {
-                    tvFocusModeStatus.setText("Inactive - " + focusModeApps.size() + " apps ready");
-                    tvFocusModeStatus.setTextColor(ContextCompat.getColor(this, R.color.neutral_600)); // Modern grey
-                }
-                if (binding != null && binding.switchFocusMode != null) {
-                    binding.switchFocusMode.setChecked(false);
-                }
-            }
-
-            // Always show edit button so users can select/modify apps
-            if (btnEditAppList != null) {
-                btnEditAppList.setVisibility(View.VISIBLE);
-            } else {
-                // Try to reinitialize
-                btnEditAppList = findViewById(R.id.btnEditAppList);
-                if (btnEditAppList != null) {
-                    btnEditAppList.setVisibility(View.VISIBLE);
-                }
-            }
-
-            // 🔧 FINAL UI REFRESH: Force refresh the entire view
-            tvFocusModeStatus.requestLayout();
-            tvFocusModeStatus.invalidate();
-
-        } catch (Exception e) {
-            Log.e(TAG, "❌ Error updating Focus Mode UI: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    private void showEditAppListDialog() {
-        if (currentChildDeviceId == null) {
-            Toast.makeText(this, "Please select a child device first", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (focusModeApps.isEmpty()) {
-            // No apps selected, show option to select apps
-            AlertDialog.Builder builder = new AlertDialog.Builder(
-                    new android.view.ContextThemeWrapper(this, R.style.AlertDialogCustom));
-            builder.setTitle("📱 Focus Mode App Selection");
-            builder.setMessage(
-                    "No apps selected for focus mode.\n\nSelect apps from your child device to block during focus mode sessions.");
-            builder.setPositiveButton("Select Apps", (dialog, which) -> {
-                showFocusModeAppSelection();
-            });
-            builder.setNegativeButton("Cancel", null);
-            builder.show();
-            return;
-        }
-
-        // Show currently selected apps
-        StringBuilder appListText = new StringBuilder();
-        appListText.append("Currently selected apps for focus mode:\n\n");
-
-        for (AppInfo appInfo : focusModeApps) {
-            String displayName = appInfo.name != null ? appInfo.name : appInfo.packageName;
-            appListText.append("📱 ").append(displayName).append("\n");
-        }
-
-        appListText.append("\nTotal: ").append(focusModeApps.size()).append(" apps");
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(
-                new android.view.ContextThemeWrapper(this, R.style.AlertDialogCustom));
-        builder.setTitle("📱 Focus Mode App List");
-        builder.setMessage(appListText.toString());
-        builder.setPositiveButton("Edit Selection", (dialog, which) -> {
-            showFocusModeAppSelection();
-        });
-        builder.setNegativeButton("Cancel", null);
-        builder.setNeutralButton("Clear All", (dialog, which) -> {
-            focusModeApps.clear();
-            saveFocusModeApps();
-            updateFocusModeUI();
-            if (isFocusModeActive) {
-                // Deactivate focus mode since no apps are selected
-                binding.switchFocusMode.setChecked(false);
-                deactivateFocusMode();
-            }
-            Toast.makeText(this, "All apps cleared from focus mode", Toast.LENGTH_SHORT).show();
-        });
-        builder.show();
-    }
-
-
     private void setupQRScanOnlyListener() {
         // Legacy connection/focus fallback removed; canonical v2 listeners own this state.
     }
@@ -1470,7 +1243,6 @@ public class ParentDashboardActivity extends BaseActivity {
             device.linkedAt = linkedAtValue;
             device.lastConnected = linkedAtValue > 0 ? linkedAtValue : System.currentTimeMillis();
             device.apps = new ArrayList<>();
-            device.focusModeActive = false;
 
             runOnUiThread(() -> {
                 addConnectedDevice(device, true);
@@ -1538,29 +1310,29 @@ public class ParentDashboardActivity extends BaseActivity {
 
     private void nuclearAddDevice(ChildDevice device) {
         try {
-            Log.d(TAG, "�🔥🔥 NUCLEAR DEVICE ADDITION: " + device.deviceName + " (ID: " + device.deviceId + ")");
-            Log.d(TAG, "� FUCK ALL BLOCKING - ADDING DEVICE IMMEDIATELY!");
+            Log.d(TAG, "Ã¯Â¿Â½Ã°Å¸â€Â¥Ã°Å¸â€Â¥ NUCLEAR DEVICE ADDITION: " + device.deviceName + " (ID: " + device.deviceId + ")");
+            Log.d(TAG, "Ã¯Â¿Â½ FUCK ALL BLOCKING - ADDING DEVICE IMMEDIATELY!");
 
             // Check if already exists
             boolean exists = connectedDevices.stream().anyMatch(d -> Objects.equals(d.deviceId, device.deviceId));
 
             if (!exists) {
-                // 🔧 DEVICE REMOVAL FIX: Check if device was permanently removed
+                // Ã°Å¸â€Â§ DEVICE REMOVAL FIX: Check if device was permanently removed
                 if (isPermanentlyRemoved(device.deviceId)) {
-                    Log.d(TAG, "🚫 Device was previously removed, clearing removal status for QR reconnection: "
+                    Log.d(TAG, "Ã°Å¸Å¡Â« Device was previously removed, clearing removal status for QR reconnection: "
                             + device.deviceName);
                     removePermanentRemoval(device.deviceId);
                 }
 
                 // Add to local list
                 connectedDevices.add(device);
-                Log.d(TAG, "� Device added to local list. Total devices now: " + connectedDevices.size());
+                Log.d(TAG, "Ã¯Â¿Â½ Device added to local list. Total devices now: " + connectedDevices.size());
             } else {
                 // Update existing device
                 for (int i = 0; i < connectedDevices.size(); i++) {
                     if (Objects.equals(connectedDevices.get(i).deviceId, device.deviceId)) {
                         connectedDevices.set(i, device);
-                        Log.d(TAG, "📱 Device updated in local list: " + device.deviceName);
+                        Log.d(TAG, "Ã°Å¸â€œÂ± Device updated in local list: " + device.deviceName);
                         break;
                     }
                 }
@@ -1573,7 +1345,7 @@ public class ParentDashboardActivity extends BaseActivity {
             // manually selected one
             // This prevents auto-switching when new devices connect
             if (currentChildDeviceId == null && connectedDevices.size() == 1) {
-                // 🔧 MULTI-DEVICE FIX: Clean up before switching
+                // Ã°Å¸â€Â§ MULTI-DEVICE FIX: Clean up before switching
                 performMultiDeviceSwitchCleanup();
 
                 // Only auto-select if this is the very first device (non-explicit)
@@ -1585,14 +1357,13 @@ public class ParentDashboardActivity extends BaseActivity {
                 // Initialize usage limiter for first device
                 initializeLimiterForDevice(device.deviceId);
 
-                // 🔧 FORCE-CLOSE PERSISTENCE: Save device name immediately
-                saveDeviceNameForCurrentDevice();
+                // Ã°Å¸â€Â§ FORCE-CLOSE PERSISTENCE: Save device name immediately
 
-                Log.d(TAG, "📱 Set as current device (first device only): " + device.deviceName);
+                Log.d(TAG, "Ã°Å¸â€œÂ± Set as current device (first device only): " + device.deviceName);
             } else if (currentChildDeviceId != null) {
-                Log.d(TAG, "📱 Device added but keeping current selection: " + currentChildDeviceName);
+                Log.d(TAG, "Ã°Å¸â€œÂ± Device added but keeping current selection: " + currentChildDeviceName);
             } else {
-                Log.d(TAG, "📱 Multiple devices present, user must manually select");
+                Log.d(TAG, "Ã°Å¸â€œÂ± Multiple devices present, user must manually select");
             }
 
             // Update UI immediately
@@ -1603,29 +1374,29 @@ public class ParentDashboardActivity extends BaseActivity {
                 refreshCurrentChildDeviceCards();
                 refreshDeviceListPremium();
 
-                Log.d(TAG, "🚀🚀� UI UPDATED FOR DEVICE: " + device.deviceName);
+                Log.d(TAG, "Ã°Å¸Å¡â‚¬Ã°Å¸Å¡â‚¬Ã¯Â¿Â½ UI UPDATED FOR DEVICE: " + device.deviceName);
 
-                showRecentConnectionToast(device, "🎉 " + device.deviceName + " connected!");
+                showRecentConnectionToast(device, "Ã°Å¸Å½â€° " + device.deviceName + " connected!");
             });
 
         } catch (Exception e) {
-            Log.e(TAG, "🔥 Error in nuclear device addition: " + e.getMessage());
+            Log.e(TAG, "Ã°Å¸â€Â¥ Error in nuclear device addition: " + e.getMessage());
         }
     }
 
     private void continueDeviceConnection(ChildDevice device, boolean isFromQRScan) {
         try {
-            Log.d(TAG, "✅✅✅ DEVICE PASSES ALL CHECKS - PROCEEDING WITH CONNECTION");
+            Log.d(TAG, "Ã¢Å“â€¦Ã¢Å“â€¦Ã¢Å“â€¦ DEVICE PASSES ALL CHECKS - PROCEEDING WITH CONNECTION");
 
-            // ✅ QR SCAN DEVICE CONNECTION ACCEPTED
-            Log.d(TAG, "✅ QR SCAN DEVICE APPROVED: " + device.deviceName + " (ID: " + device.deviceId + ")");
-            Log.d(TAG, "✅ Connection method: QR Code Scan (ONLY valid method)");
-            Log.d(TAG, "✅ Parent Email Account: " + getCurrentParentUserId());
+            // Ã¢Å“â€¦ QR SCAN DEVICE CONNECTION ACCEPTED
+            Log.d(TAG, "Ã¢Å“â€¦ QR SCAN DEVICE APPROVED: " + device.deviceName + " (ID: " + device.deviceId + ")");
+            Log.d(TAG, "Ã¢Å“â€¦ Connection method: QR Code Scan (ONLY valid method)");
+            Log.d(TAG, "Ã¢Å“â€¦ Parent Email Account: " + getCurrentParentUserId());
 
             // Remove from permanent removal list since QR scan was successful
             removePermanentRemoval(device.deviceId);
-            Log.d(TAG, "🔓 Device removed from permanent removal list via QR scan: " + device.deviceId);
-            Log.d(TAG, "🔓 Device can now connect normally until removed again");
+            Log.d(TAG, "Ã°Å¸â€â€œ Device removed from permanent removal list via QR scan: " + device.deviceId);
+            Log.d(TAG, "Ã°Å¸â€â€œ Device can now connect normally until removed again");
 
             // Add to persistent storage (device has already passed blacklist check)
             connectedDevicesManager.addOrUpdateDevice(device);
@@ -1633,12 +1404,12 @@ public class ParentDashboardActivity extends BaseActivity {
             // Add to local list
             connectedDevices.removeIf(d -> d.deviceId.equals(device.deviceId));
             connectedDevices.add(device);
-            Log.d(TAG, "📱 Device added to local list. Total devices now: " + connectedDevices.size());
+            Log.d(TAG, "Ã°Å¸â€œÂ± Device added to local list. Total devices now: " + connectedDevices.size());
 
             // Log all current devices
             for (int i = 0; i < connectedDevices.size(); i++) {
                 ChildDevice d = connectedDevices.get(i);
-                Log.d(TAG, "📱 Device " + (i + 1) + ": " + d.deviceName + " (ID: " + d.deviceId + ")");
+                Log.d(TAG, "Ã°Å¸â€œÂ± Device " + (i + 1) + ": " + d.deviceName + " (ID: " + d.deviceId + ")");
             }
 
             // If this is the first device or no current device is set, make it the current
@@ -1667,16 +1438,16 @@ public class ParentDashboardActivity extends BaseActivity {
             // Refresh the category summary chart with new device data
             setupCategorySummaryChart();
 
-            Log.d(TAG, "✅ Successfully added device: " + device.deviceName);
+            Log.d(TAG, "Ã¢Å“â€¦ Successfully added device: " + device.deviceName);
 
             // Show success message for QR scan connections
             if (isFromQRScan) {
-                Toast.makeText(this, "✅ " + device.deviceName + " connected via QR scan", Toast.LENGTH_SHORT).show();
-                Log.d(TAG, "🎉 QR scan connection successful - device now appears in parent app");
+                Toast.makeText(this, "Ã¢Å“â€¦ " + device.deviceName + " connected via QR scan", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "Ã°Å¸Å½â€° QR scan connection successful - device now appears in parent app");
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "❌ Error adding connected device: " + e.getMessage());
+            Log.e(TAG, "Ã¢ÂÅ’ Error adding connected device: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -1684,17 +1455,17 @@ public class ParentDashboardActivity extends BaseActivity {
     private void removeFromDeviceBlacklist(String deviceId) {
         SharedPreferences blacklistPrefs = getSharedPreferences("removed_devices", MODE_PRIVATE);
         blacklistPrefs.edit().remove(deviceId).apply();
-        Log.d(TAG, "🔓 Removed device from blacklist (reconnecting): " + deviceId);
+        Log.d(TAG, "Ã°Å¸â€â€œ Removed device from blacklist (reconnecting): " + deviceId);
     }
 
     /**
-     * 🚫 Mark device as permanently removed (requires QR scan to reconnect)
+     * Ã°Å¸Å¡Â« Mark device as permanently removed (requires QR scan to reconnect)
      * Email-specific removal tracking to ensure complete isolation
      */
     private void addToPermanentRemovalList(String deviceId) {
         String parentUserId = getCurrentParentUserId();
         if (parentUserId == null) {
-            Log.w(TAG, "⚠️ Cannot add to permanent removal list - no parent user ID");
+            Log.w(TAG, "Ã¢Å¡Â Ã¯Â¸Â Cannot add to permanent removal list - no parent user ID");
             return;
         }
 
@@ -1707,32 +1478,26 @@ public class ParentDashboardActivity extends BaseActivity {
         SharedPreferences globalRemovedPrefs = getSharedPreferences("permanently_removed_devices", MODE_PRIVATE);
         globalRemovedPrefs.edit().putBoolean(deviceId, true).apply();
 
-        // 🧹 SELECTIVE CLEANUP: Keep Focus Mode data but prevent restoration
-        // NOTE: We don't clear focus mode data here because user wants persistence
-        // The permanent removal list will prevent restoration, but data stays for QR
-        // reconnection
-        Log.d(TAG,
-                "🧹 Device marked as permanently removed, but Focus Mode data preserved for potential QR reconnection");
 
-        Log.d(TAG, "🚫 PERMANENT REMOVAL: Added device to email-specific removal list");
-        Log.d(TAG, "🚫 Parent Email ID: " + parentUserId);
-        Log.d(TAG, "🚫 Device ID: " + deviceId);
-        Log.d(TAG, "🚫 Removal Storage Key: " + removalKey);
-        Log.d(TAG, "🔄 Device will ONLY reconnect via QR scan - NO automatic loading allowed");
+        Log.d(TAG, "Ã°Å¸Å¡Â« PERMANENT REMOVAL: Added device to email-specific removal list");
+        Log.d(TAG, "Ã°Å¸Å¡Â« Parent Email ID: " + parentUserId);
+        Log.d(TAG, "Ã°Å¸Å¡Â« Device ID: " + deviceId);
+        Log.d(TAG, "Ã°Å¸Å¡Â« Removal Storage Key: " + removalKey);
+        Log.d(TAG, "Ã°Å¸â€â€ž Device will ONLY reconnect via QR scan - NO automatic loading allowed");
     }
 
     /**
-     * 🔍 Check if device is permanently removed (cannot auto-reconnect)
+     * Ã°Å¸â€Â Check if device is permanently removed (cannot auto-reconnect)
      * Email-specific checking with fallback to global list
      */
     private boolean isPermanentlyRemoved(String deviceId) {
         String parentUserId = getCurrentParentUserId();
-        Log.d(TAG, "🔍 PERMANENT REMOVAL CHECK START:");
-        Log.d(TAG, "🔍 getCurrentParentUserId() returned: " + (parentUserId != null ? parentUserId : "NULL"));
+        Log.d(TAG, "Ã°Å¸â€Â PERMANENT REMOVAL CHECK START:");
+        Log.d(TAG, "Ã°Å¸â€Â getCurrentParentUserId() returned: " + (parentUserId != null ? parentUserId : "NULL"));
 
         if (parentUserId == null) {
-            Log.w(TAG, "⚠️⚠️⚠️ CRITICAL: Cannot check permanent removal - no parent user ID");
-            Log.w(TAG, "⚠️ This would block all connections! Allowing connection as safety fallback");
+            Log.w(TAG, "Ã¢Å¡Â Ã¯Â¸ÂÃ¢Å¡Â Ã¯Â¸ÂÃ¢Å¡Â Ã¯Â¸Â CRITICAL: Cannot check permanent removal - no parent user ID");
+            Log.w(TAG, "Ã¢Å¡Â Ã¯Â¸Â This would block all connections! Allowing connection as safety fallback");
             return false; // CHANGED: Allow connection if we can't get parent ID
         }
 
@@ -1745,25 +1510,25 @@ public class ParentDashboardActivity extends BaseActivity {
         boolean isGlobalRemoved = false;
         boolean isRemoved = isEmailSpecificRemoved;
 
-        Log.d(TAG, "🔍 PERMANENT REMOVAL CHECK RESULTS:");
-        Log.d(TAG, "🔍 Parent Email ID: " + parentUserId);
-        Log.d(TAG, "🔍 Device ID: " + deviceId);
-        Log.d(TAG, "🔍 Email-specific removed: " + isEmailSpecificRemoved);
-        Log.d(TAG, "🔍 Global removed: " + isGlobalRemoved);
-        Log.d(TAG, "🔍 FINAL RESULT: " + (isRemoved ? "DEVICE IS BLOCKED" : "DEVICE IS ALLOWED"));
-        Log.d(TAG, "🔍 Final result: " + (isRemoved ? "🚫 BLOCKED" : "✅ ALLOWED"));
+        Log.d(TAG, "Ã°Å¸â€Â PERMANENT REMOVAL CHECK RESULTS:");
+        Log.d(TAG, "Ã°Å¸â€Â Parent Email ID: " + parentUserId);
+        Log.d(TAG, "Ã°Å¸â€Â Device ID: " + deviceId);
+        Log.d(TAG, "Ã°Å¸â€Â Email-specific removed: " + isEmailSpecificRemoved);
+        Log.d(TAG, "Ã°Å¸â€Â Global removed: " + isGlobalRemoved);
+        Log.d(TAG, "Ã°Å¸â€Â FINAL RESULT: " + (isRemoved ? "DEVICE IS BLOCKED" : "DEVICE IS ALLOWED"));
+        Log.d(TAG, "Ã°Å¸â€Â Final result: " + (isRemoved ? "Ã°Å¸Å¡Â« BLOCKED" : "Ã¢Å“â€¦ ALLOWED"));
 
         return isRemoved;
     }
 
     /**
-     * 🔓 Remove device from permanent removal list (QR scan reconnection)
+     * Ã°Å¸â€â€œ Remove device from permanent removal list (QR scan reconnection)
      * Clears from both email-specific and global removal lists
      */
     private void removePermanentRemoval(String deviceId) {
         String parentUserId = getCurrentParentUserId();
         if (parentUserId == null) {
-            Log.w(TAG, "⚠️ Cannot remove from permanent removal list - no parent user ID");
+            Log.w(TAG, "Ã¢Å¡Â Ã¯Â¸Â Cannot remove from permanent removal list - no parent user ID");
             return;
         }
 
@@ -1776,16 +1541,15 @@ public class ParentDashboardActivity extends BaseActivity {
         SharedPreferences globalRemovedPrefs = getSharedPreferences("permanently_removed_devices", MODE_PRIVATE);
         globalRemovedPrefs.edit().remove(deviceId).apply();
 
-        Log.d(TAG, "🔓 PERMANENT REMOVAL CLEARED:");
-        Log.d(TAG, "🔓 Parent Email ID: " + parentUserId);
-        Log.d(TAG, "🔓 Device ID: " + deviceId);
-        Log.d(TAG, "🔓 Removed from: " + removalKey);
-        Log.d(TAG, "🔓 QR scan reconnection successful - device can now connect");
-        Log.d(TAG, "💾 IMPORTANT: Focus Mode data preserved during removal - will be available upon reconnection");
+        Log.d(TAG, "Ã°Å¸â€â€œ PERMANENT REMOVAL CLEARED:");
+        Log.d(TAG, "Ã°Å¸â€â€œ Parent Email ID: " + parentUserId);
+        Log.d(TAG, "Ã°Å¸â€â€œ Device ID: " + deviceId);
+        Log.d(TAG, "Ã°Å¸â€â€œ Removed from: " + removalKey);
+        Log.d(TAG, "Ã°Å¸â€â€œ QR scan reconnection successful - device can now connect");
     }
 
     /**
-     * 🆔 Get current parent user ID (email-based identifier)
+     * Ã°Å¸â€ â€ Get current parent user ID (email-based identifier)
      * Returns Firebase Auth UID or SessionManager user ID
      */
     private String getCurrentParentUserId() {
@@ -1793,30 +1557,30 @@ public class ParentDashboardActivity extends BaseActivity {
 
         if (mAuth != null && mAuth.getCurrentUser() != null) {
             parentUserId = mAuth.getCurrentUser().getUid();
-            Log.d(TAG, "🆔 Parent User ID from Firebase Auth: " + parentUserId);
+            Log.d(TAG, "Ã°Å¸â€ â€ Parent User ID from Firebase Auth: " + parentUserId);
             return parentUserId;
         }
 
         if (sessionManager != null && sessionManager.isLoggedIn()) {
             parentUserId = sessionManager.getParentUserId();
             if (parentUserId != null && !parentUserId.isEmpty()) {
-                Log.d(TAG, "🆔 Parent User ID from Session Manager (parentUserId): " + parentUserId);
+                Log.d(TAG, "Ã°Å¸â€ â€ Parent User ID from Session Manager (parentUserId): " + parentUserId);
                 return parentUserId;
             }
 
             parentUserId = sessionManager.getUserId();
             if (parentUserId != null && !parentUserId.isEmpty()) {
-                Log.d(TAG, "🆔 Parent User ID from Session Manager (userId fallback): " + parentUserId);
+                Log.d(TAG, "Ã°Å¸â€ â€ Parent User ID from Session Manager (userId fallback): " + parentUserId);
                 return parentUserId;
             }
         }
 
-        Log.w(TAG, "⚠️ No parent user ID available - user not properly authenticated");
+        Log.w(TAG, "Ã¢Å¡Â Ã¯Â¸Â No parent user ID available - user not properly authenticated");
         return null;
     }
 
     /**
-     * 🧹 Clean up permanently removed devices from ConnectedDevicesManager storage
+     * Ã°Å¸Â§Â¹ Clean up permanently removed devices from ConnectedDevicesManager storage
      * Email-specific cleanup to prevent removed devices from reappearing
      * This prevents removed devices from reappearing when the app restarts
      */
@@ -1824,7 +1588,7 @@ public class ParentDashboardActivity extends BaseActivity {
         try {
             String parentUserId = getCurrentParentUserId();
             if (parentUserId == null) {
-                Log.w(TAG, "⚠️ Cannot perform cleanup - no parent user ID available");
+                Log.w(TAG, "Ã¢Å¡Â Ã¯Â¸Â Cannot perform cleanup - no parent user ID available");
                 return;
             }
 
@@ -1843,15 +1607,15 @@ public class ParentDashboardActivity extends BaseActivity {
             allRemovedDevices.putAll(globalRemoved);
 
             if (allRemovedDevices.isEmpty()) {
-                Log.d(TAG, "🧹 CLEANUP: No permanently removed devices to clean up for email: " + parentUserId);
+                Log.d(TAG, "Ã°Å¸Â§Â¹ CLEANUP: No permanently removed devices to clean up for email: " + parentUserId);
                 return;
             }
 
-            Log.d(TAG, "🧹 CLEANUP: Starting email-specific permanent removal cleanup");
-            Log.d(TAG, "🧹 Parent Email ID: " + parentUserId);
-            Log.d(TAG, "🧹 Email-specific removed devices: " + emailSpecificRemoved.size());
-            Log.d(TAG, "🧹 Global removed devices: " + globalRemoved.size());
-            Log.d(TAG, "🧹 Total devices to check for removal: " + allRemovedDevices.size());
+            Log.d(TAG, "Ã°Å¸Â§Â¹ CLEANUP: Starting email-specific permanent removal cleanup");
+            Log.d(TAG, "Ã°Å¸Â§Â¹ Parent Email ID: " + parentUserId);
+            Log.d(TAG, "Ã°Å¸Â§Â¹ Email-specific removed devices: " + emailSpecificRemoved.size());
+            Log.d(TAG, "Ã°Å¸Â§Â¹ Global removed devices: " + globalRemoved.size());
+            Log.d(TAG, "Ã°Å¸Â§Â¹ Total devices to check for removal: " + allRemovedDevices.size());
 
             // Get current loaded devices from ConnectedDevicesManager
             List<ChildDevice> loadedDevices = connectedDevicesManager.getConnectedDevices();
@@ -1861,7 +1625,7 @@ public class ParentDashboardActivity extends BaseActivity {
             for (ChildDevice device : loadedDevices) {
                 if (allRemovedDevices.containsKey(device.deviceId)) {
                     devicesToRemove.add(device.deviceId);
-                    Log.d(TAG, "🚫 CLEANUP: Found permanently removed device in storage: " + device.deviceName
+                    Log.d(TAG, "Ã°Å¸Å¡Â« CLEANUP: Found permanently removed device in storage: " + device.deviceName
                             + " (ID: " + device.deviceId + ")");
                 }
             }
@@ -1869,7 +1633,7 @@ public class ParentDashboardActivity extends BaseActivity {
             // Remove permanently removed devices from ConnectedDevicesManager
             for (String deviceId : devicesToRemove) {
                 connectedDevicesManager.removeDevice(deviceId);
-                Log.d(TAG, "🗑️ CLEANUP: Permanently removed device deleted from storage: " + deviceId);
+                Log.d(TAG, "Ã°Å¸â€”â€˜Ã¯Â¸Â CLEANUP: Permanently removed device deleted from storage: " + deviceId);
             }
 
             // Also clear from local connectedDevices list
@@ -1880,37 +1644,37 @@ public class ParentDashboardActivity extends BaseActivity {
                 if (allRemovedDevices.containsKey(device.deviceId)) {
                     iterator.remove();
                     removedFromLocal++;
-                    Log.d(TAG, "🔥 CLEANUP: Removed from local memory: " + device.deviceName);
+                    Log.d(TAG, "Ã°Å¸â€Â¥ CLEANUP: Removed from local memory: " + device.deviceName);
                 }
             }
 
             if (!devicesToRemove.isEmpty() || removedFromLocal > 0) {
-                Log.d(TAG, "✅ CLEANUP COMPLETE for email: " + parentUserId);
-                Log.d(TAG, "✅ Removed from storage: " + devicesToRemove.size());
-                Log.d(TAG, "✅ Removed from memory: " + removedFromLocal);
-                Log.d(TAG, "🔄 These devices will NOT appear until QR scan reconnection");
+                Log.d(TAG, "Ã¢Å“â€¦ CLEANUP COMPLETE for email: " + parentUserId);
+                Log.d(TAG, "Ã¢Å“â€¦ Removed from storage: " + devicesToRemove.size());
+                Log.d(TAG, "Ã¢Å“â€¦ Removed from memory: " + removedFromLocal);
+                Log.d(TAG, "Ã°Å¸â€â€ž These devices will NOT appear until QR scan reconnection");
 
                 // Update UI to reflect clean device list
                 updateDeviceStatus();
                 updateTargetDeviceDisplay();
             } else {
-                Log.d(TAG, "✅ CLEANUP COMPLETE: No permanently removed devices found in loaded storage for email: "
+                Log.d(TAG, "Ã¢Å“â€¦ CLEANUP COMPLETE: No permanently removed devices found in loaded storage for email: "
                         + parentUserId);
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "❌ Error during email-specific permanent removal cleanup: " + e.getMessage());
+            Log.e(TAG, "Ã¢ÂÅ’ Error during email-specific permanent removal cleanup: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     /**
-     * 🆕 Clear local SharedPreferences timer storage for a specific device
+     * Ã°Å¸â€ â€¢ Clear local SharedPreferences timer storage for a specific device
      * This prevents timers from being restored when device reconnects
      */
     private void clearLocalTimerStorageForDevice(String deviceId) {
         try {
-            Log.d(TAG, "🧹 Clearing LOCAL timer storage for device: " + deviceId);
+            Log.d(TAG, "Ã°Å¸Â§Â¹ Clearing LOCAL timer storage for device: " + deviceId);
 
             // 1. Clear timer_duration (stored per device)
             SharedPreferences timerDurationPrefs = getSharedPreferences("timer_duration", MODE_PRIVATE);
@@ -1920,7 +1684,7 @@ public class ParentDashboardActivity extends BaseActivity {
                     .remove(hoursKey)
                     .remove(minutesKey)
                     .apply();
-            Log.d(TAG, "✅ Cleared timer_duration for device: " + deviceId);
+            Log.d(TAG, "Ã¢Å“â€¦ Cleared timer_duration for device: " + deviceId);
 
             // 2. Clear smart_timer_prefs (if stored per device)
             SharedPreferences smartTimerPrefs = getSharedPreferences("smart_timer_prefs", MODE_PRIVATE);
@@ -1928,7 +1692,7 @@ public class ParentDashboardActivity extends BaseActivity {
             for (String key : smartTimerPrefs.getAll().keySet()) {
                 if (key.contains(deviceId)) {
                     smartEditor.remove(key);
-                    Log.d(TAG, "✅ Removed smart_timer key: " + key);
+                    Log.d(TAG, "Ã¢Å“â€¦ Removed smart_timer key: " + key);
                 }
             }
             smartEditor.apply();
@@ -1939,7 +1703,7 @@ public class ParentDashboardActivity extends BaseActivity {
             for (String key : timerStatePrefs.getAll().keySet()) {
                 if (key.contains(deviceId)) {
                     stateEditor.remove(key);
-                    Log.d(TAG, "✅ Removed timer_state key: " + key);
+                    Log.d(TAG, "Ã¢Å“â€¦ Removed timer_state key: " + key);
                 }
             }
             stateEditor.apply();
@@ -1950,33 +1714,23 @@ public class ParentDashboardActivity extends BaseActivity {
             for (String key : appTimerPrefs.getAll().keySet()) {
                 if (key.contains(deviceId)) {
                     appEditor.remove(key);
-                    Log.d(TAG, "✅ Removed app_timer key: " + key);
+                    Log.d(TAG, "Ã¢Å“â€¦ Removed app_timer key: " + key);
                 }
             }
             appEditor.apply();
 
-            // 5. Clear focus_mode_prefs for this device
-            SharedPreferences focusModePrefs = getSharedPreferences("focus_mode_prefs", MODE_PRIVATE);
-            SharedPreferences.Editor focusEditor = focusModePrefs.edit();
-            for (String key : focusModePrefs.getAll().keySet()) {
-                if (key.contains(deviceId)) {
-                    focusEditor.remove(key);
-                    Log.d(TAG, "✅ Removed focus_mode key: " + key);
-                }
-            }
-            focusEditor.apply();
 
             // 6. Clear blocked_apps SharedPreferences for this device
             SharedPreferences blockedAppsPrefs = getSharedPreferences("blocked_apps_" + deviceId, MODE_PRIVATE);
             if (blockedAppsPrefs.getAll().size() > 0) {
                 blockedAppsPrefs.edit().clear().apply();
-                Log.d(TAG, "✅ Cleared blocked_apps prefs for device: " + deviceId);
+                Log.d(TAG, "Ã¢Å“â€¦ Cleared blocked_apps prefs for device: " + deviceId);
             }
 
-            Log.d(TAG, "🎯 LOCAL timer storage completely cleared for device: " + deviceId);
+            Log.d(TAG, "Ã°Å¸Å½Â¯ LOCAL timer storage completely cleared for device: " + deviceId);
 
         } catch (Exception e) {
-            Log.e(TAG, "❌ Error clearing local timer storage: " + e.getMessage());
+            Log.e(TAG, "Ã¢ÂÅ’ Error clearing local timer storage: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -1988,14 +1742,14 @@ public class ParentDashboardActivity extends BaseActivity {
         // Remove from current session only
         connectedDevices.removeIf(device -> device.deviceId.equals(deviceId));
         connectedDevicesManager.removeDevice(deviceId);
-        Log.d(TAG, "🗑️ Device removed from current session: " + deviceId);
+        Log.d(TAG, "Ã°Å¸â€”â€˜Ã¯Â¸Â Device removed from current session: " + deviceId);
     }
 
     private void loadConnectedDevices() {
-        // 🚫 DISABLED - This method was causing automatic device loading from Firebase
+        // Ã°Å¸Å¡Â« DISABLED - This method was causing automatic device loading from Firebase
         // User requirement: Only QR scanned devices should be shown
-        Log.d(TAG, "🚫 AUTOMATIC DEVICE LOADING DISABLED - Only QR scan connections allowed");
-        Log.d(TAG, "📱 Device list will remain empty until QR codes are scanned");
+        Log.d(TAG, "Ã°Å¸Å¡Â« AUTOMATIC DEVICE LOADING DISABLED - Only QR scan connections allowed");
+        Log.d(TAG, "Ã°Å¸â€œÂ± Device list will remain empty until QR codes are scanned");
 
         // Clear any existing devices and show empty state
         connectedDevices.clear();
@@ -2007,7 +1761,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
     private void loadConnectedDevicesOLD_DISABLED() {
         try {
-            Log.d(TAG, "🔍 Loading connected devices from multiple sources...");
+            Log.d(TAG, "Ã°Å¸â€Â Loading connected devices from multiple sources...");
 
             // First load from persistent storage (devices that were previously connected)
             connectedDevicesManager.loadDevicesAsync(new ConnectedDevicesManager.OnDevicesLoadedListener() {
@@ -2035,28 +1789,26 @@ public class ParentDashboardActivity extends BaseActivity {
                         if (device != null) {
                             currentChildDeviceName = device.deviceName;
 
-                            // ⭐ Setup device-specific data loading
+                            // Ã¢Â­Â Setup device-specific data loading
 
                             updateDeviceStatus();
                             updateTargetDeviceDisplay();
-                            loadFocusModeApps();
-                            updateFocusModeUI();
                             // Refresh the category summary chart with loaded device data
                             setupCategorySummaryChart();
                             // Load usage data for the selected device
                             loadSmartUsageDataForSelectedDate();
 
-                            Log.d(TAG, "✅ Device-specific data loaded for: " + device.deviceName);
+                            Log.d(TAG, "Ã¢Å“â€¦ Device-specific data loaded for: " + device.deviceName);
                         }
                     }
                 }
             });
 
-            // 🚫 DISABLED - These methods cause automatic device loading
+            // Ã°Å¸Å¡Â« DISABLED - These methods cause automatic device loading
             // User requirement: Only QR scanned devices should be shown
             // loadDevicesFromQRShares();
             // loadDevicesFromParentsStructure();
-            Log.d(TAG, "🚫 Firebase device loading disabled - QR scan only mode active");
+            Log.d(TAG, "Ã°Å¸Å¡Â« Firebase device loading disabled - QR scan only mode active");
 
         } catch (Exception e) {
             Log.e(TAG, "Error loading connected devices: " + e.getMessage());
@@ -2074,13 +1826,13 @@ public class ParentDashboardActivity extends BaseActivity {
             Log.d(TAG, "No device auto-selected; waiting for user to pick a device.");
         }
 
-        Log.d(TAG, "✅ Device loading finalized. Total devices: " + connectedDevices.size());
+        Log.d(TAG, "Ã¢Å“â€¦ Device loading finalized. Total devices: " + connectedDevices.size());
 
         // Update UI to reflect current state
         runOnUiThread(() -> {
             updateDeviceStatus();
             if (connectedDevices.isEmpty()) {
-                Log.d(TAG, "📱 No devices connected - showing tap to view devices message");
+                Log.d(TAG, "Ã°Å¸â€œÂ± No devices connected - showing tap to view devices message");
                 binding.tvDeviceStatus.setText("Tap to view devices");
                 binding.tvDeviceStatus.setTextColor(ContextCompat.getColor(this, R.color.success_600)); // Always green
             }
@@ -2092,9 +1844,9 @@ public class ParentDashboardActivity extends BaseActivity {
     // ==============================================
     private void updateDeviceStatus() {
         try {
-            Log.d(TAG, "📱 UPDATING DEVICE STATUS DISPLAY");
-            Log.d(TAG, "📱 Current device ID: " + currentChildDeviceId);
-            Log.d(TAG, "📱 Current device name: " + currentChildDeviceName);
+            Log.d(TAG, "Ã°Å¸â€œÂ± UPDATING DEVICE STATUS DISPLAY");
+            Log.d(TAG, "Ã°Å¸â€œÂ± Current device ID: " + currentChildDeviceId);
+            Log.d(TAG, "Ã°Å¸â€œÂ± Current device name: " + currentChildDeviceName);
 
             if (currentChildDeviceId != null) {
                 // Show formatted device status text
@@ -2111,7 +1863,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 String capitalizedName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
                 String deviceStatusText = capitalizedName + " (Tap to Manage Device)";
 
-                Log.d(TAG, "📱 Setting device status text to: " + deviceStatusText);
+                Log.d(TAG, "Ã°Å¸â€œÂ± Setting device status text to: " + deviceStatusText);
                 binding.tvDeviceStatus.setText(deviceStatusText);
                 binding.tvDeviceStatus.setTextColor(ContextCompat.getColor(this, R.color.success_600)); // Teal color
 
@@ -2122,10 +1874,10 @@ public class ParentDashboardActivity extends BaseActivity {
                 if (btnRemoveDevice != null) {
                     btnRemoveDevice.setVisibility(View.VISIBLE);
                 }
-                Log.d(TAG, "✅ Device status updated successfully");
+                Log.d(TAG, "Ã¢Å“â€¦ Device status updated successfully");
             } else {
                 // Show default text when no device
-                Log.d(TAG, "📱 No current device, showing default text");
+                Log.d(TAG, "Ã°Å¸â€œÂ± No current device, showing default text");
                 binding.tvDeviceStatus.setText("Select a child");
                 binding.tvDeviceStatus.setTextColor(ContextCompat.getColor(this, R.color.neutral_500));
 
@@ -2147,18 +1899,18 @@ public class ParentDashboardActivity extends BaseActivity {
                 loadUninstallProtectionForDevice(currentChildDeviceId);
             }
 
-            // 🔧 REFRESH DEVICE LIST UI
+            // Ã°Å¸â€Â§ REFRESH DEVICE LIST UI
             populateDeviceList();
 
         } catch (Exception e) {
-            Log.e(TAG, "❌ Error updating device status: " + e.getMessage());
+            Log.e(TAG, "Ã¢ÂÅ’ Error updating device status: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     private void refreshDeviceList() {
         try {
-            Log.d(TAG, "🔄 Force refreshing device list display");
+            Log.d(TAG, "Ã°Å¸â€â€ž Force refreshing device list display");
 
             // Force update device status display
             updateDeviceStatus();
@@ -2167,10 +1919,10 @@ public class ParentDashboardActivity extends BaseActivity {
             // Force adapter notification if using RecyclerView
             if (binding != null) {
                 // Update any RecyclerView adapters here if they exist
-                Log.d(TAG, "📱 Device list UI refreshed");
+                Log.d(TAG, "Ã°Å¸â€œÂ± Device list UI refreshed");
             }
 
-            // 🔧 POPULATE THE NEW HORIZONTAL LIST
+            // Ã°Å¸â€Â§ POPULATE THE NEW HORIZONTAL LIST
             populateDeviceList();
 
         } catch (Exception e) {
@@ -2225,7 +1977,7 @@ public class ParentDashboardActivity extends BaseActivity {
                     ? device.userName
                     : device.deviceName;
 
-            // 🛑 Add Remove badge to top-right corner of the avatar frame
+            // Ã°Å¸â€ºâ€˜ Add Remove badge to top-right corner of the avatar frame
             android.widget.FrameLayout badgeFrame = new android.widget.FrameLayout(this);
             int badgeSize = (int) (18 * getResources().getDisplayMetrics().density); // small and unobtrusive
             android.widget.FrameLayout.LayoutParams badgeParams = new android.widget.FrameLayout.LayoutParams(badgeSize, badgeSize);
@@ -2337,21 +2089,21 @@ public class ParentDashboardActivity extends BaseActivity {
     }
 
     private void switchDevice(String deviceId) {
-        // 🔍 DATE TRACE: Device switch initiated
+        // Ã°Å¸â€Â DATE TRACE: Device switch initiated
         String dateBefore = usageDateFormat.format(currentUsageDate.getTime());
-        Log.d(TAG, "🔍 DATE_TRACE_SWITCH_START: === switchDevice() CALLED ===");
-        Log.d(TAG, "🔍 DATE_TRACE_SWITCH_START: FROM device = " + currentChildDeviceId);
-        Log.d(TAG, "🔍 DATE_TRACE_SWITCH_START: TO device = " + deviceId);
-        Log.d(TAG, "🔍 DATE_TRACE_SWITCH_START: currentUsageDate BEFORE = " + dateBefore);
-        Log.d(TAG, "🔍 DATE_TRACE_SWITCH_START: dateSetByUser BEFORE = " + dateSetByUser);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_START: === switchDevice() CALLED ===");
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_START: FROM device = " + currentChildDeviceId);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_START: TO device = " + deviceId);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_START: currentUsageDate BEFORE = " + dateBefore);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_START: dateSetByUser BEFORE = " + dateSetByUser);
 
         if (deviceId.equals(currentChildDeviceId)) {
-            Log.d(TAG, "🔍 DATE_TRACE_SWITCH_END: EARLY RETURN - Same device");
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_END: EARLY RETURN - Same device");
             return;
         }
 
         if (connectedDevicesManager == null) {
-            Log.d(TAG, "🔍 DATE_TRACE_SWITCH_END: EARLY RETURN - No manager");
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_END: EARLY RETURN - No manager");
             return;
         }
 
@@ -2365,21 +2117,21 @@ public class ParentDashboardActivity extends BaseActivity {
         stopUninstallDetection();
 
         if (currentChildDeviceId != null && !currentChildDeviceId.isEmpty()) {
-            Log.d(TAG, "🔍 DATE_TRACE_SWITCH_SAVE: Saving old device state");
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_SAVE: Saving old device state");
             String dateBeforeSave = usageDateFormat.format(currentUsageDate.getTime());
-            Log.d(TAG, "🔍 DATE_TRACE_SWITCH_SAVE: currentUsageDate BEFORE save = " + dateBeforeSave);
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_SAVE: currentUsageDate BEFORE save = " + dateBeforeSave);
 
             saveCompleteDeviceState();
 
             String dateAfterSave = usageDateFormat.format(currentUsageDate.getTime());
-            Log.d(TAG, "🔍 DATE_TRACE_SWITCH_SAVE: currentUsageDate AFTER save = " + dateAfterSave);
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_SAVE: currentUsageDate AFTER save = " + dateAfterSave);
         }
 
         clearDeviceSpecificUI();
 
         String dateAfterClear = usageDateFormat.format(currentUsageDate.getTime());
-        Log.d(TAG, "🔍 DATE_TRACE_SWITCH_CLEAR: After clearDeviceSpecificUI()");
-        Log.d(TAG, "🔍 DATE_TRACE_SWITCH_CLEAR: currentUsageDate = " + dateAfterClear);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_CLEAR: After clearDeviceSpecificUI()");
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_CLEAR: currentUsageDate = " + dateAfterClear);
 
         connectedDevicesManager.setCurrentDevice(deviceId, true);
         currentChildDeviceId = deviceId;
@@ -2391,7 +2143,6 @@ public class ParentDashboardActivity extends BaseActivity {
 
         if (device != null) {
             initializeLimiterForDevice(device.deviceId);
-            saveDeviceNameForCurrentDevice();
         }
 
         restoreCachedChildLocationPreview(deviceId);
@@ -2399,18 +2150,18 @@ public class ParentDashboardActivity extends BaseActivity {
         updateDeviceStatus();
         updateTargetDeviceDisplay(); // Update green text (now uses currentChildUserName)
 
-        // 🔍 DATE TRACE: Before loading new device state
+        // Ã°Å¸â€Â DATE TRACE: Before loading new device state
         String dateBeforeLoad = usageDateFormat.format(currentUsageDate.getTime());
-        Log.d(TAG, "🔍 DATE_TRACE_SWITCH_LOAD: BEFORE loadCompleteDeviceState()");
-        Log.d(TAG, "🔍 DATE_TRACE_SWITCH_LOAD: currentUsageDate BEFORE = " + dateBeforeLoad);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_LOAD: BEFORE loadCompleteDeviceState()");
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_LOAD: currentUsageDate BEFORE = " + dateBeforeLoad);
 
         loadCompleteDeviceState();
 
-        // 🔍 DATE TRACE: After loading new device state
+        // Ã°Å¸â€Â DATE TRACE: After loading new device state
         String dateAfterLoad = usageDateFormat.format(currentUsageDate.getTime());
-        Log.d(TAG, "🔍 DATE_TRACE_SWITCH_LOAD: AFTER loadCompleteDeviceState()");
-        Log.d(TAG, "🔍 DATE_TRACE_SWITCH_LOAD: currentUsageDate AFTER = " + dateAfterLoad);
-        Log.d(TAG, "🔍 DATE_TRACE_SWITCH_LOAD: Date changed? " + (!dateBeforeLoad.equals(dateAfterLoad)));
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_LOAD: AFTER loadCompleteDeviceState()");
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_LOAD: currentUsageDate AFTER = " + dateAfterLoad);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_LOAD: Date changed? " + (!dateBeforeLoad.equals(dateAfterLoad)));
         refreshCurrentChildDeviceCards();
 
         setupParentTimerExpiryListener();
@@ -2421,12 +2172,12 @@ public class ParentDashboardActivity extends BaseActivity {
         // Re-populate list to update selection state (uses simple circular icons)
         populateDeviceList();
 
-        // 🔍 DATE TRACE: Device switch complete
+        // Ã°Å¸â€Â DATE TRACE: Device switch complete
         String dateAfter = usageDateFormat.format(currentUsageDate.getTime());
-        Log.d(TAG, "🔍 DATE_TRACE_SWITCH_END: === switchDevice() COMPLETE ===");
-        Log.d(TAG, "🔍 DATE_TRACE_SWITCH_END: currentUsageDate AFTER = " + dateAfter);
-        Log.d(TAG, "🔍 DATE_TRACE_SWITCH_END: dateSetByUser AFTER = " + dateSetByUser);
-        Log.d(TAG, "🔍 DATE_TRACE_SWITCH_END: Overall date changed? " + (!dateBefore.equals(dateAfter)));
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_END: === switchDevice() COMPLETE ===");
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_END: currentUsageDate AFTER = " + dateAfter);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_END: dateSetByUser AFTER = " + dateSetByUser);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SWITCH_END: Overall date changed? " + (!dateBefore.equals(dateAfter)));
     }
 
     /**
@@ -2647,21 +2398,21 @@ public class ParentDashboardActivity extends BaseActivity {
 
     private void debugDeviceLists(String context) {
         try {
-            Log.d(TAG, "🔍 DEBUG DEVICE LISTS - " + context);
-            Log.d(TAG, "📱 Local connectedDevices size: " + connectedDevices.size());
+            Log.d(TAG, "Ã°Å¸â€Â DEBUG DEVICE LISTS - " + context);
+            Log.d(TAG, "Ã°Å¸â€œÂ± Local connectedDevices size: " + connectedDevices.size());
             for (int i = 0; i < connectedDevices.size(); i++) {
                 ChildDevice device = connectedDevices.get(i);
                 Log.d(TAG, "  [" + i + "] " + device.deviceName + " (ID: " + device.deviceId + ")");
             }
 
             List<ChildDevice> persistentDevices = connectedDevicesManager.getConnectedDevices();
-            Log.d(TAG, "💾 Persistent storage devices size: " + persistentDevices.size());
+            Log.d(TAG, "Ã°Å¸â€™Â¾ Persistent storage devices size: " + persistentDevices.size());
             for (int i = 0; i < persistentDevices.size(); i++) {
                 ChildDevice device = persistentDevices.get(i);
                 Log.d(TAG, "  [" + i + "] " + device.deviceName + " (ID: " + device.deviceId + ")");
             }
 
-            Log.d(TAG, "🎯 Current device: " + currentChildDeviceId + " (" + currentChildDeviceName + ")");
+            Log.d(TAG, "Ã°Å¸Å½Â¯ Current device: " + currentChildDeviceId + " (" + currentChildDeviceName + ")");
 
         } catch (Exception e) {
             Log.e(TAG, "Error debugging device lists: " + e.getMessage());
@@ -2670,7 +2421,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
     private void startListeningForDeviceStatus(String deviceId) {
         try {
-            Log.d(TAG, "👂 Starting device status listener for: " + deviceId);
+            Log.d(TAG, "Ã°Å¸â€˜â€š Starting device status listener for: " + deviceId);
             deviceStatusManager.listenForChildDeviceStatus(deviceId,
                     new DeviceStatusManager.OnDeviceStatusChangeListener() {
                         @Override
@@ -2740,7 +2491,7 @@ public class ParentDashboardActivity extends BaseActivity {
     }
 
     /**
-     * 📊 Get day label for bar chart index (0 = oldest day, last index = today)
+     * Ã°Å¸â€œÅ  Get day label for bar chart index (0 = oldest day, last index = today)
      */
     private String getDayLabelForBarIndex(int index) {
         // Calculate the date for this bar index
@@ -2763,7 +2514,7 @@ public class ParentDashboardActivity extends BaseActivity {
     }
 
     /**
-     * 📅 Get date for bar chart index
+     * Ã°Å¸â€œâ€¦ Get date for bar chart index
      */
     private Calendar getDateForBarIndex(int index) {
         // Get current 7-day window
@@ -2810,7 +2561,7 @@ public class ParentDashboardActivity extends BaseActivity {
     private void updateParentDashboardBarChart(List<Float> barValues, List<String> dayLabels) {
         // 7-Day Usage Overview section has been removed from layout
         // This method is disabled to prevent errors
-        Log.d(TAG, "📊 7-Day Usage Overview disabled - section removed from layout");
+        Log.d(TAG, "Ã°Å¸â€œÅ  7-Day Usage Overview disabled - section removed from layout");
         return;
     }
 
@@ -2842,7 +2593,7 @@ public class ParentDashboardActivity extends BaseActivity {
                     }
                 }
 
-                Log.d(TAG, "📊 Extracted " + barValues.size() + " bar values from Firebase");
+                Log.d(TAG, "Ã°Å¸â€œÅ  Extracted " + barValues.size() + " bar values from Firebase");
             }
 
             // Check for day labels data
@@ -2857,7 +2608,7 @@ public class ParentDashboardActivity extends BaseActivity {
                     }
                 }
 
-                Log.d(TAG, "📅 Extracted " + dayLabels.size() + " day labels from Firebase");
+                Log.d(TAG, "Ã°Å¸â€œâ€¦ Extracted " + dayLabels.size() + " day labels from Firebase");
             }
 
             // If we have data, update the bar chart
@@ -2870,9 +2621,9 @@ public class ParentDashboardActivity extends BaseActivity {
 
                 // Update the chart
                 updateParentDashboardBarChart(barValues, dayLabels);
-                Log.d(TAG, "📊 Successfully updated bar chart with " + barValues.size() + " data points");
+                Log.d(TAG, "Ã°Å¸â€œÅ  Successfully updated bar chart with " + barValues.size() + " data points");
             } else {
-                Log.d(TAG, "📊 No bar chart data available in snapshot");
+                Log.d(TAG, "Ã°Å¸â€œÅ  No bar chart data available in snapshot");
             }
 
         } catch (Exception e) {
@@ -2913,20 +2664,20 @@ public class ParentDashboardActivity extends BaseActivity {
             // Create welcome text directly - no card wrapper, no button
             TextView welcomeText = new TextView(this);
             welcomeText.setTag("welcome_text");
-            welcomeText.setText("🎉 Welcome & Important Information\n\n" +
+            welcomeText.setText("Ã°Å¸Å½â€° Welcome & Important Information\n\n" +
                     "Welcome! Here are some important tips:\n\n" +
-                    "• Use the QR code scanner to connect child devices\n" +
-                    "• Monitor and manage your child's screen time easily\n" +
-                    "• Access all controls from this parent dashboard\n\n" +
-                    "⚠️ TROUBLESHOOTING: If you can see a device name but cannot track its data, please:\n" +
+                    "Ã¢â‚¬Â¢ Use the QR code scanner to connect child devices\n" +
+                    "Ã¢â‚¬Â¢ Monitor and manage your child's screen time easily\n" +
+                    "Ã¢â‚¬Â¢ Access all controls from this parent dashboard\n\n" +
+                    "Ã¢Å¡Â Ã¯Â¸Â TROUBLESHOOTING: If you can see a device name but cannot track its data, please:\n" +
                     "1. Remove the device from this app\n" +
                     "2. Reinstall the app on the child device\n" +
                     "3. Connect the child via QR code again\n\n" +
-                    "🔒 IMPORTANT SECURITY: Before uninstalling this app or logging out permanently:\n" +
-                    "• Always remove all connected child devices first\n" +
-                    "• This prevents security issues and data conflicts\n" +
-                    "• Use 'Disconnect All Devices' in Settings if needed\n\n" +
-                    "💡 TIP: Ensure both devices have stable internet when connecting via QR code.");
+                    "Ã°Å¸â€â€™ IMPORTANT SECURITY: Before uninstalling this app or logging out permanently:\n" +
+                    "Ã¢â‚¬Â¢ Always remove all connected child devices first\n" +
+                    "Ã¢â‚¬Â¢ This prevents security issues and data conflicts\n" +
+                    "Ã¢â‚¬Â¢ Use 'Disconnect All Devices' in Settings if needed\n\n" +
+                    "Ã°Å¸â€™Â¡ TIP: Ensure both devices have stable internet when connecting via QR code.");
 
             // Style the text
             welcomeText.setTextSize(14);
@@ -2945,9 +2696,9 @@ public class ParentDashboardActivity extends BaseActivity {
             // Add text to settings layout (at the bottom)
             settingsLayout.addView(welcomeText);
 
-            Log.d(TAG, "✅ SUCCESS! Welcome information text added to settings - should be visible now!");
+            Log.d(TAG, "Ã¢Å“â€¦ SUCCESS! Welcome information text added to settings - should be visible now!");
         } else {
-            Log.e(TAG, "❌ FAILED! Settings content is null or not LinearLayout - cannot add welcome text");
+            Log.e(TAG, "Ã¢ÂÅ’ FAILED! Settings content is null or not LinearLayout - cannot add welcome text");
             if (settingsContent == null) {
                 Log.e(TAG, "settingsContent is NULL");
             } else {
@@ -2976,7 +2727,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
                 // Title
                 TextView helpTitle = new TextView(this);
-                helpTitle.setText("🎉 Welcome & Important Information");
+                helpTitle.setText("Ã°Å¸Å½â€° Welcome & Important Information");
                 helpTitle.setTextSize(16);
                 helpTitle.setTextColor(ContextCompat.getColor(this, R.color.primary_600));
                 helpTitle.setTypeface(null, Typeface.BOLD);
@@ -2985,18 +2736,18 @@ public class ParentDashboardActivity extends BaseActivity {
                 // Help content - FULL WELCOME MESSAGE
                 TextView helpContent = new TextView(this);
                 helpContent.setText("Welcome! Here are some important tips:\n\n" +
-                        "• Use the QR code scanner to connect child devices\n" +
-                        "• Monitor and manage your child's screen time easily\n" +
-                        "• Access all controls from this parent dashboard\n\n" +
-                        "⚠️ TROUBLESHOOTING: If you can see a device name but cannot track its data, please:\n" +
+                        "Ã¢â‚¬Â¢ Use the QR code scanner to connect child devices\n" +
+                        "Ã¢â‚¬Â¢ Monitor and manage your child's screen time easily\n" +
+                        "Ã¢â‚¬Â¢ Access all controls from this parent dashboard\n\n" +
+                        "Ã¢Å¡Â Ã¯Â¸Â TROUBLESHOOTING: If you can see a device name but cannot track its data, please:\n" +
                         "1. Remove the device from this app\n" +
                         "2. Reinstall the app on the child device\n" +
                         "3. Connect the child via QR code again\n\n" +
-                        "� IMPORTANT SECURITY: Before uninstalling this app or logging out permanently:\n" +
-                        "• Always remove all connected child devices first\n" +
-                        "• This prevents security issues and data conflicts\n" +
-                        "• Use 'Disconnect All Devices' in Settings if needed\n\n" +
-                        "� TIP: Ensure both devices have stable internet when connecting via QR code.");
+                        "Ã¯Â¿Â½ IMPORTANT SECURITY: Before uninstalling this app or logging out permanently:\n" +
+                        "Ã¢â‚¬Â¢ Always remove all connected child devices first\n" +
+                        "Ã¢â‚¬Â¢ This prevents security issues and data conflicts\n" +
+                        "Ã¢â‚¬Â¢ Use 'Disconnect All Devices' in Settings if needed\n\n" +
+                        "Ã¯Â¿Â½ TIP: Ensure both devices have stable internet when connecting via QR code.");
                 helpContent.setTextSize(14);
                 helpContent.setTextColor(ContextCompat.getColor(this, android.R.color.black));
                 helpContent.setLineSpacing(4, 1.1f);
@@ -3033,7 +2784,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 new android.view.ContextThemeWrapper(this, R.style.AlertDialogCustom));
         builder.setTitle("Disconnect All Devices");
         builder.setMessage(
-                "Are you sure you want to disconnect all connected child devices?\n\nThis action will:\n• Remove all connected devices\n• Sign out all child devices\n• Redirect you to the login page\n\nThis action cannot be undone.");
+                "Are you sure you want to disconnect all connected child devices?\n\nThis action will:\nÃ¢â‚¬Â¢ Remove all connected devices\nÃ¢â‚¬Â¢ Sign out all child devices\nÃ¢â‚¬Â¢ Redirect you to the login page\n\nThis action cannot be undone.");
         builder.setPositiveButton("Disconnect All", (dialog, which) -> {
             disconnectAllDevices();
         });
@@ -3043,7 +2794,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
     private void performLogout() {
         try {
-            Log.d(TAG, "🚪 NUCLEAR LOGOUT INITIATED - Obliterating all device connections");
+            Log.d(TAG, "Ã°Å¸Å¡Âª NUCLEAR LOGOUT INITIATED - Obliterating all device connections");
 
             // Show loading dialog for logout process
             runOnUiThread(() -> {
@@ -3061,13 +2812,13 @@ public class ParentDashboardActivity extends BaseActivity {
             }
 
             if (parentId != null) {
-                Log.d(TAG, "☢️ NUCLEAR FIREBASE OBLITERATION for user: " + parentId);
+                Log.d(TAG, "Ã¢ËœÂ¢Ã¯Â¸Â NUCLEAR FIREBASE OBLITERATION for user: " + parentId);
                 performNuclearFirebaseCleanup(parentId, () -> {
                     // STEP 2: Complete local cleanup after Firebase cleanup
                     completeLogoutProcess();
                 });
             } else {
-                Log.w(TAG, "⚠️ No user ID found - proceeding with local cleanup only");
+                Log.w(TAG, "Ã¢Å¡Â Ã¯Â¸Â No user ID found - proceeding with local cleanup only");
                 completeLogoutProcess();
             }
 
@@ -3183,7 +2934,7 @@ public class ParentDashboardActivity extends BaseActivity {
      * Complete the logout process with local cleanup
      */
     private void completeLogoutProcess() {
-        Log.d(TAG, "🧹 COMPLETING LOCAL CLEANUP");
+        Log.d(TAG, "Ã°Å¸Â§Â¹ COMPLETING LOCAL CLEANUP");
 
         // Set flag for fresh login cleanup
         SharedPreferences appStatePrefs = getSharedPreferences("app_state", MODE_PRIVATE);
@@ -3200,9 +2951,6 @@ public class ParentDashboardActivity extends BaseActivity {
             connectedDevicesManager.clearAllDevices();
         }
 
-        // Clear local preferences
-        SharedPreferences prefs = getSharedPreferences("focus_mode_prefs", MODE_PRIVATE);
-        prefs.edit().clear().apply();
 
         // Sign out from Firebase
         FirebaseAuth.getInstance().signOut();
@@ -3212,7 +2960,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 loadingDialogManager.hide();
             }
 
-            Toast.makeText(this, "✅ Logged out successfully - All devices disconnected", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Ã¢Å“â€¦ Logged out successfully - All devices disconnected", Toast.LENGTH_LONG).show();
 
             // Navigate to main activity
             Intent intent = new Intent(this, MainActivity.class);
@@ -3221,8 +2969,8 @@ public class ParentDashboardActivity extends BaseActivity {
             finish();
         });
 
-        Log.d(TAG, "🎯 NUCLEAR LOGOUT COMPLETED - Clean slate achieved");
-        Log.d(TAG, "🎯 NEXT LOGIN WILL BE TREATED AS FRESH LOGIN");
+        Log.d(TAG, "Ã°Å¸Å½Â¯ NUCLEAR LOGOUT COMPLETED - Clean slate achieved");
+        Log.d(TAG, "Ã°Å¸Å½Â¯ NEXT LOGIN WILL BE TREATED AS FRESH LOGIN");
     }
 
     /**
@@ -3232,7 +2980,7 @@ public class ParentDashboardActivity extends BaseActivity {
     private void debugForceFreshLogin() {
         SharedPreferences prefs = getSharedPreferences("app_state", MODE_PRIVATE);
         prefs.edit().putBoolean("was_logged_out", true).apply();
-        Log.d(TAG, "🧪 DEBUG: Fresh login flag set - restart app to test");
+        Log.d(TAG, "Ã°Å¸Â§Âª DEBUG: Fresh login flag set - restart app to test");
         Toast.makeText(this, "Fresh login flag set - restart app to test", Toast.LENGTH_LONG).show();
     }
 
@@ -3240,21 +2988,21 @@ public class ParentDashboardActivity extends BaseActivity {
      * Trigger logout on a specific child device
      */
     /**
-     * 🔥 Trigger nuclear cleanup from parent side to ensure child cannot reconnect
+     * Ã°Å¸â€Â¥ Trigger nuclear cleanup from parent side to ensure child cannot reconnect
      */
     /**
      * Enable device connection listeners after fresh login when user manually
      * connects first device
-     * 🚫 DISABLED - Prevents automatic device loading
+     * Ã°Å¸Å¡Â« DISABLED - Prevents automatic device loading
      */
     private void enableDeviceListenersAfterFreshLogin() {
-        // 🚫 DISABLED - This method would enable automatic device loading listeners
+        // Ã°Å¸Å¡Â« DISABLED - This method would enable automatic device loading listeners
         // User requirement: Only QR scanned devices should be shown
-        Log.d(TAG, "🚫 AUTOMATIC LISTENER ACTIVATION DISABLED - QR scan only mode maintained");
+        Log.d(TAG, "Ã°Å¸Å¡Â« AUTOMATIC LISTENER ACTIVATION DISABLED - QR scan only mode maintained");
 
         if (isFreshLoginSession) {
             isFreshLoginSession = false; // Clear fresh login flag
-            Log.d(TAG, "✅ Fresh login flag cleared - but listeners remain disabled");
+            Log.d(TAG, "Ã¢Å“â€¦ Fresh login flag cleared - but listeners remain disabled");
         }
     }
 
@@ -3270,27 +3018,27 @@ public class ParentDashboardActivity extends BaseActivity {
             boolean isFirstRun = prefs.getBoolean("is_first_run", true);
 
             if (wasLoggedOut || isFirstRun) {
-                // 🔧 CONNECTION FIX: Check if we have existing devices - if so, this isn't a
+                // Ã°Å¸â€Â§ CONNECTION FIX: Check if we have existing devices - if so, this isn't a
                 // fresh start, it's an update!
                 boolean hasExistingDevices = false;
                 SharedPreferences devicePrefs = getSharedPreferences("connected_devices", MODE_PRIVATE);
                 String devicesJson = devicePrefs.getString("devices", "[]");
                 if (devicesJson != null && !devicesJson.equals("[]") && !devicesJson.isEmpty()) {
                     hasExistingDevices = true;
-                    Log.d(TAG, "📱 EXISTING DEVICES DETECTED during fresh login check - Preserving data");
+                    Log.d(TAG, "Ã°Å¸â€œÂ± EXISTING DEVICES DETECTED during fresh login check - Preserving data");
                 }
 
                 if (isFirstRun) {
                     if (hasExistingDevices) {
-                        Log.d(TAG, "🚀 APP UPDATE DETECTED - Existing devices found, skipping initial cleanup");
+                        Log.d(TAG, "Ã°Å¸Å¡â‚¬ APP UPDATE DETECTED - Existing devices found, skipping initial cleanup");
                         prefs.edit().putBoolean("is_first_run", false).apply();
                         // SKIP CLEANUP!
                         return false;
                     }
-                    Log.d(TAG, "🚀 FIRST APP RUN DETECTED - Performing initial cleanup");
+                    Log.d(TAG, "Ã°Å¸Å¡â‚¬ FIRST APP RUN DETECTED - Performing initial cleanup");
                     prefs.edit().putBoolean("is_first_run", false).apply();
                 } else {
-                    Log.d(TAG, "🧹 FRESH LOGIN DETECTED - Performing cleanup");
+                    Log.d(TAG, "Ã°Å¸Â§Â¹ FRESH LOGIN DETECTED - Performing cleanup");
                 }
 
                 // Clear the fresh login flag
@@ -3299,12 +3047,9 @@ public class ParentDashboardActivity extends BaseActivity {
                 // Ensure all connected device data is cleared
                 if (connectedDevicesManager != null) {
                     connectedDevicesManager.clearAllDevices();
-                    Log.d(TAG, "🗑️ ConnectedDevicesManager cleared");
+                    Log.d(TAG, "Ã°Å¸â€”â€˜Ã¯Â¸Â ConnectedDevicesManager cleared");
                 }
 
-                // Clear focus mode preferences
-                SharedPreferences focusPrefs = getSharedPreferences("focus_mode_prefs", MODE_PRIVATE);
-                focusPrefs.edit().clear().apply();
 
                 // Clear any other app state preferences
                 SharedPreferences connectedDevicesPrefs = getSharedPreferences("connected_devices", MODE_PRIVATE);
@@ -3318,12 +3063,12 @@ public class ParentDashboardActivity extends BaseActivity {
                 currentChildDeviceId = connectedDevicesManager.getCurrentDeviceId();
                 currentChildDeviceName = "No Device";
 
-                Log.d(TAG, "✅ Fresh start cleanup completed - NO DEVICES SHOULD BE LOADED");
-                Log.d(TAG, "🎯 EXPECTED RESULT: User should see 'No Device' and empty device list");
-                Log.d(TAG, "📱 Device connection method: Manual QR scan ONLY");
+                Log.d(TAG, "Ã¢Å“â€¦ Fresh start cleanup completed - NO DEVICES SHOULD BE LOADED");
+                Log.d(TAG, "Ã°Å¸Å½Â¯ EXPECTED RESULT: User should see 'No Device' and empty device list");
+                Log.d(TAG, "Ã°Å¸â€œÂ± Device connection method: Manual QR scan ONLY");
                 return true; // This is a fresh login - skip device loading
             } else {
-                Log.d(TAG, "📱 Continuing existing session");
+                Log.d(TAG, "Ã°Å¸â€œÂ± Continuing existing session");
                 return false; // Normal session - allow device loading
             }
 
@@ -3377,16 +3122,12 @@ public class ParentDashboardActivity extends BaseActivity {
             }
         }
 
-        // Update Focus Mode UI when app resumes
-        Log.d(TAG, "App resumed - updating Focus Mode UI");
-        forceUpdateFocusModeUI();
 
         // Additional checks for current device
         if (currentChildDeviceId != null && !currentChildDeviceId.isEmpty()) {
             rebindCurrentChildSessionState();
 
             Log.d(TAG, "App resumed - syncing device: " + currentChildDeviceId);
-            checkActualFocusModeStateFromFirebase(); // Sync with Firebase state
 
             // Restore timer state from Firebase
             Log.d(TAG, "Restoring timer state for device: " + currentChildDeviceId);
@@ -3409,7 +3150,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
     }
 
-    // ── Map card visibility helper ─────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Map card visibility helper Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     /**
      * Shows the map card if at least one child device is connected.
      * When no child is connected the card is still visible but blurred with
@@ -3425,7 +3166,7 @@ public class ParentDashboardActivity extends BaseActivity {
         cardMapContainer.setVisibility(View.VISIBLE);
 
         if (hasChild) {
-            // Child connected — clear blur overlay, show map
+            // Child connected Ã¢â‚¬â€ clear blur overlay, show map
             if (mapBlurOverlay != null)  mapBlurOverlay.setVisibility(View.GONE);
             if (ivMapToggleIcon != null) ivMapToggleIcon.setImageResource(R.drawable.ic_map_expand);
             // Start listening for real-time child location
@@ -3433,7 +3174,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 attachChildLocationListener(currentChildDeviceId);
             }
         } else {
-            // No child — show blur + message
+            // No child Ã¢â‚¬â€ show blur + message
             if (mapBlurOverlay != null)  mapBlurOverlay.setVisibility(View.VISIBLE);
             detachChildLocationListener();
             // Hide sync warning when no child is connected
@@ -3446,7 +3187,7 @@ public class ParentDashboardActivity extends BaseActivity {
         }
     }
 
-    // ── MapView additional lifecycle forwards ─────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ MapView additional lifecycle forwards Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     @Override
     protected void onStart() {
         super.onStart();
@@ -3522,9 +3263,9 @@ public class ParentDashboardActivity extends BaseActivity {
         super.onLowMemory();
         if (mapCardInitialized && dashboardMapView != null) dashboardMapView.onLowMemory();
     }
-    // ── End MapView lifecycle ──────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ End MapView lifecycle Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
-    // ── Child live location ────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Child live location Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
     private void attachChildLocationListener(String deviceId) {
         detachChildLocationListener(); // Remove any previous listener first
@@ -3873,7 +3614,7 @@ public class ParentDashboardActivity extends BaseActivity {
         if (deviceId == null || deviceId.isEmpty()) return;
         online.monarchlabs.sentinel.data.FirebaseSchemaV2Repository
                             .requestLocationRefresh(deviceId);
-        Log.d(TAG, "📍 Auto-requested fresh location for: " + deviceId);
+        Log.d(TAG, "Ã°Å¸â€œÂ Auto-requested fresh location for: " + deviceId);
     }
 
     private void detachChildLocationListener() {
@@ -3954,7 +3695,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
     /**
      * Creates a filled circle bitmap with up to 2 initials of the child's name in white.
-     * e.g. "hamza" → "H", "John Doe" → "JD"
+     * e.g. "hamza" Ã¢â€ â€™ "H", "John Doe" Ã¢â€ â€™ "JD"
      */
     private Bitmap createInitialsBitmap(String name, int circleColor) {
         int sizeDp = 48;
@@ -4033,7 +3774,7 @@ public class ParentDashboardActivity extends BaseActivity {
             deviceStatusManager.stopStatusTracking();
         }
 
-        // 🚨 Stop uninstall detection monitoring
+        // Ã°Å¸Å¡Â¨ Stop uninstall detection monitoring
         if (uninstallDetectionManager != null) {
             uninstallDetectionManager.stopAllMonitoring();
         }
@@ -4137,7 +3878,7 @@ public class ParentDashboardActivity extends BaseActivity {
                                 // Show confirmation dialog and pass device ID directly
                                 new AlertDialog.Builder(new android.view.ContextThemeWrapper(
                                         ParentDashboardActivity.this, R.style.AlertDialogCustom))
-                                        .setTitle("🗑️ Remove Device")
+                                        .setTitle("Ã°Å¸â€”â€˜Ã¯Â¸Â Remove Device")
                                         .setMessage("Removing \"" + deviceNameToRemove
                                             + "\".\n\nThis will log out the child from the child side as well as here.\n\nDo you wish to continue?")
                                         .setPositiveButton("Remove", (dialog, which) -> {
@@ -4189,7 +3930,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(
                 new android.view.ContextThemeWrapper(this, R.style.AlertDialogCustom));
-        builder.setTitle("🗑️ Remove Device");
+        builder.setTitle("Ã°Å¸â€”â€˜Ã¯Â¸Â Remove Device");
         builder.setMessage("Removing \"" + deviceName + "\".\n\n" +
                 "This will log out the child from the child side as well as here.\n\n" +
                 "Do you wish to continue?");
@@ -4380,12 +4121,6 @@ public class ParentDashboardActivity extends BaseActivity {
                 .remove("last_time_" + childDeviceId)
                 .commit();
 
-        getSharedPreferences("device_presets", MODE_PRIVATE)
-                .edit()
-                .remove("preset_" + childDeviceId)
-                .remove("preset_count_" + childDeviceId)
-                .remove("focus_active_" + childDeviceId)
-                .commit();
 
         cachedChildLocations.remove(childDeviceId);
         cachedChildLocationTimestamps.remove(childDeviceId);
@@ -4408,9 +4143,7 @@ public class ParentDashboardActivity extends BaseActivity {
         binding.tvDeviceStatus.setText(deviceStatusText);
 
         // Set appropriate color (teal for modern look)
-        if (!isFocusModeActive) {
             binding.tvDeviceStatus.setTextColor(ContextCompat.getColor(this, R.color.success_600));
-        }
     }
 
     private String getCurrentChildDisplayName() {
@@ -4432,34 +4165,7 @@ public class ParentDashboardActivity extends BaseActivity {
             return;
         }
 
-        if (requestCode == REQUEST_FOCUS_MODE_APPS && resultCode == RESULT_OK && data != null) {
-            // Get selected apps from child app list activity for focus mode
-            ArrayList<AppInfo> selectedApps = data.getParcelableArrayListExtra("selected_apps");
-            if (selectedApps != null) {
-                Log.d(TAG, "Received " + selectedApps.size() + " selected apps from ChildAppListActivity");
-                for (AppInfo app : selectedApps) {
-                    Log.d(TAG, "Selected app: " + app.name + " (" + app.packageName + ")");
-                }
-
-                focusModeApps.clear();
-                focusModeApps.addAll(selectedApps);
-
-                // Save the selected apps persistently
-                saveFocusModeApps();
-
-                Toast.makeText(this, "Selected " + selectedApps.size() + " apps for focus mode blocking",
-                        Toast.LENGTH_SHORT).show();
-                Log.d(TAG, "Focus mode now has " + focusModeApps.size() + " apps selected");
-
-                // Update the focus mode UI to show selected apps
-                updateFocusModeUI();
-
-                // If focus mode is currently active, apply the new app selection
-                if (isFocusModeActive) {
-                    activateFocusMode();
-                }
-            }
-        } else if (requestCode == 1003 && resultCode == RESULT_OK && data != null) {
+        if (requestCode == 1003 && resultCode == RESULT_OK && data != null) {
             // Handle usage limiter app selection result
             ArrayList<String> selectedAppPackages = data.getStringArrayListExtra("selected_packages");
             if (selectedAppPackages != null) {
@@ -4492,7 +4198,6 @@ public class ParentDashboardActivity extends BaseActivity {
                 if (bottomNavigation != null) {
                     bottomNavigation.setSelectedItemId(R.id.nav_home);
                 }
-                updateFocusModeUI();
             } else if ("settings".equals(selectedTab)) {
                 // Launch Settings Activity
                 Intent intent = new Intent(this, ParentSettingsActivity.class);
@@ -4509,14 +4214,13 @@ public class ParentDashboardActivity extends BaseActivity {
         try {
             qrCodeManager = new QRCodeManager(this);
             childDeviceManager = new ChildDeviceManager(this);
-            presetManager = new PresetManager(this);
             deviceStatusManager = new DeviceStatusManager(this);
             connectedDevicesManager = new ConnectedDevicesManager(this);
 
-            // 🚫 CRITICAL: Clean up permanently removed devices from loaded storage
+            // Ã°Å¸Å¡Â« CRITICAL: Clean up permanently removed devices from loaded storage
             cleanupPermanentlyRemovedDevices();
 
-            // 🔧 PERSISTENCE FIX: Don't clear devices! Load them instead.
+            // Ã°Å¸â€Â§ PERSISTENCE FIX: Don't clear devices! Load them instead.
             // Old code: connectedDevicesManager.clearAllDevices();
 
             // Load preserved devices from storage
@@ -4524,7 +4228,7 @@ public class ParentDashboardActivity extends BaseActivity {
             if (connectedDevices == null) {
                 connectedDevices = new ArrayList<>();
             }
-            Log.d(TAG, "📱 Loaded " + connectedDevices.size() + " preserved devices from storage");
+            Log.d(TAG, "Ã°Å¸â€œÂ± Loaded " + connectedDevices.size() + " preserved devices from storage");
 
             // Sync current device ID
             String savedDeviceId = connectedDevicesManager.getCurrentDeviceId();
@@ -4537,7 +4241,7 @@ public class ParentDashboardActivity extends BaseActivity {
                         break;
                     }
                 }
-                Log.d(TAG, "📱 Restored current device: " + currentChildDeviceName);
+                Log.d(TAG, "Ã°Å¸â€œÂ± Restored current device: " + currentChildDeviceName);
             }
 
             // Start as parent device
@@ -4558,7 +4262,7 @@ public class ParentDashboardActivity extends BaseActivity {
     private void restoreLastSelectedChildOnStartup() {
         try {
             if (connectedDevicesManager == null) {
-                Log.w(TAG, "⚠️ Cannot restore child selection - ConnectedDevicesManager is null");
+                Log.w(TAG, "Ã¢Å¡Â Ã¯Â¸Â Cannot restore child selection - ConnectedDevicesManager is null");
                 return;
             }
 
@@ -4566,11 +4270,11 @@ public class ParentDashboardActivity extends BaseActivity {
 
             if ((deviceIdToRestore == null || deviceIdToRestore.isEmpty()) && !connectedDevices.isEmpty()) {
                 deviceIdToRestore = connectedDevicesManager.autoSelectDevice();
-                Log.d(TAG, "📱 No saved child selection found - auto-selected: " + deviceIdToRestore);
+                Log.d(TAG, "Ã°Å¸â€œÂ± No saved child selection found - auto-selected: " + deviceIdToRestore);
             }
 
             if (deviceIdToRestore == null || deviceIdToRestore.isEmpty()) {
-                Log.d(TAG, "📱 No child device available to restore on startup");
+                Log.d(TAG, "Ã°Å¸â€œÂ± No child device available to restore on startup");
                 currentChildDeviceId = null;
                 currentChildDeviceName = "No Device";
                 currentChildUserName = null;
@@ -4596,7 +4300,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 currentChildUserName = "";
             }
 
-            Log.d(TAG, "📱 Restored child selection on startup: " + currentChildDeviceId + " ("
+            Log.d(TAG, "Ã°Å¸â€œÂ± Restored child selection on startup: " + currentChildDeviceId + " ("
                     + currentChildDeviceName + ")");
 
             rebindCurrentChildSessionState();
@@ -4670,7 +4374,7 @@ public class ParentDashboardActivity extends BaseActivity {
             Button btnShowQRFullscreen = findViewById(R.id.btnShowQRFullscreen);
             if (btnShowQRFullscreen != null) {
                 btnShowQRFullscreen.setOnClickListener(v -> showQRFullscreen());
-                Log.d(TAG, "📱 QR button ready for manual device connections");
+                Log.d(TAG, "Ã°Å¸â€œÂ± QR button ready for manual device connections");
             }
 
             // Removed qrImageView code since user does not want to show QR code image in
@@ -4730,7 +4434,7 @@ public class ParentDashboardActivity extends BaseActivity {
         }
     }
 
-    // ⭐ NEW: Confirmation dialog for clearing timer
+    // Ã¢Â­Â NEW: Confirmation dialog for clearing timer
     private void showClearTimerConfirmation() {
         if (currentChildDeviceId == null) {
             Toast.makeText(this, "No device selected", Toast.LENGTH_SHORT).show();
@@ -4739,23 +4443,23 @@ public class ParentDashboardActivity extends BaseActivity {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(
                 new android.view.ContextThemeWrapper(this, R.style.AlertDialogCustom));
-        builder.setTitle("🗑️ Clear Timer");
+        builder.setTitle("Ã°Å¸â€”â€˜Ã¯Â¸Â Clear Timer");
         builder.setMessage("Are you sure you want to clear the timer for \"" + currentChildDeviceName + "\"?\n\n" +
-                "⚠️ This will:\n" +
-                "• Stop the current timer immediately\n" +
-                "• Remove all timer settings\n" +
-                "• Clear selected apps for this device\n" +
-                "• Require setting a new timer to restart\n\n" +
+                "Ã¢Å¡Â Ã¯Â¸Â This will:\n" +
+                "Ã¢â‚¬Â¢ Stop the current timer immediately\n" +
+                "Ã¢â‚¬Â¢ Remove all timer settings\n" +
+                "Ã¢â‚¬Â¢ Clear selected apps for this device\n" +
+                "Ã¢â‚¬Â¢ Require setting a new timer to restart\n\n" +
                 "This action cannot be undone.");
         builder.setIcon(android.R.drawable.ic_dialog_alert);
 
-        builder.setPositiveButton("🗑️ Clear Timer", (dialog, which) -> {
-            Log.d(TAG, "✅ User confirmed timer clear for device: " + currentChildDeviceName);
+        builder.setPositiveButton("Ã°Å¸â€”â€˜Ã¯Â¸Â Clear Timer", (dialog, which) -> {
+            Log.d(TAG, "Ã¢Å“â€¦ User confirmed timer clear for device: " + currentChildDeviceName);
             clearUsageLimiter();
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> {
-            Log.d(TAG, "❌ User cancelled timer clear");
+            Log.d(TAG, "Ã¢ÂÅ’ User cancelled timer clear");
         });
 
         builder.show();
@@ -4814,20 +4518,20 @@ public class ParentDashboardActivity extends BaseActivity {
 
     private void showDeviceSwitcherLegacy() {
         try {
-            Log.d(TAG, "🔄 DEVICE SWITCHER - Checking connected devices");
-            Log.d(TAG, "📱 Current device: " + currentChildDeviceId + " (" + currentChildDeviceName + ")");
+            Log.d(TAG, "Ã°Å¸â€â€ž DEVICE SWITCHER - Checking connected devices");
+            Log.d(TAG, "Ã°Å¸â€œÂ± Current device: " + currentChildDeviceId + " (" + currentChildDeviceName + ")");
 
-            // 🔍 DEBUG: Log device list status before showing switcher
+            // Ã°Å¸â€Â DEBUG: Log device list status before showing switcher
             debugDeviceLists("Before Device Switcher");
 
             // Use local connectedDevices list (QR-scanned devices)
             List<ChildDevice> devices = new ArrayList<>(connectedDevices);
-            Log.d(TAG, "📱 Local device list has " + devices.size() + " devices");
+            Log.d(TAG, "Ã°Å¸â€œÂ± Local device list has " + devices.size() + " devices");
 
-            // 🔧 DEVICE REMOVAL FIX: Check persistent storage but filter out removed
+            // Ã°Å¸â€Â§ DEVICE REMOVAL FIX: Check persistent storage but filter out removed
             // devices
             List<ChildDevice> persistentDevices = connectedDevicesManager.getConnectedDevices();
-            Log.d(TAG, "💾 Persistent storage has " + persistentDevices.size() + " devices");
+            Log.d(TAG, "Ã°Å¸â€™Â¾ Persistent storage has " + persistentDevices.size() + " devices");
 
             // Filter out permanently removed devices from persistent storage
             List<ChildDevice> filteredPersistentDevices = new ArrayList<>();
@@ -4835,19 +4539,19 @@ public class ParentDashboardActivity extends BaseActivity {
                 if (!isPermanentlyRemoved(device.deviceId)) {
                     filteredPersistentDevices.add(device);
                 } else {
-                    Log.d(TAG, "🚫 Filtering out permanently removed device: " + device.deviceName);
+                    Log.d(TAG, "Ã°Å¸Å¡Â« Filtering out permanently removed device: " + device.deviceName);
                 }
             }
-            Log.d(TAG, "💾 Filtered persistent storage has " + filteredPersistentDevices.size() + " devices");
+            Log.d(TAG, "Ã°Å¸â€™Â¾ Filtered persistent storage has " + filteredPersistentDevices.size() + " devices");
 
             // Use whichever list has devices (prioritize local list)
             if (devices.isEmpty() && !filteredPersistentDevices.isEmpty()) {
                 devices = filteredPersistentDevices;
-                Log.d(TAG, "📱 Using filtered persistent devices as backup");
+                Log.d(TAG, "Ã°Å¸â€œÂ± Using filtered persistent devices as backup");
             }
 
             if (devices.isEmpty()) {
-                Log.d(TAG, "❌ No devices found in either local or persistent storage");
+                Log.d(TAG, "Ã¢ÂÅ’ No devices found in either local or persistent storage");
                 Toast.makeText(this,
                         "No child devices connected\n\nTo connect a device:\n1. Open child app\n2. Scan the QR code from parent app",
                         Toast.LENGTH_LONG).show();
@@ -4855,7 +4559,7 @@ public class ParentDashboardActivity extends BaseActivity {
             }
 
             // Log all available devices
-            Log.d(TAG, "📱 Available devices for switching:");
+            Log.d(TAG, "Ã°Å¸â€œÂ± Available devices for switching:");
             for (int i = 0; i < devices.size(); i++) {
                 ChildDevice device = devices.get(i);
                 String currentFlag = device.deviceId.equals(currentChildDeviceId) ? " [CURRENT]" : "";
@@ -4870,7 +4574,7 @@ public class ParentDashboardActivity extends BaseActivity {
             final AlertDialog[] dialogHolder = new AlertDialog[1];
 
             for (ChildDevice device : devices) {
-                Log.d(TAG, "📲 Adding device to switcher: " + device.deviceName + " (ID: " + device.deviceId + ")");
+                Log.d(TAG, "Ã°Å¸â€œÂ² Adding device to switcher: " + device.deviceName + " (ID: " + device.deviceId + ")");
 
                 LinearLayout row = new LinearLayout(this);
                 row.setOrientation(LinearLayout.HORIZONTAL);
@@ -4894,7 +4598,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 deviceName.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
                 deviceName.setOnClickListener(v -> {
                     Log.d(TAG,
-                            "🔄 Device selected for switch: " + device.deviceName + " (ID: " + device.deviceId + ")");
+                            "Ã°Å¸â€â€ž Device selected for switch: " + device.deviceName + " (ID: " + device.deviceId + ")");
 
                     // Check if this is already the current device
                     if (device.deviceId.equals(currentChildDeviceId)) {
@@ -4919,7 +4623,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 removeBtn.setTextColor(ContextCompat.getColor(this, R.color.error_600)); // Modern red
                 removeBtn.setTextSize(14);
                 removeBtn.setOnClickListener(v -> {
-                    Log.d(TAG, "🗑️ REMOVE BUTTON CLICKED for device: " + device.deviceId);
+                    Log.d(TAG, "Ã°Å¸â€”â€˜Ã¯Â¸Â REMOVE BUTTON CLICKED for device: " + device.deviceId);
 
                     // Show confirmation dialog before removing
                     new AlertDialog.Builder(ParentDashboardActivity.this)
@@ -4958,7 +4662,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 return;
             }
 
-            Log.d(TAG, "🔄 DEVICE SWITCH: From '" + currentChildDeviceName + "' to '" + device.deviceName + "'");
+            Log.d(TAG, "Ã°Å¸â€â€ž DEVICE SWITCH: From '" + currentChildDeviceName + "' to '" + device.deviceName + "'");
 
             if (connectedDevicesManager != null) {
                 connectedDevicesManager.addOrUpdateDevice(device);
@@ -4966,14 +4670,14 @@ public class ParentDashboardActivity extends BaseActivity {
 
             switchDevice(device.deviceId);
 
-            Toast.makeText(this, "✅ Switched to " + device.deviceName, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Ã¢Å“â€¦ Switched to " + device.deviceName, Toast.LENGTH_SHORT).show();
 
-            Log.d(TAG, "🔄 Successfully switched to device: " + device.deviceName + " (" + device.deviceId + ")");
+            Log.d(TAG, "Ã°Å¸â€â€ž Successfully switched to device: " + device.deviceName + " (" + device.deviceId + ")");
         } catch (Exception e) {
-            Log.e(TAG, "❌ Error switching device: " + e.getMessage());
+            Log.e(TAG, "Ã¢ÂÅ’ Error switching device: " + e.getMessage());
             runOnUiThread(() -> {
                 hideChildSwitchLoading();
-                Toast.makeText(this, "❌ Error switching device: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Ã¢ÂÅ’ Error switching device: " + e.getMessage(), Toast.LENGTH_LONG).show();
             });
             // Fallback: Clear display on error
             clearUsageDisplay();
@@ -4982,7 +4686,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
     private void clearDeviceSpecificUI() {
         try {
-            Log.d(TAG, "🧹 Clearing previous device-specific UI data");
+            Log.d(TAG, "Ã°Å¸Â§Â¹ Clearing previous device-specific UI data");
 
             detachChildLocationListener();
             resetChildLocationPreview();
@@ -4991,19 +4695,16 @@ public class ParentDashboardActivity extends BaseActivity {
             // ENHANCED: Clear ALL device-specific data completely
             // Clear usage display immediately
             clearUsageDisplay();
-            Log.d(TAG, "✅ Cleared usage display");
+            Log.d(TAG, "Ã¢Å“â€¦ Cleared usage display");
 
             // DON'T clear timer data during device switch - it will be loaded for new
             // device
-            Log.d(TAG, "✅ Skipped timer display clear to preserve timer state");
+            Log.d(TAG, "Ã¢Å“â€¦ Skipped timer display clear to preserve timer state");
 
-            // Clear focus mode apps display
-            focusModeApps.clear();
-            updateFocusModeUI();
 
             // Clear any cached usage data
             clearCachedUsageData();
-            Log.d(TAG, "✅ Cleared cached usage data");
+            Log.d(TAG, "Ã¢Å“â€¦ Cleared cached usage data");
 
             // Clear timer display for device isolation
             // Timer running state no longer needed
@@ -5018,9 +4719,9 @@ public class ParentDashboardActivity extends BaseActivity {
             // Clear usage chart data
             setupCategorySummaryChart(); // This will clear the chart for new device
 
-            Log.d(TAG, "✅ Device-specific UI completely cleared");
+            Log.d(TAG, "Ã¢Å“â€¦ Device-specific UI completely cleared");
         } catch (Exception e) {
-            Log.e(TAG, "❌ Error clearing device-specific UI: " + e.getMessage());
+            Log.e(TAG, "Ã¢ÂÅ’ Error clearing device-specific UI: " + e.getMessage());
         }
     }
 
@@ -5028,7 +4729,7 @@ public class ParentDashboardActivity extends BaseActivity {
         if (currentChildDeviceId == null)
             return;
 
-        Log.d(TAG, "🔄 Refreshing device-specific data for: " + currentChildDeviceName);
+        Log.d(TAG, "Ã°Å¸â€â€ž Refreshing device-specific data for: " + currentChildDeviceName);
 
         try {
             // Refresh category summary chart with device-specific data
@@ -5039,9 +4740,9 @@ public class ParentDashboardActivity extends BaseActivity {
             // Refresh usage data
             loadSmartUsageDataForSelectedDate();
 
-            Log.d(TAG, "✅ Device-specific data refresh complete");
+            Log.d(TAG, "Ã¢Å“â€¦ Device-specific data refresh complete");
         } catch (Exception e) {
-            Log.e(TAG, "❌ Error refreshing device-specific data: " + e.getMessage());
+            Log.e(TAG, "Ã¢ÂÅ’ Error refreshing device-specific data: " + e.getMessage());
         }
     }
 
@@ -5052,164 +4753,8 @@ public class ParentDashboardActivity extends BaseActivity {
         return null;
     }
 
-    private void setupFocusMode() {
-        Log.d(TAG, "🔧 Setting up focus mode functionality...");
-
-        try {
-            // Load saved focus mode apps for current device
-            loadFocusModeApps();
-
-            // 🔧 PERSISTENCE FIX: Check actual Focus Mode state from Firebase
-            checkActualFocusModeStateFromFirebase();
-
-            Log.d(TAG, "🎛️ Setting up focus mode switch listener...");
-
-            // Check if binding and switch are available
-            if (binding != null && binding.switchFocusMode != null) {
-                Log.d(TAG, "✅ Focus mode switch found, setting up listener");
-
-                // Set up focus mode switch listener
-                binding.switchFocusMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    Log.d(TAG, "🎯 Focus mode switch toggled: " + isChecked);
-
-                    if (isChecked) {
-                        if (currentChildDeviceId == null) {
-                            Log.w(TAG, "❌ No child device selected");
-                            Toast.makeText(this, "Please select a child device first", Toast.LENGTH_SHORT).show();
-                            buttonView.setChecked(false);
-                            return;
-                        }
-
-                        if (isCreatingPreset) {
-                            Log.w(TAG, "❌ Already processing focus mode request");
-                            Toast.makeText(this, "Please wait, processing...", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-
-                        // Check if apps are selected
-                        if (focusModeApps.isEmpty()) {
-                            Log.w(TAG, "❌ No apps selected for focus mode");
-                            Toast.makeText(this, "Please select apps first by clicking 'Edit App List'",
-                                    Toast.LENGTH_SHORT).show();
-                            buttonView.setChecked(false);
-                            return;
-                        }
-
-                        Log.d(TAG, "✅ Activating focus mode with " + focusModeApps.size() + " apps");
-                        // Activate focus mode with selected apps
-                        activateFocusMode();
-
-                    } else {
-                        Log.d(TAG, "🔓 Deactivating focus mode");
-                        // Deactivate focus mode
-                        deactivateFocusMode();
-                    }
-                });
-
-                // Set up edit app list button
-                if (btnEditAppList != null) {
-                    btnEditAppList.setOnClickListener(v -> {
-                        Log.d(TAG, "📝 Edit App List button clicked");
-                        showEditAppListDialog();
-                    });
-                    Log.d(TAG, "✅ Edit App List button listener set");
-                } else {
-                    Log.e(TAG, "❌ btnEditAppList is null!");
-                }
-
-                // Update initial state
-                updateFocusModeUI();
-
-            } else {
-                Log.e(TAG, "❌ Focus mode switch not found in binding! Cannot set up focus mode.");
-                Toast.makeText(this, "Focus mode switch not available", Toast.LENGTH_SHORT).show();
-            }
-
-        } catch (Exception e) {
-            Log.e(TAG, "❌ Error setting up focus mode: " + e.getMessage(), e);
-            Toast.makeText(this, "Focus mode temporarily unavailable", Toast.LENGTH_SHORT).show();
-            try {
-                if (binding != null && binding.switchFocusMode != null) {
-                    binding.switchFocusMode.setChecked(false);
-                }
-            } catch (Exception bindingError) {
-                Log.e(TAG, "Error accessing focus mode switch: " + bindingError.getMessage());
-            }
-        }
-    }
-
-    private void showFocusModeAppSelection() {
-        if (currentChildDeviceId == null) {
-            Toast.makeText(this, "Please select a child device first", Toast.LENGTH_SHORT).show();
-            // Reset the switch if no device is selected
-            binding.switchFocusMode.setChecked(false);
-            return;
-        }
-
-        // Launch child app list activity for focus mode
-        Intent intent = new Intent(this, ChildAppListActivity.class);
-        intent.putExtra("deviceId", currentChildDeviceId);
-        intent.putExtra("deviceName", currentChildDeviceName);
-        intent.putExtra("selectionPurpose", "blocking");
-
-        // Pass currently selected apps so they appear as checked
-        if (!focusModeApps.isEmpty()) {
-            intent.putParcelableArrayListExtra("preselected_apps", new ArrayList<>(focusModeApps));
-            Log.d(TAG, "Passing " + focusModeApps.size() + " preselected apps to ChildAppListActivity");
-            for (AppInfo app : focusModeApps) {
-                Log.d(TAG, "Preselected app: " + app.name + " (" + app.packageName + ")");
-            }
-        } else {
-            Log.d(TAG, "No preselected apps to pass to ChildAppListActivity");
-        }
-
-        startActivityForResult(intent, REQUEST_FOCUS_MODE_APPS);
-    }
-
     /**
-     * 🔧 PERSISTENCE FIX: Check actual Focus Mode state from Firebase
      */
-    private void checkActualFocusModeStateFromFirebase() {
-        if (currentChildDeviceId == null) {
-            return;
-        }
-        FirebaseDatabase.getInstance().getReference("v2")
-                .child("device_policies")
-                .child(currentChildDeviceId)
-                .child("focus_mode")
-                .child("enabled")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot snapshot) {
-                        Boolean enabled = snapshot.getValue(Boolean.class);
-                        if (enabled != null) {
-                            applyFocusModeStateToUi(enabled);
-                        } else {
-                            checkLegacyFocusModeState();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError error) {
-                        checkLegacyFocusModeState();
-                    }
-                });
-    }
-
-
-    private void checkLegacyFocusModeState() {
-        // Legacy connection/focus fallback removed; canonical v2 listeners own this state.
-    }
-
-
-    private void applyFocusModeStateToUi(boolean active) {
-        if (active == isFocusModeActive) {
-            return;
-        }
-        isFocusModeActive = active;
-        saveFocusModeApps();
-        updateFocusModeUI();
-    }
     private void setupCategorySummaryChart() {
         /*
          * Removed from XML
@@ -5235,11 +4780,11 @@ public class ParentDashboardActivity extends BaseActivity {
         Button btnViewInstalledApps = findViewById(R.id.btnViewInstalledApps);
         if (btnViewInstalledApps != null) {
             btnViewInstalledApps.setOnClickListener(v -> {
-                Log.d(TAG, "📱 View Installed Apps button clicked");
+                Log.d(TAG, "Ã°Å¸â€œÂ± View Installed Apps button clicked");
                 if (currentChildDeviceId != null) {
                     Intent intent = new Intent(this, ChildInstalledAppsActivity.class);
                     intent.putExtra(ChildInstalledAppsActivity.EXTRA_CHILD_DEVICE_ID, currentChildDeviceId);
-                    // 🔧 FIX: Pass actual child name if available, otherwise device name
+                    // Ã°Å¸â€Â§ FIX: Pass actual child name if available, otherwise device name
                     String displayName = (currentChildUserName != null && !currentChildUserName.isEmpty())
                             ? currentChildUserName
                             : currentChildDeviceName;
@@ -5270,7 +4815,7 @@ public class ParentDashboardActivity extends BaseActivity {
         // Create the app list text
         StringBuilder appList = new StringBuilder();
         for (String app : apps) {
-            appList.append("• ").append(app).append("\n");
+            appList.append("Ã¢â‚¬Â¢ ").append(app).append("\n");
         }
 
         builder.setMessage(appList.toString());
@@ -5338,7 +4883,7 @@ public class ParentDashboardActivity extends BaseActivity {
         String oldDateKey = usageDateFormat.format(currentUsageDate.getTime());
         String newDateKey = usageDateFormat.format(newDate.getTime());
 
-        Log.d(TAG, "🔐 USER DATE CHANGE: " + oldDateKey + " → " + newDateKey + " (Reason: " + reason + ")");
+        Log.d(TAG, "Ã°Å¸â€Â USER DATE CHANGE: " + oldDateKey + " Ã¢â€ â€™ " + newDateKey + " (Reason: " + reason + ")");
 
         currentUsageDate = (Calendar) newDate.clone();
         dateSetByUser = true;
@@ -5357,11 +4902,11 @@ public class ParentDashboardActivity extends BaseActivity {
     private boolean preventAutoDateReset(String attemptReason) {
         if (dateSetByUser) {
             String currentDateKey = usageDateFormat.format(currentUsageDate.getTime());
-            Log.w(TAG, "🚫 BLOCKED AUTO DATE RESET: User selected " + currentDateKey + ", blocking reset attempt: "
+            Log.w(TAG, "Ã°Å¸Å¡Â« BLOCKED AUTO DATE RESET: User selected " + currentDateKey + ", blocking reset attempt: "
                     + attemptReason);
             return true; // Block the operation
         }
-        Log.d(TAG, "✅ Auto date operation allowed: " + attemptReason + " (User hasn't manually set date)");
+        Log.d(TAG, "Ã¢Å“â€¦ Auto date operation allowed: " + attemptReason + " (User hasn't manually set date)");
         return false; // Allow the operation
     }
 
@@ -5395,7 +4940,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
             tvSelectedDate.setText(displayDate);
             String dateKey = usageDateFormat.format(currentUsageDate.getTime());
-            Log.d(TAG, "📅 DISPLAY: Updated date display to: " + dateKey + " (User set: " + dateSetByUser + ")");
+            Log.d(TAG, "Ã°Å¸â€œâ€¦ DISPLAY: Updated date display to: " + dateKey + " (User set: " + dateSetByUser + ")");
         }
     }
 
@@ -5406,13 +4951,13 @@ public class ParentDashboardActivity extends BaseActivity {
      * Save the current usage date for the specific device
      */
     private void saveUsageDateForDevice() {
-        // 🔍 DATE TRACE: Save operation
-        Log.d(TAG, "🔍 DATE_TRACE_SAVE_START: === saveUsageDateForDevice() CALLED ===");
-        Log.d(TAG, "🔍 DATE_TRACE_SAVE_START: currentChildDeviceId = " + currentChildDeviceId);
-        Log.d(TAG, "🔍 DATE_TRACE_SAVE_START: Called from: " + getCallerMethodName());
+        // Ã°Å¸â€Â DATE TRACE: Save operation
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SAVE_START: === saveUsageDateForDevice() CALLED ===");
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SAVE_START: currentChildDeviceId = " + currentChildDeviceId);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SAVE_START: Called from: " + getCallerMethodName());
 
         if (currentChildDeviceId == null) {
-            Log.d(TAG, "🔍 DATE_TRACE_SAVE_END: EARLY RETURN - No device");
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SAVE_END: EARLY RETURN - No device");
             return;
         }
 
@@ -5423,10 +4968,10 @@ public class ParentDashboardActivity extends BaseActivity {
 
             String dateString = usageDateFormat.format(currentUsageDate.getTime());
 
-            Log.d(TAG, "🔍 DATE_TRACE_SAVE_WRITE: Saving to SharedPreferences");
-            Log.d(TAG, "🔍 DATE_TRACE_SAVE_WRITE: dateKey = " + dateKey);
-            Log.d(TAG, "🔍 DATE_TRACE_SAVE_WRITE: Saving dateString = " + dateString);
-            Log.d(TAG, "🔍 DATE_TRACE_SAVE_WRITE: Saving dateSetByUser = " + dateSetByUser);
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SAVE_WRITE: Saving to SharedPreferences");
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SAVE_WRITE: dateKey = " + dateKey);
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SAVE_WRITE: Saving dateString = " + dateString);
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SAVE_WRITE: Saving dateSetByUser = " + dateSetByUser);
 
             datePrefs.edit()
                     .putString(dateKey, dateString)
@@ -5435,7 +4980,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
             Log.d(TAG, "Saved usage date for device " + currentChildDeviceId + ": " + dateString + " (user set: "
                     + dateSetByUser + ")");
-            Log.d(TAG, "🔍 DATE_TRACE_SAVE_END: Save complete");
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_SAVE_END: Save complete");
         } catch (Exception e) {
             Log.e(TAG, "Error saving usage date for device: " + e.getMessage());
         }
@@ -5445,16 +4990,16 @@ public class ParentDashboardActivity extends BaseActivity {
      * Load the saved usage date for the current device
      */
     private void loadUsageDateForDevice() {
-        // 🔍 DATE TRACE: Entry point
+        // Ã°Å¸â€Â DATE TRACE: Entry point
         String dateBefore = usageDateFormat.format(currentUsageDate.getTime());
-        Log.d(TAG, "🔍 DATE_TRACE_LOAD_START: === loadUsageDateForDevice() CALLED ===");
-        Log.d(TAG, "🔍 DATE_TRACE_LOAD_START: currentChildDeviceId = " + currentChildDeviceId);
-        Log.d(TAG, "🔍 DATE_TRACE_LOAD_START: currentUsageDate BEFORE = " + dateBefore);
-        Log.d(TAG, "🔍 DATE_TRACE_LOAD_START: dateSetByUser BEFORE = " + dateSetByUser);
-        Log.d(TAG, "🔍 DATE_TRACE_LOAD_START: Called from: " + getCallerMethodName());
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_START: === loadUsageDateForDevice() CALLED ===");
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_START: currentChildDeviceId = " + currentChildDeviceId);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_START: currentUsageDate BEFORE = " + dateBefore);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_START: dateSetByUser BEFORE = " + dateSetByUser);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_START: Called from: " + getCallerMethodName());
 
         if (currentChildDeviceId == null) {
-            Log.d(TAG, "🔍 DATE_TRACE_LOAD_END: EARLY RETURN - No device selected");
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_END: EARLY RETURN - No device selected");
             return;
         }
 
@@ -5463,37 +5008,37 @@ public class ParentDashboardActivity extends BaseActivity {
             String dateKey = "usage_date_" + currentChildDeviceId;
             String userSetKey = "date_user_set_" + currentChildDeviceId;
 
-            Log.d(TAG, "🔍 DATE_TRACE_LOAD_PREFS: Reading SharedPreferences");
-            Log.d(TAG, "🔍 DATE_TRACE_LOAD_PREFS: dateKey = " + dateKey);
-            Log.d(TAG, "🔍 DATE_TRACE_LOAD_PREFS: userSetKey = " + userSetKey);
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_PREFS: Reading SharedPreferences");
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_PREFS: dateKey = " + dateKey);
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_PREFS: userSetKey = " + userSetKey);
 
             String savedDateString = datePrefs.getString(dateKey, null);
             boolean savedUserSetFlag = datePrefs.getBoolean(userSetKey, false);
 
-            Log.d(TAG, "🔍 DATE_TRACE_LOAD_PREFS: savedDateString = " + savedDateString);
-            Log.d(TAG, "🔍 DATE_TRACE_LOAD_PREFS: savedUserSetFlag = " + savedUserSetFlag);
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_PREFS: savedDateString = " + savedDateString);
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_PREFS: savedUserSetFlag = " + savedUserSetFlag);
 
             if (savedDateString != null && savedUserSetFlag) {
-                Log.d(TAG, "🔍 DATE_TRACE_LOAD_FOUND: Saved date EXISTS in prefs and was manually set by user");
+                Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_FOUND: Saved date EXISTS in prefs and was manually set by user");
                 try {
                     Date savedDate = usageDateFormat.parse(savedDateString);
 
-                    // 🔍 DATE TRACE: CRITICAL MOMENT - About to change date
+                    // Ã°Å¸â€Â DATE TRACE: CRITICAL MOMENT - About to change date
                     String beforeChange = usageDateFormat.format(currentUsageDate.getTime());
-                    Log.d(TAG, "🔍🔍🔍 DATE_TRACE_CHANGE_CRITICAL: ABOUT TO MODIFY currentUsageDate");
-                    Log.d(TAG, "🔍🔍🔍 DATE_TRACE_CHANGE_CRITICAL: currentUsageDate BEFORE = " + beforeChange);
-                    Log.d(TAG, "🔍🔍🔍 DATE_TRACE_CHANGE_CRITICAL: Will set to = " + savedDateString);
-                    Log.d(TAG, "🔍🔍🔍 DATE_TRACE_CHANGE_CRITICAL: Parsed Date object = " + savedDate);
+                    Log.d(TAG, "Ã°Å¸â€ÂÃ°Å¸â€ÂÃ°Å¸â€Â DATE_TRACE_CHANGE_CRITICAL: ABOUT TO MODIFY currentUsageDate");
+                    Log.d(TAG, "Ã°Å¸â€ÂÃ°Å¸â€ÂÃ°Å¸â€Â DATE_TRACE_CHANGE_CRITICAL: currentUsageDate BEFORE = " + beforeChange);
+                    Log.d(TAG, "Ã°Å¸â€ÂÃ°Å¸â€ÂÃ°Å¸â€Â DATE_TRACE_CHANGE_CRITICAL: Will set to = " + savedDateString);
+                    Log.d(TAG, "Ã°Å¸â€ÂÃ°Å¸â€ÂÃ°Å¸â€Â DATE_TRACE_CHANGE_CRITICAL: Parsed Date object = " + savedDate);
 
                         currentUsageDate.setTime(savedDate);
 
-                    // 🔍 DATE TRACE: After change
+                    // Ã°Å¸â€Â DATE TRACE: After change
                     String afterChange = usageDateFormat.format(currentUsageDate.getTime());
-                    Log.d(TAG, "🔍🔍🔍 DATE_TRACE_CHANGE_COMPLETE: currentUsageDate AFTER = " + afterChange);
-                    Log.d(TAG, "🔍🔍🔍 DATE_TRACE_CHANGE_COMPLETE: Date actually changed? " + (!beforeChange.equals(afterChange)));
+                    Log.d(TAG, "Ã°Å¸â€ÂÃ°Å¸â€ÂÃ°Å¸â€Â DATE_TRACE_CHANGE_COMPLETE: currentUsageDate AFTER = " + afterChange);
+                    Log.d(TAG, "Ã°Å¸â€ÂÃ°Å¸â€ÂÃ°Å¸â€Â DATE_TRACE_CHANGE_COMPLETE: Date actually changed? " + (!beforeChange.equals(afterChange)));
 
                         dateSetByUser = savedUserSetFlag;
-                        Log.d(TAG, "🔍🔍🔍 DATE_TRACE_CHANGE_COMPLETE: dateSetByUser set to = " + savedUserSetFlag);
+                        Log.d(TAG, "Ã°Å¸â€ÂÃ°Å¸â€ÂÃ°Å¸â€Â DATE_TRACE_CHANGE_COMPLETE: dateSetByUser set to = " + savedUserSetFlag);
 
                         Log.d(TAG, "DBG_USAGE_PATH: loadUsageDateForDevice device=" + currentChildDeviceId +
                             " savedDate=" + savedDateString + " savedUserSet=" + savedUserSetFlag);
@@ -5502,7 +5047,7 @@ public class ParentDashboardActivity extends BaseActivity {
                         Log.d(TAG, "Loaded usage date for device " + currentChildDeviceId + ": " + savedDateString
                             + " (user set: " + dateSetByUser + ")");
                 } catch (Exception parseE) {
-                    Log.e(TAG, "🔍 DATE_TRACE_ERROR: Error parsing saved date: " + parseE.getMessage());
+                    Log.e(TAG, "Ã°Å¸â€Â DATE_TRACE_ERROR: Error parsing saved date: " + parseE.getMessage());
                     String beforeReset = usageDateFormat.format(currentUsageDate.getTime());
 
                     // Reset to today if parse fails
@@ -5510,12 +5055,12 @@ public class ParentDashboardActivity extends BaseActivity {
                     dateSetByUser = false;
 
                     String afterReset = usageDateFormat.format(currentUsageDate.getTime());
-                    Log.d(TAG, "🔍 DATE_TRACE_ERROR: Reset to today due to parse error");
-                    Log.d(TAG, "🔍 DATE_TRACE_ERROR: BEFORE reset = " + beforeReset);
-                    Log.d(TAG, "🔍 DATE_TRACE_ERROR: AFTER reset = " + afterReset);
+                    Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ERROR: Reset to today due to parse error");
+                    Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ERROR: BEFORE reset = " + beforeReset);
+                    Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_ERROR: AFTER reset = " + afterReset);
                 }
             } else {
-                Log.d(TAG, "🔍 DATE_TRACE_LOAD_NOT_FOUND: No saved date in prefs");
+                Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_NOT_FOUND: No saved date in prefs");
                 String beforeDefault = usageDateFormat.format(currentUsageDate.getTime());
 
                 // No saved date, default to today
@@ -5523,70 +5068,68 @@ public class ParentDashboardActivity extends BaseActivity {
                 dateSetByUser = false;
 
                 String afterDefault = usageDateFormat.format(currentUsageDate.getTime());
-                Log.d(TAG, "🔍 DATE_TRACE_LOAD_NOT_FOUND: Defaulting to today");
-                Log.d(TAG, "🔍 DATE_TRACE_LOAD_NOT_FOUND: BEFORE default = " + beforeDefault);
-                Log.d(TAG, "🔍 DATE_TRACE_LOAD_NOT_FOUND: AFTER default = " + afterDefault);
+                Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_NOT_FOUND: Defaulting to today");
+                Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_NOT_FOUND: BEFORE default = " + beforeDefault);
+                Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_NOT_FOUND: AFTER default = " + afterDefault);
                 Log.d(TAG, "No saved usage date for device " + currentChildDeviceId + ", defaulting to today");
             }
         } catch (Exception e) {
-            Log.e(TAG, "🔍 DATE_TRACE_EXCEPTION: Exception in loadUsageDateForDevice: " + e.getMessage());
+            Log.e(TAG, "Ã°Å¸â€Â DATE_TRACE_EXCEPTION: Exception in loadUsageDateForDevice: " + e.getMessage());
             String beforeException = usageDateFormat.format(currentUsageDate.getTime());
 
             currentUsageDate = Calendar.getInstance();
             dateSetByUser = false;
 
             String afterException = usageDateFormat.format(currentUsageDate.getTime());
-            Log.d(TAG, "🔍 DATE_TRACE_EXCEPTION: Reset to today due to exception");
-            Log.d(TAG, "🔍 DATE_TRACE_EXCEPTION: BEFORE = " + beforeException);
-            Log.d(TAG, "🔍 DATE_TRACE_EXCEPTION: AFTER = " + afterException);
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_EXCEPTION: Reset to today due to exception");
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_EXCEPTION: BEFORE = " + beforeException);
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_EXCEPTION: AFTER = " + afterException);
         }
 
-        // 🔍 DATE TRACE: Final state before exit
+        // Ã°Å¸â€Â DATE TRACE: Final state before exit
         String dateAfter = usageDateFormat.format(currentUsageDate.getTime());
-        Log.d(TAG, "🔍 DATE_TRACE_LOAD_END: === loadUsageDateForDevice() COMPLETE ===");
-        Log.d(TAG, "🔍 DATE_TRACE_LOAD_END: currentUsageDate AFTER = " + dateAfter);
-        Log.d(TAG, "🔍 DATE_TRACE_LOAD_END: dateSetByUser AFTER = " + dateSetByUser);
-        Log.d(TAG, "🔍 DATE_TRACE_LOAD_END: Date changed? " + (!dateBefore.equals(dateAfter)));
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_END: === loadUsageDateForDevice() COMPLETE ===");
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_END: currentUsageDate AFTER = " + dateAfter);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_END: dateSetByUser AFTER = " + dateSetByUser);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_LOAD_END: Date changed? " + (!dateBefore.equals(dateAfter)));
     }
 
     /**
      * Comprehensive device-specific state loading for complete isolation
      */
     private void loadCompleteDeviceState() {
-        // 🔍 DATE TRACE: Complete state load
+        // Ã°Å¸â€Â DATE TRACE: Complete state load
         String dateBefore = usageDateFormat.format(currentUsageDate.getTime());
-        Log.d(TAG, "🔍 DATE_TRACE_COMPLETE_START: === loadCompleteDeviceState() CALLED ===");
-        Log.d(TAG, "🔍 DATE_TRACE_COMPLETE_START: currentUsageDate BEFORE = " + dateBefore);
-        Log.d(TAG, "🔍 DATE_TRACE_COMPLETE_START: Called from: " + getCallerMethodName());
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_COMPLETE_START: === loadCompleteDeviceState() CALLED ===");
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_COMPLETE_START: currentUsageDate BEFORE = " + dateBefore);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_COMPLETE_START: Called from: " + getCallerMethodName());
 
         if (currentChildDeviceId == null) {
             Log.w(TAG, "Cannot load device state: no device selected");
-            Log.d(TAG, "🔍 DATE_TRACE_COMPLETE_END: EARLY RETURN - No device");
+            Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_COMPLETE_END: EARLY RETURN - No device");
             return;
         }
 
-        Log.d(TAG, "🔄 Loading complete state for device: " + currentChildDeviceId);
+        Log.d(TAG, "Ã°Å¸â€â€ž Loading complete state for device: " + currentChildDeviceId);
 
         // Load all device-specific data
         loadSelectedAppsForDevice();
         loadTimerDurationFromLocal();
 
-        // 🔍 DATE TRACE: Critical - about to load date
+        // Ã°Å¸â€Â DATE TRACE: Critical - about to load date
         String dateBeforeLoadDate = usageDateFormat.format(currentUsageDate.getTime());
-        Log.d(TAG, "🔍 DATE_TRACE_COMPLETE_BEFORE_DATE: BEFORE loadUsageDateForDevice()");
-        Log.d(TAG, "🔍 DATE_TRACE_COMPLETE_BEFORE_DATE: currentUsageDate = " + dateBeforeLoadDate);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_COMPLETE_BEFORE_DATE: BEFORE loadUsageDateForDevice()");
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_COMPLETE_BEFORE_DATE: currentUsageDate = " + dateBeforeLoadDate);
 
         loadUsageDateForDevice();
 
-        // 🔍 DATE TRACE: After loading date
+        // Ã°Å¸â€Â DATE TRACE: After loading date
         String dateAfterLoadDate = usageDateFormat.format(currentUsageDate.getTime());
-        Log.d(TAG, "🔍 DATE_TRACE_COMPLETE_AFTER_DATE: AFTER loadUsageDateForDevice()");
-        Log.d(TAG, "🔍 DATE_TRACE_COMPLETE_AFTER_DATE: currentUsageDate = " + dateAfterLoadDate);
-        Log.d(TAG, "🔍 DATE_TRACE_COMPLETE_AFTER_DATE: Date changed? " + (!dateBeforeLoadDate.equals(dateAfterLoadDate)));
-        loadFocusModeApps();
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_COMPLETE_AFTER_DATE: AFTER loadUsageDateForDevice()");
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_COMPLETE_AFTER_DATE: currentUsageDate = " + dateAfterLoadDate);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_COMPLETE_AFTER_DATE: Date changed? " + (!dateBeforeLoadDate.equals(dateAfterLoadDate)));
 
         // Update all UI components for this device
-        updateFocusModeUI();
         updateTargetDeviceDisplay();
         updateSelectedDateDisplay();
 
@@ -5601,13 +5144,13 @@ public class ParentDashboardActivity extends BaseActivity {
             }
         });
 
-        Log.d(TAG, "✅ Complete device state loaded for: " + currentChildDeviceId);
+        Log.d(TAG, "Ã¢Å“â€¦ Complete device state loaded for: " + currentChildDeviceId);
 
-        // 🔍 DATE TRACE: Complete state load finished
+        // Ã°Å¸â€Â DATE TRACE: Complete state load finished
         String dateAfter = usageDateFormat.format(currentUsageDate.getTime());
-        Log.d(TAG, "🔍 DATE_TRACE_COMPLETE_END: === loadCompleteDeviceState() COMPLETE ===");
-        Log.d(TAG, "🔍 DATE_TRACE_COMPLETE_END: currentUsageDate AFTER = " + dateAfter);
-        Log.d(TAG, "🔍 DATE_TRACE_COMPLETE_END: Overall date changed? " + (!dateBefore.equals(dateAfter)));
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_COMPLETE_END: === loadCompleteDeviceState() COMPLETE ===");
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_COMPLETE_END: currentUsageDate AFTER = " + dateAfter);
+        Log.d(TAG, "Ã°Å¸â€Â DATE_TRACE_COMPLETE_END: Overall date changed? " + (!dateBefore.equals(dateAfter)));
     }
 
     private void refreshChildLocationIfNeeded() {
@@ -5616,7 +5159,7 @@ public class ParentDashboardActivity extends BaseActivity {
         }
 
         if (!autoLocationRefreshEnabled) {
-            Log.d(TAG, "📍 Manual location mode enabled for " + currentChildDeviceId + ", skipping auto refresh");
+            Log.d(TAG, "Ã°Å¸â€œÂ Manual location mode enabled for " + currentChildDeviceId + ", skipping auto refresh");
             return;
         }
 
@@ -5637,12 +5180,10 @@ public class ParentDashboardActivity extends BaseActivity {
         if (currentChildDeviceId == null)
             return;
 
-        Log.d(TAG, "💾 Saving complete state for device: " + currentChildDeviceId);
+        Log.d(TAG, "Ã°Å¸â€™Â¾ Saving complete state for device: " + currentChildDeviceId);
 
         saveSelectedAppsForDevice();
-        saveFocusModeApps();
         saveUsageDateForDevice();
-        saveDeviceNameForCurrentDevice();
 
         // Save timer duration if currently set
         if (etLimiterHours != null && etLimiterMinutes != null) {
@@ -5659,11 +5200,11 @@ public class ParentDashboardActivity extends BaseActivity {
             }
         }
 
-        Log.d(TAG, "✅ Complete device state saved for: " + currentChildDeviceId);
+        Log.d(TAG, "Ã¢Å“â€¦ Complete device state saved for: " + currentChildDeviceId);
     }
 
     /**
-     * 🎯 Load Smart Usage Data - GAME CHANGER!
+     * Ã°Å¸Å½Â¯ Load Smart Usage Data - GAME CHANGER!
      * Load rolling 7-day usage data from connection-based tracking
      */
     private void loadSmartUsageDataForSelectedDate() {
@@ -5714,12 +5255,12 @@ public class ParentDashboardActivity extends BaseActivity {
                     }
 
                     Object rawVal = snapshot.getValue();
-                    Log.d(TAG, "🔍 DBG_TODAY_LISTENER: rawVal=" + rawVal + " type=" + (rawVal != null ? rawVal.getClass().getSimpleName() : "null") + " device=" + selectedDeviceId + " date=" + todayKey);
+                    Log.d(TAG, "Ã°Å¸â€Â DBG_TODAY_LISTENER: rawVal=" + rawVal + " type=" + (rawVal != null ? rawVal.getClass().getSimpleName() : "null") + " device=" + selectedDeviceId + " date=" + todayKey);
                     Number totalValue = rawVal instanceof Number ? (Number) rawVal : null;
                     loadedUsageDeviceIds.add(selectedDeviceId);
                     if (totalValue != null) {
                         long totalUsageMs = Math.max(0L, totalValue.longValue());
-                        Log.d(TAG, "🔍 DBG_TODAY_LISTENER: totalUsageMs=" + totalUsageMs);
+                        Log.d(TAG, "Ã°Å¸â€Â DBG_TODAY_LISTENER: totalUsageMs=" + totalUsageMs);
                         updateUsageDisplayUI(totalUsageMs);
                         Long lastSynced = lastUsageUploadTimestamps.get(selectedDeviceId);
                         cacheTodayUsageSummary(cacheManager, selectedDeviceId, todayKey, totalUsageMs,
@@ -5727,7 +5268,7 @@ public class ParentDashboardActivity extends BaseActivity {
                     } else {
                         // FALLBACK: totalScreenTimeMillis node is null/missing,
                         // try reading the full day node and compute total from apps
-                        Log.w(TAG, "🔍 DBG_TODAY_LISTENER: totalScreenTimeMillis is NULL, attempting full day fallback for " + selectedDeviceId + "/" + todayKey);
+                        Log.w(TAG, "Ã°Å¸â€Â DBG_TODAY_LISTENER: totalScreenTimeMillis is NULL, attempting full day fallback for " + selectedDeviceId + "/" + todayKey);
                         dayRef.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             @SuppressWarnings("unchecked")
@@ -5735,22 +5276,22 @@ public class ParentDashboardActivity extends BaseActivity {
                                 if (!isUsageSelectionCurrent(selectedDeviceId, todayKey)) return;
                                 if (fullDaySnap.exists()) {
                                     Object fullRaw = fullDaySnap.getValue();
-                                    Log.d(TAG, "🔍 DBG_TODAY_FALLBACK: fullDaySnap exists, type=" + (fullRaw != null ? fullRaw.getClass().getSimpleName() : "null"));
+                                    Log.d(TAG, "Ã°Å¸â€Â DBG_TODAY_FALLBACK: fullDaySnap exists, type=" + (fullRaw != null ? fullRaw.getClass().getSimpleName() : "null"));
                                     if (fullRaw instanceof Map) {
                                         Map<String, Object> dayMap = (Map<String, Object>) fullRaw;
-                                        Log.d(TAG, "🔍 DBG_TODAY_FALLBACK: dayMap keys=" + dayMap.keySet());
+                                        Log.d(TAG, "Ã°Å¸â€Â DBG_TODAY_FALLBACK: dayMap keys=" + dayMap.keySet());
                                         displayCachedSmartUsageData(dayMap, todayKey);
                                     } else {
                                         clearUsageDisplay();
                                     }
                                 } else {
-                                    Log.w(TAG, "🔍 DBG_TODAY_FALLBACK: full day snapshot does NOT exist");
+                                    Log.w(TAG, "Ã°Å¸â€Â DBG_TODAY_FALLBACK: full day snapshot does NOT exist");
                                     clearUsageDisplay();
                                 }
                             }
                             @Override
                             public void onCancelled(@NonNull DatabaseError error) {
-                                Log.e(TAG, "🔍 DBG_TODAY_FALLBACK: cancelled: " + error.getMessage());
+                                Log.e(TAG, "Ã°Å¸â€Â DBG_TODAY_FALLBACK: cancelled: " + error.getMessage());
                             }
                         });
                     }
@@ -5866,7 +5407,7 @@ public class ParentDashboardActivity extends BaseActivity {
         return dateKey.equals(selectedDateKey);
     }
     /**
-     * 🎯 Display Smart Usage Data using yyyy-MM-dd keys
+     * Ã°Å¸Å½Â¯ Display Smart Usage Data using yyyy-MM-dd keys
      */
     private void displaySmartUsageData(DataSnapshot smartDataSnapshot, String requestedDateKey) {
         displaySmartUsageData(smartDataSnapshot, requestedDateKey, false);
@@ -5882,7 +5423,7 @@ public class ParentDashboardActivity extends BaseActivity {
         final String selectedDeviceId = currentChildDeviceId;
         usageComputationExecutor.execute(() -> {
             try {
-                Log.d(TAG, "🎯 Processing smart usage data (susage) for date: " + requestedDateKey);
+                Log.d(TAG, "Ã°Å¸Å½Â¯ Processing smart usage data (susage) for date: " + requestedDateKey);
 
                 // Look for data in weeklyData -> [DateKey]
                 DataSnapshot dailyDataSnapshot;
@@ -5898,7 +5439,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 String totalUsageTextFallback = null;
 
                 if (dailyDataSnapshot.exists()) {
-                    Log.d(TAG, "✅ Found usage data for " + requestedDateKey);
+                    Log.d(TAG, "Ã¢Å“â€¦ Found usage data for " + requestedDateKey);
 
                     // Prefer canonical total if present
                     if (dailyDataSnapshot.hasChild("totalScreenTimeMillis")) {
@@ -5906,7 +5447,7 @@ public class ParentDashboardActivity extends BaseActivity {
                             Long storedTotal = dailyDataSnapshot.child("totalScreenTimeMillis").getValue(Long.class);
                             if (storedTotal != null) {
                                 totalUsage = storedTotal;
-                                Log.d(TAG, "⚡ Using canonical totalScreenTimeMillis: " + totalUsage);
+                                Log.d(TAG, "Ã¢Å¡Â¡ Using canonical totalScreenTimeMillis: " + totalUsage);
                             }
                         } catch (Exception e) {
                             Log.w(TAG, "Error reading totalScreenTimeMillis: " + e.getMessage());
@@ -5927,7 +5468,7 @@ public class ParentDashboardActivity extends BaseActivity {
                                     Log.e(TAG, "Error reading app usage fallback: " + ex.getMessage());
                                 }
                             }
-                            Log.d(TAG, "⚡ Summed per-app usage (with fallbacks): " + totalUsage);
+                            Log.d(TAG, "Ã¢Å¡Â¡ Summed per-app usage (with fallbacks): " + totalUsage);
                         }
                     }
 
@@ -5938,19 +5479,19 @@ public class ParentDashboardActivity extends BaseActivity {
                                 Long t = dailyDataSnapshot.child("totalUsageMs").getValue(Long.class);
                                 if (t != null) {
                                     totalUsage = t;
-                                    Log.d(TAG, "⚡ Used fallback totalUsageMs: " + totalUsage);
+                                    Log.d(TAG, "Ã¢Å¡Â¡ Used fallback totalUsageMs: " + totalUsage);
                                 }
                             } else if (dailyDataSnapshot.hasChild("total_usage_ms")) {
                                 Long t = dailyDataSnapshot.child("total_usage_ms").getValue(Long.class);
                                 if (t != null) {
                                     totalUsage = t;
-                                    Log.d(TAG, "⚡ Used fallback total_usage_ms: " + totalUsage);
+                                    Log.d(TAG, "Ã¢Å¡Â¡ Used fallback total_usage_ms: " + totalUsage);
                                 }
                             } else if (dailyDataSnapshot.hasChild("totalText")) {
                                 String t = dailyDataSnapshot.child("totalText").getValue(String.class);
                                 if (t != null && !t.isEmpty()) {
                                     totalUsageTextFallback = t;
-                                    Log.d(TAG, "⚡ Using legacy totalText as formatted fallback: " + t);
+                                    Log.d(TAG, "Ã¢Å¡Â¡ Using legacy totalText as formatted fallback: " + t);
                                 }
                             } else if (dailyDataSnapshot.hasChild("totalTexts")) {
                                 DataSnapshot totalTextsSnapshot = dailyDataSnapshot.child("totalTexts");
@@ -5964,7 +5505,7 @@ public class ParentDashboardActivity extends BaseActivity {
                                 int arrayIndex = totalTextsList.size() - 1;
                                 if (arrayIndex >= 0 && arrayIndex < totalTextsList.size()) {
                                     totalUsageTextFallback = totalTextsList.get(arrayIndex);
-                                    Log.d(TAG, "⚡ Using legacy totalTexts last item as fallback: " + totalUsageTextFallback);
+                                    Log.d(TAG, "Ã¢Å¡Â¡ Using legacy totalTexts last item as fallback: " + totalUsageTextFallback);
                                 }
                             }
                         } catch (Exception ex) {
@@ -5972,7 +5513,7 @@ public class ParentDashboardActivity extends BaseActivity {
                         }
                     }
                 } else {
-                    Log.d(TAG, "❌ No data found for date key: " + requestedDateKey);
+                    Log.d(TAG, "Ã¢ÂÅ’ No data found for date key: " + requestedDateKey);
                 }
 
                 Log.d(TAG, "DBG_USAGE_PATH: source=SMART date=" + requestedDateKey +
@@ -5988,18 +5529,18 @@ public class ParentDashboardActivity extends BaseActivity {
                     }
                     if (finalTotalUsage > 0) {
                         updateUsageDisplayUI(finalTotalUsage);
-                        Log.d(TAG, "📊 Total usage calc (ms): " + formatDurationMs(finalTotalUsage));
+                        Log.d(TAG, "Ã°Å¸â€œÅ  Total usage calc (ms): " + formatDurationMs(finalTotalUsage));
                     } else if (finalTotalUsageText != null) {
                         updateTotalUsageUI(finalTotalUsageText);
-                        Log.d(TAG, "📊 Total usage calc (text fallback): " + finalTotalUsageText);
+                        Log.d(TAG, "Ã°Å¸â€œÅ  Total usage calc (text fallback): " + finalTotalUsageText);
                     } else {
                         updateUsageDisplayUI(0);
-                        Log.d(TAG, "📊 No usable total found; showing 0");
+                        Log.d(TAG, "Ã°Å¸â€œÅ  No usable total found; showing 0");
                     }
                 });
 
             } catch (Exception e) {
-                Log.e(TAG, "❌ Error displaying smart usage data: " + e.getMessage());
+                Log.e(TAG, "Ã¢ÂÅ’ Error displaying smart usage data: " + e.getMessage());
                 e.printStackTrace();
                 runOnUiThread(() -> {
                     if (selectedDeviceId != null && selectedDeviceId.equals(currentChildDeviceId)) {
@@ -6040,7 +5581,7 @@ public class ParentDashboardActivity extends BaseActivity {
         final String selectedDeviceId = currentChildDeviceId;
         usageComputationExecutor.execute(() -> {
             try {
-                Log.d(TAG, "🎯 Processing cached smart usage data for date: " + requestedDateKey);
+                Log.d(TAG, "Ã°Å¸Å½Â¯ Processing cached smart usage data for date: " + requestedDateKey);
                 long totalUsage = 0L;
 
                 if (dailyMap != null) {
@@ -6078,7 +5619,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 });
 
             } catch (Exception e) {
-                Log.e(TAG, "❌ Error displaying cached smart usage data: " + e.getMessage());
+                Log.e(TAG, "Ã¢ÂÅ’ Error displaying cached smart usage data: " + e.getMessage());
                 runOnUiThread(() -> {
                     if (selectedDeviceId != null && selectedDeviceId.equals(currentChildDeviceId)) {
                         clearUsageDisplay();
@@ -6089,7 +5630,7 @@ public class ParentDashboardActivity extends BaseActivity {
     }
 
     /**
-     * 📊 Display smart usage list data
+     * Ã°Å¸â€œÅ  Display smart usage list data
      */
     private long readUsageMillisFromAppSnapshot(DataSnapshot appSnapshot) {
         Object rawValue = appSnapshot.getValue();
@@ -6126,7 +5667,7 @@ public class ParentDashboardActivity extends BaseActivity {
     }
     private void displaySmartUsageList(List<AppUsage> appUsageList) {
         try {
-            Log.d(TAG, "📊 Displaying " + appUsageList.size() + " apps from smart usage data");
+            Log.d(TAG, "Ã°Å¸â€œÅ  Displaying " + appUsageList.size() + " apps from smart usage data");
 
             // Calculate total usage time
             long totalUsage = 0;
@@ -6140,23 +5681,23 @@ public class ParentDashboardActivity extends BaseActivity {
             // Log app details for debugging
             for (int i = 0; i < Math.min(appUsageList.size(), 5); i++) {
                 AppUsage app = appUsageList.get(i);
-                Log.d(TAG, "📱 App " + (i + 1) + ": " + app.getAppName() +
+                Log.d(TAG, "Ã°Å¸â€œÂ± App " + (i + 1) + ": " + app.getAppName() +
                         " - " + formatDurationMs(app.getUsageTime()));
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "❌ Error displaying smart usage list: " + e.getMessage());
+            Log.e(TAG, "Ã¢ÂÅ’ Error displaying smart usage list: " + e.getMessage());
             clearUsageDisplay();
         }
     }
 
     /**
-     * 📊 Show smart tracking information to user
+     * Ã°Å¸â€œÅ  Show smart tracking information to user
      */
     private void showSmartTrackingInfo(long trackingStartTime, long daysSinceTracking, int appsCount) {
         try {
             Date trackingStart = new Date(trackingStartTime);
-            String trackingInfo = String.format("🎯 Smart Tracking: Day %d since %s (%d apps)",
+            String trackingInfo = String.format("Ã°Å¸Å½Â¯ Smart Tracking: Day %d since %s (%d apps)",
                     daysSinceTracking + 1,
                     new SimpleDateFormat("MMM dd", Locale.getDefault()).format(trackingStart),
                     appsCount);
@@ -6171,7 +5712,7 @@ public class ParentDashboardActivity extends BaseActivity {
     }
 
     /**
-     * 📭 Display message when no data is available for selected date
+     * Ã°Å¸â€œÂ­ Display message when no data is available for selected date
      */
     private void displayNoDataMessage(long daysSinceTracking, long currentDay) {
         clearUsageDisplay();
@@ -6187,22 +5728,22 @@ public class ParentDashboardActivity extends BaseActivity {
             message = "No usage data recorded for this day";
         }
 
-        Log.d(TAG, "📭 " + message);
+        Log.d(TAG, "Ã°Å¸â€œÂ­ " + message);
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
     /**
-     * 🔄 LEGACY METHOD - Replaced by Smart Usage Tracking
+     * Ã°Å¸â€â€ž LEGACY METHOD - Replaced by Smart Usage Tracking
      *
      * @deprecated Use loadSmartUsageDataForSelectedDate() instead
      */
     @Deprecated
         /**
-     * 📅 Display date-aware usage data (NEW METHOD - no data contamination between
+     * Ã°Å¸â€œâ€¦ Display date-aware usage data (NEW METHOD - no data contamination between
      * days)
      */
         /**
-     * 📭 Display empty usage state for a specific date
+     * Ã°Å¸â€œÂ­ Display empty usage state for a specific date
      */
     private void displayEmptyUsageState(String dateKey, String dayLabel) {
         // Clear app list - using existing container or skip if not available
@@ -6212,7 +5753,7 @@ public class ParentDashboardActivity extends BaseActivity {
         //
         // // Add empty state message
         // TextView emptyMessage = new TextView(this);
-        // emptyMessage.setText("📭 No usage data recorded for " + dayLabel);
+        // emptyMessage.setText("Ã°Å¸â€œÂ­ No usage data recorded for " + dayLabel);
         // emptyMessage.setTextSize(16);
         // emptyMessage.setTextColor(getResources().getColor(android.R.color.darker_gray));
         // emptyMessage.setPadding(32, 32, 32, 32);
@@ -6221,9 +5762,9 @@ public class ParentDashboardActivity extends BaseActivity {
         // appUsageContainer.addView(emptyMessage);
         // }
 
-        Log.d(TAG, "📭 No usage data for " + dayLabel + " (" + dateKey + ")");
+        Log.d(TAG, "Ã°Å¸â€œÂ­ No usage data for " + dayLabel + " (" + dateKey + ")");
 
-        Log.d(TAG, "📭 Displayed empty state for " + dateKey + " (" + dayLabel + ")");
+        Log.d(TAG, "Ã°Å¸â€œÂ­ Displayed empty state for " + dateKey + " (" + dayLabel + ")");
     }
 
     /**
@@ -6244,9 +5785,9 @@ public class ParentDashboardActivity extends BaseActivity {
 
         usageComputationExecutor.execute(() -> {
             try {
-                Log.d(TAG, "⚡ DATE-AWARE displaying usage data for device: " + selectedDeviceId);
-                Log.d(TAG, "🔍 DEBUG: Current selected date: " + usageDateFormat.format(currentUsageDate.getTime()));
-                Log.d(TAG, "🔍 DEBUG: User set date flag: " + dateSetByUser);
+                Log.d(TAG, "Ã¢Å¡Â¡ DATE-AWARE displaying usage data for device: " + selectedDeviceId);
+                Log.d(TAG, "Ã°Å¸â€Â DEBUG: Current selected date: " + usageDateFormat.format(currentUsageDate.getTime()));
+                Log.d(TAG, "Ã°Å¸â€Â DEBUG: User set date flag: " + dateSetByUser);
 
                 Calendar today = Calendar.getInstance();
                 today.set(Calendar.HOUR_OF_DAY, 0);
@@ -6263,14 +5804,14 @@ public class ParentDashboardActivity extends BaseActivity {
                 long diffInMs = today.getTimeInMillis() - selectedCompare.getTimeInMillis();
                 int daysBack = (int) (diffInMs / (24 * 60 * 60 * 1000));
 
-                Log.d(TAG, "⚡ Selected date: " + selectedDateKey + " is " + daysBack + " days back from today");
+                Log.d(TAG, "Ã¢Å¡Â¡ Selected date: " + selectedDateKey + " is " + daysBack + " days back from today");
 
                 String totalTimeText = null;
 
                 if (daysBack == 0) {
                     totalTimeText = snapshot.child("totalText").getValue(String.class);
                     if (totalTimeText != null && !totalTimeText.isEmpty()) {
-                        Log.d(TAG, "⚡ TODAY: Found totalText field: " + totalTimeText);
+                        Log.d(TAG, "Ã¢Å¡Â¡ TODAY: Found totalText field: " + totalTimeText);
                     }
                 }
 
@@ -6285,17 +5826,17 @@ public class ParentDashboardActivity extends BaseActivity {
                         }
                     }
 
-                    Log.d(TAG, "⚡ Found " + totalTextsList.size() + " total texts in array");
+                    Log.d(TAG, "Ã¢Å¡Â¡ Found " + totalTextsList.size() + " total texts in array");
 
                     int arrayIndex = totalTextsList.size() - 1 - daysBack;
                     if (arrayIndex >= 0 && arrayIndex < totalTextsList.size()) {
                         totalTimeText = totalTextsList.get(arrayIndex);
                         if (totalTimeText != null && !totalTimeText.isEmpty()) {
-                            Log.d(TAG, "⚡ DATE-SPECIFIC: Found total for " + selectedDateKey + " at index " + arrayIndex
+                            Log.d(TAG, "Ã¢Å¡Â¡ DATE-SPECIFIC: Found total for " + selectedDateKey + " at index " + arrayIndex
                                     + ": " + totalTimeText);
                         }
                     } else {
-                        Log.d(TAG, "⚡ No data available for " + selectedDateKey + " (index " + arrayIndex
+                        Log.d(TAG, "Ã¢Å¡Â¡ No data available for " + selectedDateKey + " (index " + arrayIndex
                                 + " out of bounds for " + totalTextsList.size() + " items)");
                     }
                 }
@@ -6313,13 +5854,13 @@ public class ParentDashboardActivity extends BaseActivity {
                                 totalTimeText = selectedDayData.child("summaryText").getValue(String.class);
                             }
                             if (totalTimeText != null && !totalTimeText.isEmpty()) {
-                                Log.d(TAG, "⚡ Found 7-day data for " + selectedDateKey + ": " + totalTimeText);
+                                Log.d(TAG, "Ã¢Å¡Â¡ Found 7-day data for " + selectedDateKey + ": " + totalTimeText);
                             }
                         } else {
-                            Log.d(TAG, "⚡ No apps data found at index " + arrayIndex + " for dailyApps");
+                            Log.d(TAG, "Ã¢Å¡Â¡ No apps data found at index " + arrayIndex + " for dailyApps");
                         }
                     } else {
-                        Log.d(TAG, "⚡ No data available for " + selectedDateKey + " (index " + arrayIndex + " out of bounds for " + childCount + " items)");
+                        Log.d(TAG, "Ã¢Å¡Â¡ No data available for " + selectedDateKey + " (index " + arrayIndex + " out of bounds for " + childCount + " items)");
                     }
                 }
 
@@ -6342,13 +5883,13 @@ public class ParentDashboardActivity extends BaseActivity {
                     } else if (daysBack == 0) {
                         calculateTotalFromApps(snapshot);
                     } else {
-                        Log.d(TAG, "⚡ NO DATA: No historical data found for " + selectedDateKey);
+                        Log.d(TAG, "Ã¢Å¡Â¡ NO DATA: No historical data found for " + selectedDateKey);
                         loadSmartUsageDataForSelectedDate();
                     }
                 });
 
             } catch (Exception e) {
-                Log.e(TAG, "❌ Error displaying usage data: " + e.getMessage());
+                Log.e(TAG, "Ã¢ÂÅ’ Error displaying usage data: " + e.getMessage());
                 runOnUiThread(() -> {
                     if (selectedDeviceId != null && selectedDeviceId.equals(currentChildDeviceId)) {
                         clearUsageDisplay();
@@ -6377,7 +5918,7 @@ public class ParentDashboardActivity extends BaseActivity {
             }
         }
 
-        Log.d(TAG, "⚡ Total usage calculated: " + totalText);
+        Log.d(TAG, "Ã¢Å¡Â¡ Total usage calculated: " + totalText);
     }
 
     /**
@@ -6424,12 +5965,12 @@ public class ParentDashboardActivity extends BaseActivity {
             }
         }
 
-        // 🛡️ REJECTION LOGIC: If calculated usage is 0, but we have valid cache,
+        // Ã°Å¸â€ºÂ¡Ã¯Â¸Â REJECTION LOGIC: If calculated usage is 0, but we have valid cache,
         // suspicious!
         if (totalUsage == 0 && cachedUsageFormatted.containsKey(currentChildDeviceId)) {
             String cachedVal = cachedUsageFormatted.get(currentChildDeviceId);
             if (cachedVal != null && !cachedVal.equals("0m") && !cachedVal.equals("0h 0m")) {
-                Log.w(TAG, "⚠️ POTENTIAL BAD DATA: Ignored 0 usage from fast-fetch because cache has " + cachedVal);
+                Log.w(TAG, "Ã¢Å¡Â Ã¯Â¸Â POTENTIAL BAD DATA: Ignored 0 usage from fast-fetch because cache has " + cachedVal);
                 return;
             }
         }
@@ -6439,7 +5980,7 @@ public class ParentDashboardActivity extends BaseActivity {
             (snapshot.child("apps").exists() ? snapshot.child("apps").getChildrenCount() : 0));
         updateUsageDisplayUI(totalUsage);
 
-        Log.d(TAG, "⚡ CALCULATED total usage: " + formatDurationMs(totalUsage));
+        Log.d(TAG, "Ã¢Å¡Â¡ CALCULATED total usage: " + formatDurationMs(totalUsage));
     }
 
     /**
@@ -6468,13 +6009,13 @@ public class ParentDashboardActivity extends BaseActivity {
                             Log.e(TAG, "Error parsing daily app usage for date: " + e.getMessage());
                         }
                     }
-                    Log.d(TAG, "⚡ DATE-SPECIFIC: Calculated total for " + daysBack + " days back: "
+                    Log.d(TAG, "Ã¢Å¡Â¡ DATE-SPECIFIC: Calculated total for " + daysBack + " days back: "
                             + formatDurationMs(totalUsage));
                 } else {
-                    Log.d(TAG, "⚡ No apps data found for " + daysBack + " days back at index " + arrayIndex);
+                    Log.d(TAG, "Ã¢Å¡Â¡ No apps data found for " + daysBack + " days back at index " + arrayIndex);
                 }
             } else {
-                Log.d(TAG, "⚡ Date index " + arrayIndex + " out of bounds for " + childCount + " days");
+                Log.d(TAG, "Ã¢Å¡Â¡ Date index " + arrayIndex + " out of bounds for " + childCount + " days");
             }
         }
 
@@ -6734,17 +6275,17 @@ public class ParentDashboardActivity extends BaseActivity {
             tvTotalTime.setText(formattedTime);
         }
 
-        // 🎯 CACHE the data for instant display next time (Persistent + Memory)
+        // Ã°Å¸Å½Â¯ CACHE the data for instant display next time (Persistent + Memory)
         if (currentChildDeviceId != null && !currentChildDeviceId.isEmpty()) {
             cachedUsageData.put(currentChildDeviceId, totalMs);
             cachedUsageFormatted.put(currentChildDeviceId, formattedTime);
 
-            // 💾 PERSIST TO DISK
+            // Ã°Å¸â€™Â¾ PERSIST TO DISK
             if (usageCachePrefs != null) {
                 usageCachePrefs.edit().putString(currentChildDeviceId, formattedTime).apply();
             }
 
-            Log.d(TAG, "📦 Cached usage for " + currentChildDeviceId + ": " + formattedTime);
+            Log.d(TAG, "Ã°Å¸â€œÂ¦ Cached usage for " + currentChildDeviceId + ": " + formattedTime);
         }
 
         Log.d(TAG, "UI updated with total usage: " + formattedTime);
@@ -6772,13 +6313,13 @@ public class ParentDashboardActivity extends BaseActivity {
      */
     private void forceRefreshTodayData() {
         if (currentChildDeviceId == null || currentChildDeviceId.isEmpty()) {
-            Log.w(TAG, "⚠️ No child device selected for today's data refresh");
+            Log.w(TAG, "Ã¢Å¡Â Ã¯Â¸Â No child device selected for today's data refresh");
             return;
         }
 
         String dateKey = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
                 .format(currentUsageDate.getTime());
-        Log.d(TAG, "📅 Force refreshing data for SELECTED date: " + dateKey + " for device: " + currentChildDeviceName);
+        Log.d(TAG, "Ã°Å¸â€œâ€¦ Force refreshing data for SELECTED date: " + dateKey + " for device: " + currentChildDeviceName);
 
         // PRESERVE user's selected date - DO NOT force today
         // currentUsageDate remains unchanged - user's choice is respected
@@ -6902,7 +6443,7 @@ public class ParentDashboardActivity extends BaseActivity {
                         } else {
                             StringBuilder appListText = new StringBuilder();
                             for (String appName : appNames) {
-                                appListText.append("• ").append(appName).append("\n");
+                                appListText.append("Ã¢â‚¬Â¢ ").append(appName).append("\n");
                             }
                             appListText.append("\nTotal: ").append(appNames.size()).append(" apps");
                             builder.setMessage(appListText.toString());
@@ -6972,12 +6513,12 @@ public class ParentDashboardActivity extends BaseActivity {
      */
     private void refreshUsageDataFromChildEnhanced() {
         if (currentChildDeviceId == null || currentChildDeviceId.isEmpty()) {
-            Log.w(TAG, "🔄 No child device selected for enhanced refresh");
+            Log.w(TAG, "Ã°Å¸â€â€ž No child device selected for enhanced refresh");
             Toast.makeText(this, "Please select a child device first", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Log.d(TAG, "🚀 Starting FAST usage data refresh for device: " + currentChildDeviceId);
+        Log.d(TAG, "Ã°Å¸Å¡â‚¬ Starting FAST usage data refresh for device: " + currentChildDeviceId);
 
         // Show loading state
         Button btnUpdateUsageData = findViewById(R.id.btnUpdateUsageData);
@@ -6988,7 +6529,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
         // Use SMART tracking structure for immediate refresh
         loadSmartUsageDataForSelectedDate();
-        Toast.makeText(this, "📊 Refreshing usage data...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Ã°Å¸â€œÅ  Refreshing usage data...", Toast.LENGTH_SHORT).show();
 
         // Re-enable button after short delay
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -7016,14 +6557,14 @@ public class ParentDashboardActivity extends BaseActivity {
      */
     private void refreshUsageDataFromChild(boolean silentMode) {
         if (currentChildDeviceId == null || currentChildDeviceId.isEmpty()) {
-            Log.w(TAG, "🔄 No child device selected for usage data refresh");
+            Log.w(TAG, "Ã°Å¸â€â€ž No child device selected for usage data refresh");
             if (!silentMode) {
                 Toast.makeText(this, "Please select a child device first", Toast.LENGTH_SHORT).show();
             }
             return;
         }
 
-        Log.d(TAG, "🔄 Starting enhanced usage data refresh for device: " + currentChildDeviceId + " ("
+        Log.d(TAG, "Ã°Å¸â€â€ž Starting enhanced usage data refresh for device: " + currentChildDeviceId + " ("
                 + currentChildDeviceName + ")");
 
         // Show loading state and disable update button temporarily
@@ -7035,7 +6576,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
         // Show toast only if not in silent mode
         if (!silentMode) {
-            Toast.makeText(this, "🔄 Refreshing usage data from " + currentChildDeviceName + "...", Toast.LENGTH_SHORT)
+            Toast.makeText(this, "Ã°Å¸â€â€ž Refreshing usage data from " + currentChildDeviceName + "...", Toast.LENGTH_SHORT)
                     .show();
             showLoadingState();
         } else {
@@ -7062,7 +6603,7 @@ public class ParentDashboardActivity extends BaseActivity {
      * Check child device status and trigger data upload if online
      */
     private void checkChildDeviceStatusAndTriggerUpload() {
-        Log.d(TAG, "📡 Checking child device status and triggering data upload...");
+        Log.d(TAG, "Ã°Å¸â€œÂ¡ Checking child device status and triggering data upload...");
 
         // Check device status first
         DatabaseReference deviceStatusRef = FirebaseDatabase.getInstance()
@@ -7077,7 +6618,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 Long lastSeen = dataSnapshot.child("lastSeen").getValue(Long.class);
 
                 if (Boolean.TRUE.equals(isOnline)) {
-                    Log.d(TAG, "✅ Child device is online - sending data upload trigger");
+                    Log.d(TAG, "Ã¢Å“â€¦ Child device is online - sending data upload trigger");
 
                     // Send canonical v2 usage-refresh command to child device.
                     DatabaseReference uploadTriggerRef = FirebaseDatabase.getInstance()
@@ -7096,16 +6637,16 @@ public class ParentDashboardActivity extends BaseActivity {
 
                     uploadTriggerRef.setValue(triggerData)
                             .addOnSuccessListener(aVoid -> {
-                                Log.d(TAG, "✅ Upload trigger sent successfully to child device");
+                                Log.d(TAG, "Ã¢Å“â€¦ Upload trigger sent successfully to child device");
                                 Toast.makeText(ParentDashboardActivity.this,
-                                        "📤 Requesting fresh data from " + currentChildDeviceName,
+                                        "Ã°Å¸â€œÂ¤ Requesting fresh data from " + currentChildDeviceName,
                                         Toast.LENGTH_SHORT).show();
                             })
                             .addOnFailureListener(e -> {
-                                Log.e(TAG, "❌ Failed to send upload trigger: " + e.getMessage());
+                                Log.e(TAG, "Ã¢ÂÅ’ Failed to send upload trigger: " + e.getMessage());
                             });
                 } else {
-                    Log.w(TAG, "⚠️ Child device is offline - cannot trigger fresh data upload");
+                    Log.w(TAG, "Ã¢Å¡Â Ã¯Â¸Â Child device is offline - cannot trigger fresh data upload");
                     String lastSeenText = "unknown";
                     if (lastSeen != null) {
                         long timeSince = (System.currentTimeMillis() - lastSeen) / 1000;
@@ -7118,14 +6659,14 @@ public class ParentDashboardActivity extends BaseActivity {
                     }
 
                     Toast.makeText(ParentDashboardActivity.this,
-                            "📱 " + currentChildDeviceName + " is offline (last seen " + lastSeenText + ")",
+                            "Ã°Å¸â€œÂ± " + currentChildDeviceName + " is offline (last seen " + lastSeenText + ")",
                             Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e(TAG, "❌ Error checking device status: " + databaseError.getMessage());
+                Log.e(TAG, "Ã¢ÂÅ’ Error checking device status: " + databaseError.getMessage());
             }
         });
     }
@@ -7151,7 +6692,7 @@ public class ParentDashboardActivity extends BaseActivity {
      * Called when all refresh operations are completed
      */
     private void onAllRefreshesCompleted() {
-        Log.d(TAG, "✅ All data refresh operations completed");
+        Log.d(TAG, "Ã¢Å“â€¦ All data refresh operations completed");
 
         // Update device status display
         runOnUiThread(() -> {
@@ -7161,7 +6702,7 @@ public class ParentDashboardActivity extends BaseActivity {
             // Force reload of current date's usage data
             loadSmartUsageDataForSelectedDate();
 
-            Toast.makeText(this, "✅ Usage data updated successfully", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Ã¢Å“â€¦ Usage data updated successfully", Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -7181,18 +6722,18 @@ public class ParentDashboardActivity extends BaseActivity {
             }
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
-            builder.setTitle("🎉 Welcome to Parental Control");
+            builder.setTitle("Ã°Å¸Å½â€° Welcome to Parental Control");
             builder.setMessage("Welcome! Here are some important tips:\n\n" +
-                    "• Use the QR code scanner to connect child devices\n" +
-                    "• Monitor and manage your child's screen time easily\n" +
-                    "• Access all controls from this parent dashboard\n\n" +
-                    "⚠️ TROUBLESHOOTING: If you can see a device name but cannot track its data, please:\n" +
+                    "Ã¢â‚¬Â¢ Use the QR code scanner to connect child devices\n" +
+                    "Ã¢â‚¬Â¢ Monitor and manage your child's screen time easily\n" +
+                    "Ã¢â‚¬Â¢ Access all controls from this parent dashboard\n\n" +
+                    "Ã¢Å¡Â Ã¯Â¸Â TROUBLESHOOTING: If you can see a device name but cannot track its data, please:\n" +
                     "1. Remove the device from this app\n" +
                     "2. Reinstall the app on the child device\n" +
                     "3. Connect the child via QR code again\n\n" +
-                    "🔒 IMPORTANT SECURITY: Before uninstalling this app or logging out permanently:\n" +
-                    "• Always remove all connected child devices first\n" +
-                    "• This prevents security issues and data conflicts");
+                    "Ã°Å¸â€â€™ IMPORTANT SECURITY: Before uninstalling this app or logging out permanently:\n" +
+                    "Ã¢â‚¬Â¢ Always remove all connected child devices first\n" +
+                    "Ã¢â‚¬Â¢ This prevents security issues and data conflicts");
             builder.setCancelable(false);
 
             builder.setPositiveButton("Got It", (dialog, which) -> {
@@ -7236,15 +6777,15 @@ public class ParentDashboardActivity extends BaseActivity {
     private void showTroubleshootingDialog() {
         try {
             AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
-            builder.setTitle("🛠️ Device Tracking Help");
+            builder.setTitle("Ã°Å¸â€ºÂ Ã¯Â¸Â Device Tracking Help");
             builder.setMessage("If you can see a device name but cannot track its data:\n\n" +
                     "SOLUTION:\n" +
                     "1. Remove the device from this parent app\n" +
                     "2. Reinstall the app on the child device\n" +
                     "3. Connect the child via QR code again\n\n" +
                     "This usually fixes connection and data tracking issues.\n\n" +
-                    "💡 TIP: Make sure both devices have stable internet connection when connecting via QR code.\n\n" +
-                    "🔒 SECURITY REMINDER: Before uninstalling this app, always remove all connected devices first to prevent security issues.");
+                    "Ã°Å¸â€™Â¡ TIP: Make sure both devices have stable internet connection when connecting via QR code.\n\n" +
+                    "Ã°Å¸â€â€™ SECURITY REMINDER: Before uninstalling this app, always remove all connected devices first to prevent security issues.");
 
             builder.setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
 
@@ -7287,413 +6828,27 @@ public class ParentDashboardActivity extends BaseActivity {
                 // ParentDashboardActivity mainly monitors via Firebase
             }
 
-            Log.d(TAG, "✅ All background services verification completed");
+            Log.d(TAG, "Ã¢Å“â€¦ All background services verification completed");
 
         } catch (Exception e) {
-            Log.e(TAG, "❌ Error ensuring background services: " + e.getMessage());
+            Log.e(TAG, "Ã¢ÂÅ’ Error ensuring background services: " + e.getMessage());
         }
     }
 
     /**
-     * 🔧 FORCE-CLOSE PERSISTENCE FIX: Restore Focus Mode state when app restarts
      * after force-close
-     * This method scans all stored Focus Mode data and restores the last active
      * device and its state
      */
-    private void restoreFocusModeStateAfterRestart() {
-        try {
-            Log.d(TAG, "🔄 FOCUS MODE RESTORATION DEBUG - Starting restoration process...");
-
-            if (focusModePrefs == null) {
-                Log.e(TAG, "❌ CRITICAL: focusModePrefs is null, cannot restore Focus Mode state");
-                return;
-            }
-
-            // DEBUG: Show all stored preferences
-            Map<String, ?> allPrefs = focusModePrefs.getAll();
-            Log.d(TAG, "🔍 FOCUS MODE DEBUG - Total stored preferences: " + allPrefs.size());
-            for (Map.Entry<String, ?> entry : allPrefs.entrySet()) {
-                Log.d(TAG, "🔍 FOCUS MODE DEBUG - Stored: " + entry.getKey() + " = " + entry.getValue());
-            }
-
-            String lastActiveDevice = null;
-            String lastActiveDeviceName = "Unknown Device";
-            boolean foundActiveFocusMode = false;
-
-            String lastDeviceWithApps = null;
-            String lastDeviceWithAppsName = "Unknown Device";
-            boolean foundDeviceWithApps = false;
-
-            // Scan through all stored preferences to find Focus Mode data
-            for (Map.Entry<String, ?> entry : allPrefs.entrySet()) {
-                String key = entry.getKey();
-
-                // Look for active Focus Mode states (priority 1)
-                if (key.startsWith("focus_mode_active_")) {
-                    String deviceId = key.replace("focus_mode_active_", "");
-                    boolean isActive = (Boolean) entry.getValue();
-
-                    if (isActive) {
-                        Log.d(TAG, "🔍 FOCUS MODE DEBUG - Found ACTIVE Focus Mode preference for device: " + deviceId);
-
-                        // 🚫 DEVICE REMOVAL FIX: Check if device is permanently removed before
-                        // restoring
-                        if (isPermanentlyRemoved(deviceId)) {
-                            Log.d(TAG,
-                                    "🚫 FOCUS MODE DEBUG - Skipping permanently removed device in active focus mode scan: "
-                                            + deviceId);
-                            continue; // Skip this device completely
-                        }
-
-                        Log.d(TAG, "✅ FOCUS MODE DEBUG - Active Focus Mode device passed removal check: " + deviceId);
-                        lastActiveDevice = deviceId;
-                        foundActiveFocusMode = true;
-
-                        // Try to get device name from stored data
-                        String deviceNameKey = "device_name_" + deviceId;
-                        String storedDeviceName = focusModePrefs.getString(deviceNameKey, "Unknown Device");
-                        lastActiveDeviceName = storedDeviceName;
-
-                        String appsKey = "focus_apps_" + deviceId;
-                        String appsJson = focusModePrefs.getString(appsKey, "");
-                        if (!appsJson.isEmpty()) {
-                            Log.d(TAG, "Found stored Focus Mode apps for device: " + deviceId + " (" + storedDeviceName
-                                    + ")");
-                        }
-                        break; // Use the first active one found
-                    }
-                }
-
-                // 🔧 INACTIVE APP LIST RESTORATION: Look for devices with stored app lists
-                // (priority 2)
-                if (!foundActiveFocusMode && key.startsWith("focus_apps_")) {
-                    String deviceId = key.replace("focus_apps_", "");
-                    String appsJson = (String) entry.getValue();
-
-                    if (appsJson != null && !appsJson.isEmpty() && !appsJson.equals("[]")) {
-                        Log.d(TAG, "🔍 FOCUS MODE DEBUG - Found device with Focus Mode apps: " + deviceId);
-
-                        // 🚫 DEVICE REMOVAL FIX: Check if device is permanently removed before
-                        // restoring
-                        if (isPermanentlyRemoved(deviceId)) {
-                            Log.d(TAG, "🚫 FOCUS MODE DEBUG - Skipping permanently removed device in apps scan: "
-                                    + deviceId);
-                            continue; // Skip this device completely
-                        }
-
-                        Log.d(TAG, "✅ FOCUS MODE DEBUG - Apps device passed removal check: " + deviceId);
-                        lastDeviceWithApps = deviceId;
-                        foundDeviceWithApps = true;
-
-                        // Get device name
-                        String deviceNameKey = "device_name_" + deviceId;
-                        String storedDeviceName = focusModePrefs.getString(deviceNameKey, "Unknown Device");
-                        lastDeviceWithAppsName = storedDeviceName;
-
-                        Log.d(TAG, "Device with apps: " + deviceId + " (" + storedDeviceName + ")");
-                        // Continue scanning to see if there are more recent ones
-                    }
-                }
-            }
-
-            if (foundActiveFocusMode && lastActiveDevice != null) {
-                Log.d(TAG, "🎯 FOCUS MODE DEBUG - Attempting to restore ACTIVE Focus Mode for device: "
-                        + lastActiveDevice);
-                Log.d(TAG, "🎯 FOCUS MODE DEBUG - Device name: " + lastActiveDeviceName);
-                Log.d(TAG, "✅ Device passed permanent removal check during scanning - proceeding with restoration");
-
-                // Restore the device as current device (explicit restoration)
-                connectedDevicesManager.setCurrentDevice(lastActiveDevice, true);
-                currentChildDeviceId = lastActiveDevice;
-                currentChildDeviceName = lastActiveDeviceName;
-
-                // 🔧 Create a device object for the restored device and add to connected
-                // devices
-                ChildDevice restoredDevice = new ChildDevice();
-                restoredDevice.deviceId = lastActiveDevice;
-                restoredDevice.deviceName = lastActiveDeviceName;
-                restoredDevice.focusModeActive = true; // Since we found active focus mode
-                restoredDevice.lastConnected = System.currentTimeMillis(); // Set recent connection time
-
-                // Add to connected devices list so it shows up in UI
-                connectedDevices.clear();
-                connectedDevices.add(restoredDevice);
-
-                // Load Focus Mode apps and state for this device
-                loadFocusModeApps();
-
-                // 🔧 ENSURE UI UPDATE: Force UI update on main thread (ACTIVE)
-                runOnUiThread(() -> {
-                    updateFocusModeUI();
-                    updateTargetDeviceDisplay();
-                    updateDeviceStatus();
-
-                    // Additional logging to verify app list loaded (active)
-                    Log.d(TAG, "🎯 UI Updated (ACTIVE) - Focus Mode Apps loaded: " + focusModeApps.size());
-                    for (AppInfo app : focusModeApps) {
-                        Log.d(TAG, "   📱 App: " + (app.name != null ? app.name : app.packageName));
-                    }
-                });
-
-                // Sync with Firebase to ensure accuracy (with delay to allow app to fully
-                // initialize)
-                Handler restoreHandler = new Handler(Looper.getMainLooper());
-                restoreHandler.postDelayed(() -> {
-                    if (currentChildDeviceId != null) {
-                        checkActualFocusModeStateFromFirebase();
-                    }
-                }, 2000); // 2 second delay
-
-                Log.d(TAG, "✅ Focus Mode state restored successfully for device: " + lastActiveDevice);
-                Log.d(TAG, "   Focus Mode Active: " + isFocusModeActive);
-                Log.d(TAG, "   Focus Mode Apps: " + focusModeApps.size());
-
-            } else if (foundDeviceWithApps && lastDeviceWithApps != null) {
-                Log.d(TAG, "🎯 FOCUS MODE DEBUG - Attempting to restore INACTIVE Focus Mode apps for device: "
-                        + lastDeviceWithApps);
-                Log.d(TAG, "🎯 FOCUS MODE DEBUG - Device name: " + lastDeviceWithAppsName);
-                Log.d(TAG, "✅ Device passed permanent removal check during scanning - proceeding with restoration");
-
-                // Restore the device as current device (Focus Mode inactive but apps available)
-                connectedDevicesManager.setCurrentDevice(lastDeviceWithApps, true);
-                currentChildDeviceId = lastDeviceWithApps;
-                currentChildDeviceName = lastDeviceWithAppsName;
-
-                // 🔧 Create a device object for the restored device with apps
-                ChildDevice restoredDevice = new ChildDevice();
-                restoredDevice.deviceId = lastDeviceWithApps;
-                restoredDevice.deviceName = lastDeviceWithAppsName;
-                restoredDevice.focusModeActive = false; // Inactive but has apps
-                restoredDevice.lastConnected = System.currentTimeMillis();
-
-                // Add to connected devices list so it shows up in UI
-                connectedDevices.clear();
-                connectedDevices.add(restoredDevice);
-
-                // Load Focus Mode apps and state for this device
-                loadFocusModeApps();
-
-                // 🔧 ENSURE UI UPDATE: Force UI update on main thread (INACTIVE)
-                runOnUiThread(() -> {
-                    updateFocusModeUI();
-                    updateTargetDeviceDisplay();
-                    updateDeviceStatus();
-
-                    // Additional logging to verify app list loaded (inactive)
-                    Log.d(TAG, "🎯 UI Updated (INACTIVE) - Focus Mode Apps loaded: " + focusModeApps.size());
-                    for (AppInfo app : focusModeApps) {
-                        Log.d(TAG, "   📱 App: " + (app.name != null ? app.name : app.packageName));
-                    }
-                });
-
-                // Sync with Firebase to ensure accuracy (with delay to allow app to fully
-                // initialize)
-                Handler restoreHandler = new Handler(Looper.getMainLooper());
-                restoreHandler.postDelayed(() -> {
-                    if (currentChildDeviceId != null) {
-                        checkActualFocusModeStateFromFirebase();
-                    }
-                }, 2000); // 2 second delay
-
-                Log.d(TAG, "✅ Focus Mode app list restored successfully for device: " + lastDeviceWithApps);
-                Log.d(TAG, "   Focus Mode Active: " + isFocusModeActive);
-                Log.d(TAG, "   Focus Mode Apps: " + focusModeApps.size());
-
-            } else {
-                Log.d(TAG, "🎯 FOCUS MODE DEBUG - No Focus Mode data found to restore");
-                Log.d(TAG, "🎯 FOCUS MODE DEBUG - foundActiveFocusMode: " + foundActiveFocusMode);
-                Log.d(TAG, "🎯 FOCUS MODE DEBUG - foundDeviceWithApps: " + foundDeviceWithApps);
-                Log.d(TAG, "🎯 FOCUS MODE DEBUG - lastActiveDevice: " + lastActiveDevice);
-                Log.d(TAG, "🎯 FOCUS MODE DEBUG - lastDeviceWithApps: " + lastDeviceWithApps);
-            }
-
-        } catch (Exception e) {
-            Log.e(TAG, "❌ Error restoring Focus Mode state after restart: " + e.getMessage());
-        }
-    }
-
     /**
-     * 🔧 FORCE-CLOSE PERSISTENCE: Save current device name for restoration
+     * Ã°Å¸â€Â§ FORCE-CLOSE PERSISTENCE: Save current device name for restoration
      */
-    private void saveDeviceNameForCurrentDevice() {
-        if (currentChildDeviceId != null && currentChildDeviceName != null && focusModePrefs != null) {
-            String deviceNameKey = "device_name_" + currentChildDeviceId;
-            focusModePrefs.edit().putString(deviceNameKey, currentChildDeviceName).apply();
-            Log.d(TAG, "💾 Saved device name: " + currentChildDeviceName + " for device: " + currentChildDeviceId);
-        }
-    }
-
     /**
-     * Force Focus Mode UI update to ensure data displays immediately
      */
-    private void forceUpdateFocusModeUI() {
-        try {
-            // Load Focus Mode data for all possible devices
-            loadAllFocusModeData();
-
-            // Update UI immediately
-            runOnUiThread(() -> {
-                updateFocusModeUI();
-            });
-
-            // Add delayed update as backup
-            Handler handler = new Handler(Looper.getMainLooper());
-            handler.postDelayed(() -> {
-                updateFocusModeUI();
-            }, 500); // 500ms delay
-
-            // Another backup update
-            handler.postDelayed(() -> {
-                updateFocusModeUI();
-            }, 1000); // 1 second delay
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error in forceUpdateFocusModeUI: " + e.getMessage());
-        }
-    }
-
     /**
-     * Load Focus Mode data for all possible devices and select the best one
      */
-    private void loadAllFocusModeData() {
-        try {
-            Log.d(TAG, "Loading Focus Mode data...");
-
-            if (focusModePrefs == null) {
-                Log.e(TAG, "focusModePrefs is null, cannot load Focus Mode data");
-                return;
-            }
-
-            // Get all stored preferences
-            Map<String, ?> allPrefs = focusModePrefs.getAll();
-
-            String bestDeviceId = null;
-            String bestDeviceName = "Unknown Device";
-            boolean foundActiveDevice = false;
-            boolean foundDeviceWithApps = false;
-
-            // Priority 1: Look for active Focus Mode devices
-            for (Map.Entry<String, ?> entry : allPrefs.entrySet()) {
-                String key = entry.getKey();
-
-                if (key.startsWith("focus_mode_active_")) {
-                    String deviceId = key.replace("focus_mode_active_", "");
-                    boolean isActive = (Boolean) entry.getValue();
-
-                    if (isActive && !isPermanentlyRemoved(deviceId)) {
-                        bestDeviceId = deviceId;
-                        bestDeviceName = focusModePrefs.getString("device_name_" + deviceId, "Unknown Device");
-                        foundActiveDevice = true;
-                        Log.d(TAG, "Selected active Focus Mode device: " + bestDeviceName);
-                        break; // Active device takes priority
-                    }
-                }
-            }
-
-            // Priority 2: If no active device, look for devices with apps
-            if (!foundActiveDevice) {
-                for (Map.Entry<String, ?> entry : allPrefs.entrySet()) {
-                    String key = entry.getKey();
-
-                    if (key.startsWith("focus_apps_")) {
-                        String deviceId = key.replace("focus_apps_", "");
-                        String appsJson = (String) entry.getValue();
-
-                        if (appsJson != null && !appsJson.isEmpty() && !appsJson.equals("[]")
-                                && !isPermanentlyRemoved(deviceId)) {
-                            bestDeviceId = deviceId;
-                            bestDeviceName = focusModePrefs.getString("device_name_" + deviceId, "Unknown Device");
-                            foundDeviceWithApps = true;
-                            Log.d(TAG, "Selected device with Focus Mode apps: " + bestDeviceName);
-                            break; // Use first device with apps found
-                        }
-                    }
-                }
-            }
-
-            // If we found a suitable device, set it as current and load its data
-            if (bestDeviceId != null && (foundActiveDevice || foundDeviceWithApps)) {
-                Log.d(TAG, "Setting Focus Mode device: " + bestDeviceName);
-
-                // Create final copies for lambda usage
-                final String finalBestDeviceId = bestDeviceId;
-                final String finalBestDeviceName = bestDeviceName;
-                final boolean finalFoundActiveDevice = foundActiveDevice;
-
-                // Treat restoration as explicit
-                connectedDevicesManager.setCurrentDevice(finalBestDeviceId, true);
-                currentChildDeviceId = finalBestDeviceId;
-                currentChildDeviceName = finalBestDeviceName;
-
-                // Create device object if not in connected devices
-                if (connectedDevices.stream().noneMatch(d -> d.deviceId.equals(finalBestDeviceId))) {
-                    ChildDevice device = new ChildDevice();
-                    device.deviceId = finalBestDeviceId;
-                    device.deviceName = finalBestDeviceName;
-                    device.focusModeActive = finalFoundActiveDevice;
-                    device.lastConnected = System.currentTimeMillis();
-
-                    connectedDevices.clear();
-                    connectedDevices.add(device);
-                }
-
-                // Load Focus Mode data for this device
-                loadFocusModeApps();
-
-                // Update device display
-                updateDeviceStatus();
-                updateTargetDeviceDisplay();
-
-            } else {
-                Log.d(TAG, "No Focus Mode devices found");
-            }
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error loading all Focus Mode data: " + e.getMessage());
-        }
-    }
-
     /**
-     * 🔧 AUTO-RESTORE: If no devices loaded but Focus Mode data exists, clear
      * permanent removal status
      */
-    private void autoRestoreDevicesWithFocusMode() {
-        try {
-            Log.d(TAG, "🔧 AUTO-RESTORE - Checking if devices with Focus Mode data need restoration...");
-
-            if (connectedDevices.isEmpty() && focusModePrefs != null) {
-                Map<String, ?> allPrefs = focusModePrefs.getAll();
-
-                for (Map.Entry<String, ?> entry : allPrefs.entrySet()) {
-                    String key = entry.getKey();
-
-                    // Look for devices with Focus Mode apps or active state
-                    if (key.startsWith("focus_apps_") || key.startsWith("focus_mode_active_")) {
-                        String deviceId = key.replace("focus_apps_", "").replace("focus_mode_active_", "");
-
-                        if (isPermanentlyRemoved(deviceId)) {
-                            Log.d(TAG, "Auto-restoring device with Focus Mode data: " + deviceId);
-
-                            // Clear the permanent removal status
-                            removePermanentRemoval(deviceId);
-
-                            // Trigger a re-scan of Focus Mode data
-                            Handler handler = new Handler(Looper.getMainLooper());
-                            handler.postDelayed(() -> {
-                                forceUpdateFocusModeUI();
-                            }, 1000);
-
-                            break; // Only restore one device at a time
-                        }
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error in autoRestoreDevicesWithFocusMode: " + e.getMessage());
-        }
-    }
-
     // ===== USAGE LIMITER IMPLEMENTATION =====
 
     /**
@@ -7804,7 +6959,7 @@ public class ParentDashboardActivity extends BaseActivity {
                         && Boolean.TRUE.equals(dataSnapshot.child("isActive").getValue(Boolean.class))) {
                     // Timer is already active
                     Toast.makeText(ParentDashboardActivity.this,
-                            "⚠️ Timer is already running! Clear it first to set a new one.", Toast.LENGTH_LONG).show();
+                            "Ã¢Å¡Â Ã¯Â¸Â Timer is already running! Clear it first to set a new one.", Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -7830,17 +6985,17 @@ public class ParentDashboardActivity extends BaseActivity {
         String minutesText = etLimiterMinutes.getText().toString().trim();
 
         if (hoursText.isEmpty() && minutesText.isEmpty()) {
-            Toast.makeText(this, "⏰ Please enter timer duration (hours or minutes)", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Ã¢ÂÂ° Please enter timer duration (hours or minutes)", Toast.LENGTH_LONG).show();
             return;
         }
 
         if (selectedDays.isEmpty()) {
-            Toast.makeText(this, "📅 Please select which days the timer should work", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Ã°Å¸â€œâ€¦ Please select which days the timer should work", Toast.LENGTH_LONG).show();
             return;
         }
 
         if (selectedApps.isEmpty()) {
-            Toast.makeText(this, "📱 Please select apps to limit first", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Ã°Å¸â€œÂ± Please select apps to limit first", Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -7885,10 +7040,10 @@ public class ParentDashboardActivity extends BaseActivity {
 
                         // Enhanced success message
                         String timeText = (hours > 0 ? hours + "h " : "") + (minutes > 0 ? minutes + "m" : "");
-                        Toast.makeText(this, "✅ Usage limiter activated!\n" +
-                                "⏱️ Daily limit: " + timeText + "\n" +
-                                "📱 Apps: " + selectedApps.size() + " apps selected\n" +
-                                "📅 Active on: " + selectedDays.size() + " days",
+                        Toast.makeText(this, "Ã¢Å“â€¦ Usage limiter activated!\n" +
+                                "Ã¢ÂÂ±Ã¯Â¸Â Daily limit: " + timeText + "\n" +
+                                "Ã°Å¸â€œÂ± Apps: " + selectedApps.size() + " apps selected\n" +
+                                "Ã°Å¸â€œâ€¦ Active on: " + selectedDays.size() + " days",
                                 Toast.LENGTH_LONG).show();
 
                         // Update UI
@@ -7931,7 +7086,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 if (!dataSnapshot.exists()
                         || !Boolean.TRUE.equals(dataSnapshot.child("isActive").getValue(Boolean.class))) {
                     // No timer is set
-                    Toast.makeText(ParentDashboardActivity.this, "❌ No timer set", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ParentDashboardActivity.this, "Ã¢ÂÅ’ No timer set", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -7957,10 +7112,10 @@ public class ParentDashboardActivity extends BaseActivity {
         builder.setMessage(
                 "Are you sure you want to clear the usage limiter for \"" + currentChildDeviceName + "\"?\n\n" +
                         "This will:\n" +
-                        "• Stop the current limiter immediately\n" +
-                        "• Remove all limiter settings\n" +
-                        "• Clear selected apps and days\n" +
-                        "• Reset the timer\n\n" +
+                        "Ã¢â‚¬Â¢ Stop the current limiter immediately\n" +
+                        "Ã¢â‚¬Â¢ Remove all limiter settings\n" +
+                        "Ã¢â‚¬Â¢ Clear selected apps and days\n" +
+                        "Ã¢â‚¬Â¢ Reset the timer\n\n" +
                         "This action cannot be undone.");
         builder.setIcon(android.R.drawable.ic_dialog_alert);
 
@@ -7971,7 +7126,7 @@ public class ParentDashboardActivity extends BaseActivity {
             limiterRef.child(currentChildDeviceId).removeValue()
                     .addOnSuccessListener(aVoid -> {
                         Log.d(TAG, "Usage limiter cleared successfully for device: " + currentChildDeviceId);
-                        Toast.makeText(this, "✅ Usage limiter cleared for " + currentChildDeviceName,
+                        Toast.makeText(this, "Ã¢Å“â€¦ Usage limiter cleared for " + currentChildDeviceName,
                                 Toast.LENGTH_SHORT).show();
 
                         // Clear local data
@@ -8012,7 +7167,7 @@ public class ParentDashboardActivity extends BaseActivity {
      * Update the UI display with current limiter status
      */
     private void updateLimiterDisplay() {
-        // 📊 LIVE TIMER STATUS DISPLAY for Parent Dashboard
+        // Ã°Å¸â€œÅ  LIVE TIMER STATUS DISPLAY for Parent Dashboard
         if (currentChildDeviceId == null)
             return;
 
@@ -8024,17 +7179,17 @@ public class ParentDashboardActivity extends BaseActivity {
     }
 
     /**
-     * 📊 START LIVE TIMER MONITORING
+     * Ã°Å¸â€œÅ  START LIVE TIMER MONITORING
      * Shows real-time countdown of child device timer on parent dashboard
-     * 🔧 MULTI-DEVICE FIX: Properly removes old listener before adding new one
+     * Ã°Å¸â€Â§ MULTI-DEVICE FIX: Properly removes old listener before adding new one
      */
     private void startLiveTimerMonitoring() {
         if (currentChildDeviceId == null || limiterRef == null)
             return;
 
-        Log.d(TAG, "🔴 STARTING LIVE TIMER MONITORING for child device: " + currentChildDeviceId);
+        Log.d(TAG, "Ã°Å¸â€Â´ STARTING LIVE TIMER MONITORING for child device: " + currentChildDeviceId);
 
-        // 🔧 MULTI-DEVICE FIX: Remove old listener first to prevent data leakage
+        // Ã°Å¸â€Â§ MULTI-DEVICE FIX: Remove old listener first to prevent data leakage
         cleanupPreviousLimiterListener();
 
         // Store reference for later cleanup
@@ -8076,29 +7231,29 @@ public class ParentDashboardActivity extends BaseActivity {
 
         // Add the listener
         activeLimiterRef.addValueEventListener(activeLimiterListener);
-        Log.d(TAG, "✅ LIVE TIMER LISTENER ATTACHED for device: " + currentChildDeviceId);
+        Log.d(TAG, "Ã¢Å“â€¦ LIVE TIMER LISTENER ATTACHED for device: " + currentChildDeviceId);
     }
 
     /**
-     * 🔧 MULTI-DEVICE FIX: Clean up previous limiter listener when switching
+     * Ã°Å¸â€Â§ MULTI-DEVICE FIX: Clean up previous limiter listener when switching
      * devices
      * This prevents data from old device showing up for new device
      */
     private void cleanupPreviousLimiterListener() {
         if (activeLimiterRef != null && activeLimiterListener != null) {
             activeLimiterRef.removeEventListener(activeLimiterListener);
-            Log.d(TAG, "🧹 Removed previous limiter listener (multi-device cleanup)");
+            Log.d(TAG, "Ã°Å¸Â§Â¹ Removed previous limiter listener (multi-device cleanup)");
             activeLimiterRef = null;
             activeLimiterListener = null;
         }
     }
 
     /**
-     * 🔧 MULTI-DEVICE FIX: Complete cleanup when switching between children
+     * Ã°Å¸â€Â§ MULTI-DEVICE FIX: Complete cleanup when switching between children
      * Call this before loading new child's data
      */
     private void performMultiDeviceSwitchCleanup() {
-        Log.d(TAG, "🔄 MULTI-DEVICE SWITCH: Cleaning up data for device change");
+        Log.d(TAG, "Ã°Å¸â€â€ž MULTI-DEVICE SWITCH: Cleaning up data for device change");
 
         // Remove all active Firebase listeners
         cleanupPreviousLimiterListener();
@@ -8124,11 +7279,11 @@ public class ParentDashboardActivity extends BaseActivity {
             clearUsageDisplay();
         });
 
-        Log.d(TAG, "✅ Multi-device cleanup complete - ready for new device data");
+        Log.d(TAG, "Ã¢Å“â€¦ Multi-device cleanup complete - ready for new device data");
     }
 
     /**
-     * 🔴 SHOW LIVE TIMER STATUS on Parent Dashboard
+     * Ã°Å¸â€Â´ SHOW LIVE TIMER STATUS on Parent Dashboard
      */
     private void showLiveTimerStatus(long remainingTimeMs, Integer originalHours, Integer originalMinutes,
             String lastResetDate) {
@@ -8149,14 +7304,14 @@ public class ParentDashboardActivity extends BaseActivity {
             String statusText;
             if (remainingTimeMs <= 0) {
                 color = ContextCompat.getColor(this, android.R.color.holo_red_dark);
-                statusText = "⏰ TIME EXPIRED";
+                statusText = "Ã¢ÂÂ° TIME EXPIRED";
                 timeText = "00:00:00";
             } else if (remainingTimeMs < 30 * 60 * 1000) { // Less than 30 minutes
                 color = ContextCompat.getColor(this, android.R.color.holo_orange_dark);
-                statusText = "⚠️ TIME RUNNING LOW";
+                statusText = "Ã¢Å¡Â Ã¯Â¸Â TIME RUNNING LOW";
             } else {
                 color = ContextCompat.getColor(this, android.R.color.holo_green_dark);
-                statusText = "✅ TIMER ACTIVE";
+                statusText = "Ã¢Å“â€¦ TIMER ACTIVE";
             }
 
             // Show original parent-set duration
@@ -8183,9 +7338,9 @@ public class ParentDashboardActivity extends BaseActivity {
             binding.tvDeviceStatus.setTextColor(textColor);
 
             // Create detailed timer info
-            String detailedInfo = "⏰ Live Timer: " + timeText + originalDuration +
-                    "\n📅 Device: " + currentChildDeviceName +
-                    "\n📊 Status: " + statusText;
+            String detailedInfo = "Ã¢ÂÂ° Live Timer: " + timeText + originalDuration +
+                    "\nÃ°Å¸â€œâ€¦ Device: " + currentChildDeviceName +
+                    "\nÃ°Å¸â€œÅ  Status: " + statusText;
 
             // Show in a timer status view if available
             if (tvLimiterStatus != null) {
@@ -8195,7 +7350,7 @@ public class ParentDashboardActivity extends BaseActivity {
             }
 
             // Log for debugging
-            Log.d(TAG, "🔴 LIVE TIMER UPDATE: " + currentChildDeviceName + " - " + timeText + " remaining");
+            Log.d(TAG, "Ã°Å¸â€Â´ LIVE TIMER UPDATE: " + currentChildDeviceName + " - " + timeText + " remaining");
 
         } catch (Exception e) {
             Log.e(TAG, "Error updating live timer status: " + e.getMessage());
@@ -8203,7 +7358,7 @@ public class ParentDashboardActivity extends BaseActivity {
     }
 
     /**
-     * 🔘 SHOW TIMER INACTIVE STATUS
+     * Ã°Å¸â€Ëœ SHOW TIMER INACTIVE STATUS
      */
     private void showTimerInactiveStatus() {
         if (binding == null)
@@ -8233,7 +7388,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 tvLimiterStatus.setVisibility(View.VISIBLE);
             }
 
-            Log.d(TAG, "🔘 Timer inactive for device: " + currentChildDeviceName);
+            Log.d(TAG, "Ã°Å¸â€Ëœ Timer inactive for device: " + currentChildDeviceName);
 
         } catch (Exception e) {
             Log.e(TAG, "Error showing inactive timer status: " + e.getMessage());
@@ -8389,7 +7544,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 tvLimiterStatus.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
             }
             if (tvLimiterTimer != null) {
-                tvLimiterTimer.setText("⏱️ --:--:--");
+                tvLimiterTimer.setText("Ã¢ÂÂ±Ã¯Â¸Â --:--:--");
                 tvLimiterTimer.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
             }
 
@@ -8406,7 +7561,7 @@ public class ParentDashboardActivity extends BaseActivity {
     }
 
     /**
-     * 🔴 DISPLAY EXPIRED LIMITER STATE
+     * Ã°Å¸â€Â´ DISPLAY EXPIRED LIMITER STATE
      * Shows timer in RED when it has expired (00:00) but still exists
      * Timer remains visible until manually removed
      */
@@ -8453,7 +7608,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 timeText = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
             }
 
-            tvLimiterTimer.setText("⏱️ " + timeText);
+            tvLimiterTimer.setText("Ã¢ÂÂ±Ã¯Â¸Â " + timeText);
 
             // Color coding based on remaining time
             if (remainingTimeMs > 600000) { // More than 10 minutes
@@ -8464,7 +7619,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 tvLimiterTimer.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark));
             } else {
                 tvLimiterTimer.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark));
-                tvLimiterTimer.setText("⏰ TIME UP!");
+                tvLimiterTimer.setText("Ã¢ÂÂ° TIME UP!");
             }
         }
 
@@ -8556,7 +7711,7 @@ public class ParentDashboardActivity extends BaseActivity {
             }
         });
 
-        Log.d(TAG, "✅ Enhanced real-time limiter monitoring started");
+        Log.d(TAG, "Ã¢Å“â€¦ Enhanced real-time limiter monitoring started");
     }
 
     /**
@@ -8577,7 +7732,7 @@ public class ParentDashboardActivity extends BaseActivity {
                     if (lastSync != null) {
                         long syncAge = System.currentTimeMillis() - lastSync;
                         if (syncAge < 5000) { // Recent sync (within 5 seconds)
-                            status += " ●"; // Live indicator
+                            status += " Ã¢â€”Â"; // Live indicator
                         }
                     }
 
@@ -8824,7 +7979,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 tvLimiterStatus.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
             }
             if (tvLimiterTimer != null) {
-                tvLimiterTimer.setText("⏱️ --:--:--");
+                tvLimiterTimer.setText("Ã¢ÂÂ±Ã¯Â¸Â --:--:--");
                 tvLimiterTimer.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
             }
 
@@ -8833,7 +7988,7 @@ public class ParentDashboardActivity extends BaseActivity {
     }
 
     /**
-     * 🔧 CRITICAL FIX: Create timer data for QR reconnected device
+     * Ã°Å¸â€Â§ CRITICAL FIX: Create timer data for QR reconnected device
      * This ensures the device appears in parent dashboard even after reconnection
      */
     private void createTimerDataForDevice(String deviceId, String deviceName) {
@@ -8841,7 +7996,7 @@ public class ParentDashboardActivity extends BaseActivity {
     }
 
     /**
-     * 🔔 START PERSISTENT TIMER NOTIFICATION SERVICE
+     * Ã°Å¸â€â€ START PERSISTENT TIMER NOTIFICATION SERVICE
      * This service will show notifications when timers expire or need reset
      */
     private DatabaseReference timerExpiryNotifRef;
@@ -8944,7 +8099,7 @@ public class ParentDashboardActivity extends BaseActivity {
             Notification notification = new NotificationCompat.Builder(this, "timer_expiry_channel")
                     .setSmallIcon(R.drawable.ic_timer_status)
                     .setContentTitle("Timer expired: " + appName)
-                    .setContentText(appName + " — " + exceedText + ". App remains accessible.")
+                    .setContentText(appName + " Ã¢â‚¬â€ " + exceedText + ". App remains accessible.")
                     .setContentIntent(pendingIntent)
                     .setOnlyAlertOnce(true)
                     .setAutoCancel(true)
@@ -8986,7 +8141,7 @@ public class ParentDashboardActivity extends BaseActivity {
          * LayoutInflater inflater = LayoutInflater.from(this);
          *
          * for (ChildDevice device : devices) {
-         * // 🔧 CHANGED: Use new Vertical Card Layout
+         * // Ã°Å¸â€Â§ CHANGED: Use new Vertical Card Layout
          * View card = inflater.inflate(R.layout.item_device_card, llDeviceList, false);
          *
          * // Bind Views
@@ -9068,7 +8223,7 @@ public class ParentDashboardActivity extends BaseActivity {
          *
          * // "Add Device" Button (Keep as chip or make card? Keeping consistent for
          * now)
-         * // 🔧 UPDATED: Styled to match card height roughly or keep as distinct action
+         * // Ã°Å¸â€Â§ UPDATED: Styled to match card height roughly or keep as distinct action
          * View addBtn = inflater.inflate(R.layout.item_add_device_chip, llDeviceList,
          * false);
          *
@@ -9120,14 +8275,14 @@ public class ParentDashboardActivity extends BaseActivity {
     private void startPermissionEventListener() {
         try {
             online.monarchlabs.sentinel.services.PermissionEventListener.start(this);
-            Log.d(TAG, "✅ Permission Event Listener service started");
+            Log.d(TAG, "Ã¢Å“â€¦ Permission Event Listener service started");
         } catch (Exception e) {
             Log.e(TAG, "Failed to start Permission Event Listener: " + e.getMessage());
         }
     }
 
     // ================================================================================
-    // 🚨 UNINSTALL DETECTION METHODS
+    // Ã°Å¸Å¡Â¨ UNINSTALL DETECTION METHODS
     // ================================================================================
 
     /**
@@ -9140,7 +8295,7 @@ public class ParentDashboardActivity extends BaseActivity {
             return;
         }
 
-        Log.d(TAG, "🚨 Starting uninstall detection for device: " + currentChildDeviceId);
+        Log.d(TAG, "Ã°Å¸Å¡Â¨ Starting uninstall detection for device: " + currentChildDeviceId);
         resetUninstallWarningUI();
 
         uninstallDetectionManager.startMonitoringDevice(currentChildDeviceId,
@@ -9163,7 +8318,7 @@ public class ParentDashboardActivity extends BaseActivity {
     private void stopUninstallDetection() {
         if (uninstallDetectionManager != null && currentChildDeviceId != null) {
             uninstallDetectionManager.stopMonitoringDevice(currentChildDeviceId);
-            Log.d(TAG, "🛑 Stopped uninstall detection for device: " + currentChildDeviceId);
+            Log.d(TAG, "Ã°Å¸â€ºâ€˜ Stopped uninstall detection for device: " + currentChildDeviceId);
         }
 
         resetUninstallWarningUI();
@@ -9182,7 +8337,7 @@ public class ParentDashboardActivity extends BaseActivity {
             layoutUninstallWarning.setVisibility(View.VISIBLE);
 
             if (tvUninstallWarningTitle != null) {
-                tvUninstallWarningTitle.setText("⚠️ App might be affected.");
+                tvUninstallWarningTitle.setText("Ã¢Å¡Â Ã¯Â¸Â App might be affected.");
             }
 
             if (tvUninstallWarningMessage != null) {
@@ -9191,7 +8346,7 @@ public class ParentDashboardActivity extends BaseActivity {
             }
 
             if (tvSeeIssuesToggle != null) {
-                tvSeeIssuesToggle.setText("See possible issues ▼");
+                tvSeeIssuesToggle.setText("See possible issues Ã¢â€“Â¼");
                 tvSeeIssuesToggle.setVisibility(View.VISIBLE);
             }
 
@@ -9206,7 +8361,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 tvUninstallLastSeen.setText(lastSeenText);
             }
 
-            Log.w(TAG, "⚠️ UNINSTALL WARNING SHOWN for " + currentChildDeviceName + ": " + status);
+            Log.w(TAG, "Ã¢Å¡Â Ã¯Â¸Â UNINSTALL WARNING SHOWN for " + currentChildDeviceName + ": " + status);
         } else {
             layoutUninstallWarning.setVisibility(View.GONE);
         }
@@ -9226,7 +8381,7 @@ public class ParentDashboardActivity extends BaseActivity {
         }
 
         if (tvUninstallWarningTitle != null) {
-            tvUninstallWarningTitle.setText("⚠️ App might be affected.");
+            tvUninstallWarningTitle.setText("Ã¢Å¡Â Ã¯Â¸Â App might be affected.");
         }
 
         if (tvUninstallWarningMessage != null) {
@@ -9235,7 +8390,7 @@ public class ParentDashboardActivity extends BaseActivity {
         }
 
         if (tvSeeIssuesToggle != null) {
-            tvSeeIssuesToggle.setText("See possible issues ▼");
+            tvSeeIssuesToggle.setText("See possible issues Ã¢â€“Â¼");
         }
 
         if (layoutPossibleIssues != null) {
@@ -9311,7 +8466,7 @@ public class ParentDashboardActivity extends BaseActivity {
                     .setDuration(180)
                     .withEndAction(() -> layoutPossibleIssues.setVisibility(View.GONE))
                     .start();
-            tvSeeIssuesToggle.setText("See possible issues ▼");
+            tvSeeIssuesToggle.setText("See possible issues Ã¢â€“Â¼");
         } else {
             layoutPossibleIssues.setAlpha(0f);
             layoutPossibleIssues.setVisibility(View.VISIBLE);
@@ -9319,7 +8474,7 @@ public class ParentDashboardActivity extends BaseActivity {
                     .alpha(1f)
                     .setDuration(180)
                     .start();
-            tvSeeIssuesToggle.setText("See possible issues ▲");
+            tvSeeIssuesToggle.setText("See possible issues Ã¢â€“Â²");
         }
 
         isPossibleIssuesExpanded = !isPossibleIssuesExpanded;
@@ -9343,7 +8498,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 binding.tvDeviceStatus.setTextColor(ContextCompat.getColor(this, R.color.error_600));
             }
 
-            Log.d(TAG, "🔴 Device icon set to RED (uninstalled)");
+            Log.d(TAG, "Ã°Å¸â€Â´ Device icon set to RED (uninstalled)");
         } else if (UninstallDetectionManager.STATUS_OFFLINE.equals(status)) {
             // Orange/yellow for offline
             ivDeviceIcon.setColorFilter(ContextCompat.getColor(this, R.color.warning_600));
@@ -9352,7 +8507,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 binding.tvDeviceStatus.setTextColor(ContextCompat.getColor(this, R.color.warning_600));
             }
 
-            Log.d(TAG, "🟡 Device icon set to YELLOW (offline)");
+            Log.d(TAG, "Ã°Å¸Å¸Â¡ Device icon set to YELLOW (offline)");
         } else {
             // Green/normal for online
             ivDeviceIcon.setColorFilter(ContextCompat.getColor(this, R.color.neutral_400));
@@ -9361,7 +8516,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 binding.tvDeviceStatus.setTextColor(ContextCompat.getColor(this, R.color.success_600));
             }
 
-            Log.d(TAG, "🟢 Device icon set to NORMAL (online)");
+            Log.d(TAG, "Ã°Å¸Å¸Â¢ Device icon set to NORMAL (online)");
         }
     }
 
@@ -9413,7 +8568,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 notificationManager.createNotificationChannel(channel);
             }
 
-            String title = "⚠️ Uninstall Protection Alert: " + (childName != null ? childName : "Child Device");
+            String title = "Ã¢Å¡Â Ã¯Â¸Â Uninstall Protection Alert: " + (childName != null ? childName : "Child Device");
             String message = "";
             if (UninstallDetectionManager.STATUS_SUSPECTED_UNINSTALL.equals(status)) {
                 message = "No communication with child's device for over 30 minutes. App might be uninstalled or disabled.";
@@ -9438,7 +8593,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
             int notificationId = 8000 + (deviceId.hashCode() & 0x7fffffff) % 10000;
             notificationManager.notify(notificationId, builder.build());
-            Log.d(TAG, "🔔 Posted system tray notification for uninstall warning on device: " + deviceId);
+            Log.d(TAG, "Ã°Å¸â€â€ Posted system tray notification for uninstall warning on device: " + deviceId);
         } catch (Exception e) {
             Log.e(TAG, "Failed to show uninstall protection system notification: " + e.getMessage());
         }
@@ -9461,7 +8616,7 @@ public class ParentDashboardActivity extends BaseActivity {
                 notificationManager.createNotificationChannel(channel);
             }
 
-            String title = "✓ Protection Restored: " + (childName != null ? childName : "Child Device");
+            String title = "Ã¢Å“â€œ Protection Restored: " + (childName != null ? childName : "Child Device");
             String message = "Communication has been successfully restored with child's device.";
 
             Intent intent = new Intent(this, ParentDashboardActivity.class);
@@ -9481,7 +8636,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
             int notificationId = 8000 + (deviceId.hashCode() & 0x7fffffff) % 10000;
             notificationManager.notify(notificationId, builder.build());
-            Log.d(TAG, "🔔 Posted system tray notification for protection restored on device: " + deviceId);
+            Log.d(TAG, "Ã°Å¸â€â€ Posted system tray notification for protection restored on device: " + deviceId);
         } catch (Exception e) {
             Log.e(TAG, "Failed to show restored system notification: " + e.getMessage());
         }

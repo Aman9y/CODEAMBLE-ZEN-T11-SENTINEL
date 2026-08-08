@@ -241,11 +241,6 @@
     <color name="ripple_secondary">#1A6B7280</color>
     <color name="ripple_surface">#1A000000</color>
 
-    <!-- Focus mode specific colors -->
-    <color name="focus_active">#EF4444</color>
-    <color name="focus_inactive">#9CA3AF</color>
-    <color name="focus_background">#FEF2F2</color>
-
     <!-- Timer specific colors -->
     <color name="timer_active">#F59E0B</color>
     <color name="timer_inactive">#9CA3AF</color>

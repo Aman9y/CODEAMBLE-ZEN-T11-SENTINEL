@@ -645,7 +645,6 @@ public class ConnectedDevicesManager {
                     "child_session", // Child session data
                     "qr_scanner", // QR scanner preferences
                     "timer_settings", // Timer configuration
-                    "focus_mode_settings", // Focus mode preferences
                     "usage_limits", // Usage limit settings
                     "app_install_detection" // Fresh install detection (keep this one)
             };

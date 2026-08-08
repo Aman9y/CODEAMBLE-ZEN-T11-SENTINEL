@@ -444,7 +444,7 @@ public class ChildDashboardActivity extends BaseActivity {
 
         // 🛡️ BULLETPROOF: Start CRITICAL services only, with error handling
         try {
-            // CRITICAL: Start RemoteBlockService to listen for focus mode commands
+            // CRITICAL: Start RemoteBlockService to listen for parent restriction commands
             ChildServiceCoordinator.start(this, "dashboard_created");
         } catch (Exception e) {
             Log.e(TAG, "❌ Failed to start RemoteBlockService: " + e.getMessage());
@@ -1034,7 +1034,7 @@ public class ChildDashboardActivity extends BaseActivity {
         try {
             Intent serviceIntent = new Intent(this, RemoteBlockService.class);
             startForegroundService(serviceIntent);
-            Log.d(TAG, "Started RemoteBlockService for focus mode commands");
+            Log.d(TAG, "Started RemoteBlockService for parent restriction commands");
         } catch (Exception e) {
             Log.e(TAG, "Error starting RemoteBlockService: " + e.getMessage());
             Toast.makeText(this, "Error starting blocking service", Toast.LENGTH_SHORT).show();

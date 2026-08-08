@@ -31,15 +31,15 @@ public final class InfoContentRepository {
                 "CHILD-DEVICE PERMISSIONS\n\n" +
                 "Sentinel needs certain Android permissions only on a child device where its parental-control features are enabled. Android settings control whether each permission remains active.\n\n" +
                 "1. Accessibility Service\n" +
-                "Sentinel observes page views and taps in app and other actions on this child device to detect when a restricted app is opened and enforce parent-selected blocks, screen-time limits, and focus modes. App package names and enforcement events may be synchronized with the linked parent account. Sentinel does not collect passwords, payment details, private messages, or unrelated screen content through Accessibility.\n\n" +
+                "Sentinel observes page views and taps in app and other actions on this child device to detect when a restricted app is opened and enforce parent-selected blocks, screen-time limits, and scheduled restrictions. App package names and enforcement events may be synchronized with the linked parent account. Sentinel does not collect passwords, payment details, private messages, or unrelated screen content through Accessibility.\n\n" +
                 "2. Usage Access\n" +
                 "Used to calculate per-app usage, screen-time totals, timer status, and usage reports. Package names, app names, usage duration, and timestamps may be uploaded to Sentinel services and shown to the linked parent account.\n\n" +
                 "3. Notifications\n" +
-                "Used for ongoing monitoring notices, timer status, limit alerts, focus-mode updates, and permission/service status alerts. Notification permission does not give Sentinel access to other apps' notification contents.\n\n" +
+                "Used for ongoing monitoring notices, timer status, limit alerts, restriction updates, and permission/service status alerts. Notification permission does not give Sentinel access to other apps' notification contents.\n\n" +
                 "4. Location\n" +
                 "When location access is enabled, the child device can send its current location, accuracy, provider/status, and timestamp so the linked parent can view or refresh the family map. Background location is used only if the parent-authorized location feature should continue while Sentinel is closed or not in use.\n\n" +
                 "5. Installed Apps\n" +
-                "The child device sends its launchable-app list, package names, app names, icons, install/remove status, and related timestamps so the linked parent can choose apps for blocking, timers, and focus modes.\n\n" +
+                "The child device sends its launchable-app list, package names, app names, icons, install/remove status, and related timestamps so the linked parent can choose apps for blocking, timers, and scheduled restrictions.\n\n" +
                 "6. Device Admin / Uninstall Protection\n" +
                 "When Uninstall Protection is active, Sentinel uses Android Device Admin only to add Android's verification step before the app can be uninstalled. Sentinel does not use Device Admin to wipe data, reset passwords, lock the device, disable the camera, or manage other device policies. The linked parent can view the current protection state and send a setup request from the parent dashboard; Android confirms the change on the child device.\n\n" +
                 "7. Battery Optimization Exemption\n" +
@@ -57,9 +57,9 @@ public final class InfoContentRepository {
                 "- Parent account details, including name, email address, phone number, account identifiers, and account timestamps.\n" +
                 "- Child and parent device identifiers, device name/model, connection records, service status, heartbeat information, and permission status.\n" +
                 "- Installed-app details such as app name, package name, icon, and install or removal events.\n" +
-                "- App usage and screen-time records, foreground-app events, active timers, usage limits, blocked-app settings, focus-mode settings, and parent commands.\n" +
+                "- App usage and screen-time records, foreground-app events, active timers, usage limits, blocked-app settings, scheduled restriction settings, and parent commands.\n" +
                 "- Child-device location, accuracy, provider/status, and timestamp when location permission and location features are enabled, including background location when that permission is granted.\n" +
-                "- Notification permission and local notification status for ongoing monitoring, timer, focus-mode, and service alerts. Sentinel does not read other apps' notification contents.\n" +
+                "- Notification permission and local notification status for ongoing monitoring, timer, restriction, and service alerts. Sentinel does not read other apps' notification contents.\n" +
                 "- Accessibility-derived page views and taps in app and other actions used for app blocking and screen-time enforcement. Sentinel does not collect passwords, payment details, private messages, typed text, or unrelated screen content through Accessibility.\n" +
                 "- Device Admin and Uninstall Protection status, including whether parent-controlled uninstall protection is enabled or disabled.\n" +
                 "- QR pairing sessions, guardian-consent records, OTP records, rate-limit records, and login/session information.\n" +

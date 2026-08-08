@@ -125,7 +125,7 @@ public class BlockService extends AccessibilityService {
 
         // BLOCK_TIMER_MIGRATION: Initialize parallel timer monitoring
 
-        // Run diagnostics to help troubleshoot focus mode issues
+        // Run diagnostics to help troubleshoot blocking issues
         runDiagnostics();
 
         // 🛡️ WATCHDOG SUPERVISOR: Immediate check on startup

@@ -62,7 +62,7 @@ public class ChildAppListActivity extends BaseActivity {
         blockingSelection = "blocking".equals(
                 getIntent().getStringExtra("selectionPurpose"));
         
-        // Get preselected apps from intent (for focus mode editing or timer selection)
+        // Get preselected apps from intent (for timer/blocking selection)
         ArrayList<AppInfo> preselected = getIntent().getParcelableArrayListExtra("preselected_apps");
         if (preselected != null) {
             for (AppInfo app : preselected) {
