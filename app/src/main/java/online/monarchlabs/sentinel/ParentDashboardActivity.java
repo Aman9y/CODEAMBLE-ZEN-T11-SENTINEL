@@ -181,6 +181,8 @@ public class ParentDashboardActivity extends BaseActivity {
     private ValueEventListener parentsConnectionListener;
     private DatabaseReference parentDeviceLinksRef;
     private ChildEventListener parentDeviceLinksListener;
+    private DatabaseReference sosEventsRef;
+    private ChildEventListener sosEventsListener;
     private DatabaseReference deviceAppsConnectionRef;
     private boolean deviceAppsConnectionListenerAttached = false;
     private DatabaseReference uninstallProtectionStatusRef;
@@ -387,6 +389,7 @@ public class ParentDashboardActivity extends BaseActivity {
 
             // Ã°Å¸â€â€ START PERSISTENT TIMER NOTIFICATION SERVICE for parent devices
             setupParentTimerExpiryListener();
+            setupSosEventsListener();
 
             // Ã°Å¸â€œÂ¡ START PERMISSION EVENT LISTENER to monitor child device service status
             startPermissionEventListener();
@@ -3778,6 +3781,7 @@ public class ParentDashboardActivity extends BaseActivity {
         detachQRScanListener();
         detachParentConnectionListener();
         detachV2ParentDeviceLinksListener();
+        detachSosEventsListener();
 
         // Detach usage listeners
         stopSmartUsageMonitoring();
@@ -7951,6 +7955,162 @@ public class ParentDashboardActivity extends BaseActivity {
     private DatabaseReference timerExpiryNotifRef;
     private ValueEventListener timerExpiryListener;
     private final java.util.Set<String> shownTimerExpiryKeys = new java.util.HashSet<>();
+    private final java.util.Set<String> shownSosEventKeys = new java.util.HashSet<>();
+
+    private void setupSosEventsListener() {
+        detachSosEventsListener();
+        shownSosEventKeys.clear();
+        if (mAuth == null || mAuth.getCurrentUser() == null) {
+            return;
+        }
+        String parentUid = mAuth.getCurrentUser().getUid();
+        sosEventsRef = FirebaseDatabase.getInstance()
+                .getReference("v2")
+                .child("sos_events")
+                .child(parentUid);
+        sosEventsListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, String previousChildName) {
+                handleSosSnapshot(snapshot);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, String previousChildName) {
+                handleSosSnapshot(snapshot);
+            }
+
+            @Override public void onChildRemoved(@NonNull DataSnapshot snapshot) {}
+            @Override public void onChildMoved(@NonNull DataSnapshot snapshot, String previousChildName) {}
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "SOS listener cancelled: " + error.getMessage());
+            }
+        };
+        sosEventsRef.addChildEventListener(sosEventsListener);
+    }
+
+    private void detachSosEventsListener() {
+        if (sosEventsRef != null && sosEventsListener != null) {
+            sosEventsRef.removeEventListener(sosEventsListener);
+        }
+        sosEventsRef = null;
+        sosEventsListener = null;
+    }
+
+    private void handleSosSnapshot(@NonNull DataSnapshot snapshot) {
+        String eventId = snapshot.child("eventId").getValue(String.class);
+        if (eventId == null || eventId.isEmpty()) {
+            eventId = snapshot.getKey();
+        }
+        String status = snapshot.child("status").getValue(String.class);
+        if (!"active".equals(status) || eventId == null) {
+            return;
+        }
+        Long createdAt = snapshot.child("createdAt").getValue(Long.class);
+        String dedupeKey = eventId + ":" + (createdAt != null ? createdAt : 0L);
+        if (shownSosEventKeys.contains(dedupeKey)) {
+            return;
+        }
+        shownSosEventKeys.add(dedupeKey);
+
+        String childName = snapshot.child("childName").getValue(String.class);
+        String deviceName = snapshot.child("deviceName").getValue(String.class);
+        String reason = snapshot.child("reason").getValue(String.class);
+        String childDeviceId = snapshot.child("childDeviceId").getValue(String.class);
+        Integer battery = snapshot.child("batteryPercent").getValue(Integer.class);
+        Double latitude = snapshot.child("location").child("latitude").getValue(Double.class);
+        Double longitude = snapshot.child("location").child("longitude").getValue(Double.class);
+
+        showSosNotification(eventId, childName, reason);
+        showSosDialog(snapshot.getRef(), childDeviceId, childName, deviceName, reason,
+                battery != null ? battery : -1, latitude, longitude);
+    }
+
+    private void showSosDialog(DatabaseReference eventRef, String childDeviceId, String childName,
+            String deviceName, String reason, int batteryPercent, Double latitude, Double longitude) {
+        String titleName = childName != null && !childName.isEmpty() ? childName : "Child";
+        StringBuilder message = new StringBuilder();
+        message.append("Reason: ").append(reason != null ? reason : "I need help");
+        if (deviceName != null && !deviceName.isEmpty()) {
+            message.append("\nDevice: ").append(deviceName);
+        }
+        if (batteryPercent >= 0) {
+            message.append("\nBattery: ").append(batteryPercent).append("%");
+        }
+        if (latitude != null && longitude != null) {
+            message.append("\nLocation available.");
+        } else {
+            message.append("\nLocation not available yet.");
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle("SOS Alert: " + titleName)
+                .setMessage(message.toString())
+                .setPositiveButton("Mark Resolved", (dialog, which) -> resolveSos(eventRef, childDeviceId))
+                .setNegativeButton("Close", null);
+        if (latitude != null && longitude != null) {
+            builder.setNeutralButton("Open Map", (dialog, which) -> {
+                Uri uri = Uri.parse("geo:" + latitude + "," + longitude
+                        + "?q=" + latitude + "," + longitude + "(" + Uri.encode(titleName) + ")");
+                startActivity(new Intent(Intent.ACTION_VIEW, uri));
+            });
+        }
+        builder.show();
+    }
+
+    private void resolveSos(DatabaseReference eventRef, String childDeviceId) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("status", "resolved");
+        updates.put("resolvedAt", ServerValue.TIMESTAMP);
+        updates.put("updatedAt", ServerValue.TIMESTAMP);
+        eventRef.updateChildren(updates);
+        if (childDeviceId != null && !childDeviceId.isEmpty()) {
+            FirebaseDatabase.getInstance().getReference("v2")
+                    .child("sos_active_by_device")
+                    .child(childDeviceId)
+                    .child("status")
+                    .setValue("resolved");
+        }
+    }
+
+    private void showSosNotification(String eventId, String childName, String reason) {
+        try {
+            NotificationManager notificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notificationManager == null) {
+                return;
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel channel = new NotificationChannel(
+                        "sos_alert_channel",
+                        "SOS Alerts",
+                        NotificationManager.IMPORTANCE_HIGH);
+                notificationManager.createNotificationChannel(channel);
+            }
+
+            Intent intent = new Intent(this, ParentDashboardActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    this,
+                    eventId != null ? eventId.hashCode() : 9001,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+            String name = childName != null && !childName.isEmpty() ? childName : "Child";
+            Notification notification = new NotificationCompat.Builder(this, "sos_alert_channel")
+                    .setSmallIcon(R.drawable.ic_warning)
+                    .setContentTitle("SOS from " + name)
+                    .setContentText(reason != null ? reason : "I need help")
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true)
+                    .build();
+            notificationManager.notify(900000 + Math.abs((eventId != null ? eventId : name).hashCode() % 9999),
+                    notification);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to show SOS notification: " + e.getMessage());
+        }
+    }
 
     /**
      * Listen for per-app timer expiry events written by the child's AppTimerService.
