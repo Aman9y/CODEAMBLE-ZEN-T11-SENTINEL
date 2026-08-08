@@ -57,7 +57,7 @@ async function addDenylistDomain(env, profileId, domain) {
 }
 
 async function removeDenylistDomain(env, profileId, domain) {
-  const response = await fetch(`${NEXTDNS_API_BASE}/profiles/${profileId}/denylist/${domain}`, {
+  const response = await fetch(`${NEXTDNS_API_BASE}/profiles/${profileId}/denylist/${encodeURIComponent(domain)}`, {
     method: "DELETE",
     headers: nextDnsHeaders(env),
   });
