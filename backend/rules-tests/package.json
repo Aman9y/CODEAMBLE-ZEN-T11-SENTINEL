@@ -1,0 +1,13 @@
+{
+  "name": "sentinel-database-rules-tests",
+  "private": true,
+  "scripts": {
+    "test": "node --test database.rules.test.js",
+    "test:emulator": "firebase emulators:exec --config ../firebase.json --project demo-sentinel-v2 --only database \"npm test\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.1",
+    "firebase": "^12.16.0",
+    "firebase-tools": "^15.24.0"
+  }
+}

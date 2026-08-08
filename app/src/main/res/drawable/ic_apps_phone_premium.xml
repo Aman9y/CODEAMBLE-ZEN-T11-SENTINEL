@@ -1,0 +1,54 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <!-- Phone Body -->
+  <path
+      android:pathData="M7,2C5.895,2 5,2.895 5,4v16c0,1.105 0.895,2 2,2h10c1.105,0 2,-0.895 2,-2V4c0,-1.105 -0.895,-2 -2,-2H7z"
+      android:fillColor="#2C3E50"/>
+  <!-- Screen -->
+  <path
+      android:pathData="M6,5h12v14h-12z"
+      android:fillColor="#1A252F"/>
+  <!-- App Icon 1 (Red) -->
+  <path
+      android:pathData="M7.5,6.5h2v2h-2z"
+      android:fillColor="#E74C3C"/>
+  <!-- App Icon 2 (Blue) -->
+  <path
+      android:pathData="M11,6.5h2v2h-2z"
+      android:fillColor="#3498DB"/>
+  <!-- App Icon 3 (Green) -->
+  <path
+      android:pathData="M14.5,6.5h2v2h-2z"
+      android:fillColor="#2ECC71"/>
+  <!-- App Icon 4 (Yellow) -->
+  <path
+      android:pathData="M7.5,10h2v2h-2z"
+      android:fillColor="#F1C40F"/>
+  <!-- App Icon 5 (Purple) -->
+  <path
+      android:pathData="M11,10h2v2h-2z"
+      android:fillColor="#9B59B6"/>
+  <!-- App Icon 6 (Orange) -->
+  <path
+      android:pathData="M14.5,10h2v2h-2z"
+      android:fillColor="#E67E22"/>
+  <!-- App Icon 7 (Cyan) -->
+  <path
+      android:pathData="M7.5,13.5h2v2h-2z"
+      android:fillColor="#1ABC9C"/>
+  <!-- App Icon 8 (Pink) -->
+  <path
+      android:pathData="M11,13.5h2v2h-2z"
+      android:fillColor="#E91E63"/>
+  <!-- App Icon 9 (Teal) -->
+  <path
+      android:pathData="M14.5,13.5h2v2h-2z"
+      android:fillColor="#009688"/>
+  <!-- Home Button Indicator -->
+  <path
+      android:pathData="M11,20.5h2v1h-2z"
+      android:fillColor="#34495E"/>
+</vector>

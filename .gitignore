@@ -1,0 +1,73 @@
+# Built artifacts
+bin/
+gen/
+out/
+build/
+.gradle/
+app/build/
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+.navigation/
+
+# Gradle
+.gradle/
+build/
+
+# Local configuration files
+local.properties
+google-services.json
+app/google-services.json
+app/src/development/google-services.json
+!app/src/production/google-services.json
+!app/src/development/google-services.json.example
+
+# Signing files
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Sensitive project documentation
+FINAL_WORK_TO_DO_BEFORE_LAUNCH.md
+crashing child app logcat .logcat
+build_log.txt
+build_output*.txt
+build_deps*.txt
+error.log
+*.log
+*.logcat
+
+# Python virtual environment
+.venv/
+__pycache__/
+
+# Node modules
+node_modules/
+
+# Appwrite sensitive configuration
+app/src/main/java/com/example/master2/config/AppwriteConfig.java
+
+# Backup and temporary zip files
+*.zip
+*.tar.gz
+*.tar
+SUSAGE/
+appwrite-function*/
+backend/functions/node_modules/
+
+# Cleanup analysis documents
+codebase_cleanup_analysis.md
+/app/release
+/app/debug
+/app/development/debug/
+tmp/
+/app/development/release/

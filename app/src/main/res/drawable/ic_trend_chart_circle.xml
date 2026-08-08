@@ -1,0 +1,29 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="40dp"
+    android:height="40dp"
+    android:viewportWidth="40"
+    android:viewportHeight="40">
+  <!-- Light Blue Circle Background -->
+  <path
+      android:pathData="M20,20m-18,0a18,18 0,1 1,36 0a18,18 0,1 1,-36 0"
+      android:fillColor="#EAF1FF"/>
+  
+  <!-- Chart Bars (Blue) -->
+  <path
+      android:pathData="M14,26h3v-8h-3z"
+      android:fillColor="#2563EB"/>
+  <path
+      android:pathData="M19,26h3v-5h-3z"
+      android:fillColor="#2563EB"/>
+  <path
+      android:pathData="M24,26h3v-10h-3z"
+      android:fillColor="#2563EB"/>
+      
+  <!-- Trend Line (Darker Blue) -->
+  <path
+      android:pathData="M12,20 L16,16 L20,19 L28,10"
+      android:strokeWidth="2.5"
+      android:strokeColor="#1D4ED8"
+      android:strokeLineCap="round"
+      android:strokeLineJoin="round"/>
+</vector>

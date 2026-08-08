@@ -1,0 +1,424 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- ============================================== -->
+    <!-- BASE APPLICATION THEME - MODERN VERSION -->
+    <!-- ============================================== -->
+    <style name="Theme.Master2" parent="Theme.Material3.Light.NoActionBar">
+        <!-- Primary colors - Modern Blue -->
+        <item name="colorPrimary">@color/primary_600</item>
+        <item name="colorPrimaryVariant">@color/primary_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/primary_100</item>
+        <item name="colorOnPrimaryContainer">@color/primary_900</item>
+
+        <!-- Secondary colors -->
+        <item name="colorSecondary">@color/secondary_600</item>
+        <item name="colorSecondaryVariant">@color/secondary_700</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondaryContainer">@color/secondary_100</item>
+        <item name="colorOnSecondaryContainer">@color/secondary_900</item>
+
+        <!-- Surface colors -->
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorSurfaceVariant">@color/surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+
+        <!-- Background colors -->
+        <item name="android:colorBackground">@color/neutral_50</item>
+        <item name="colorOnBackground">@color/text_primary</item>
+
+        <!-- Status and navigation bars -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/surface</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
+
+        <!-- Error colors -->
+        <item name="colorError">@color/error_600</item>
+        <item name="colorOnError">@color/white</item>
+        <item name="colorErrorContainer">@color/error_100</item>
+        <item name="colorOnErrorContainer">@color/error_900</item>
+
+        <!-- Outline colors -->
+        <item name="colorOutline">@color/border_primary</item>
+        <item name="colorOutlineVariant">@color/border_secondary</item>
+
+        <!-- Material 3 specific -->
+        <item name="elevationOverlayEnabled">false</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+        <item name="alertDialogTheme">@style/AlertDialogCustom</item>
+        <item name="android:alertDialogTheme">@style/AlertDialogCustom</item>
+
+        <!-- Custom attributes for modern design -->
+        <item name="android:windowBackground">@color/neutral_50</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+    </style>
+
+    <!-- ============================================== -->
+    <!-- MODERN BUTTON STYLES -->
+    <!-- ============================================== -->
+
+    <!-- Primary Button - Blue Gradient -->
+    <style name="ModernButtonPrimary" parent="Widget.Material3.Button">
+        <item name="android:background">@drawable/primary_button_bg</item>
+        <item name="android:textColor">@color/text_on_primary</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:elevation">2dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:foreground">@drawable/ripple_effect</item>
+    </style>
+
+    <!-- Secondary Button - Light Grey -->
+    <style name="ModernButtonSecondary" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:background">@drawable/secondary_button_bg</item>
+        <item name="android:textColor">@color/text_on_primary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:foreground">@drawable/ripple_effect</item>
+    </style>
+
+    <!-- Tertiary Button - Very Light -->
+    <style name="ModernButtonTertiary" parent="Widget.Material3.Button.TextButton">
+        <item name="android:background">@drawable/tertiary_button_bg</item>
+        <item name="android:textColor">@color/primary_600</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:foreground">@drawable/ripple_effect</item>
+    </style>
+
+    <!-- Accent Button - Cyan Gradient -->
+    <style name="ModernButtonAccent" parent="Widget.Material3.Button">
+        <item name="android:background">@drawable/accent_button_bg</item>
+        <item name="android:textColor">@color/text_on_primary</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:elevation">4dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:foreground">@drawable/ripple_effect</item>
+    </style>
+
+    <!-- Floating Action Button -->
+    <style name="ModernFloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
+        <item name="android:background">@drawable/floating_button_bg</item>
+        <item name="tint">@color/white</item>
+        <item name="elevation">6dp</item>
+        <item name="pressedTranslationZ">8dp</item>
+    </style>
+
+    <!-- ============================================== -->
+    <!-- MODERN CARD STYLES -->
+    <!-- ============================================== -->
+
+    <!-- Main Card Style -->
+    <style name="ModernCard" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">6dp</item>
+        <item name="cardBackgroundColor">@color/card_background</item>
+        <item name="cardMaxElevation">8dp</item>
+        <item name="cardUseCompatPadding">true</item>
+        <item name="cardPreventCornerOverlap">true</item>
+        <item name="contentPadding">24dp</item>
+    </style>
+
+    <!-- Header Card Style -->
+    <style name="ModernCardHeader" parent="ModernCard">
+        <item name="cardCornerRadius">20dp</item>
+        <item name="cardElevation">8dp</item>
+        <item name="contentPadding">0dp</item>
+    </style>
+
+    <!-- Compact Card Style -->
+    <style name="ModernCardCompact" parent="ModernCard">
+        <item name="cardCornerRadius">12dp</item>
+        <item name="cardElevation">4dp</item>
+        <item name="contentPadding">16dp</item>
+    </style>
+
+    <!-- ============================================== -->
+    <!-- MODERN TEXT STYLES -->
+    <!-- ============================================== -->
+
+    <!-- Display Text - Largest -->
+    <style name="ModernTextDisplay">
+        <item name="android:textSize">32sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:letterSpacing">-0.02</item>
+        <item name="android:lineSpacingMultiplier">1.2</item>
+    </style>
+
+    <!-- Headline Text -->
+    <style name="ModernTextHeadline">
+        <item name="android:textSize">24sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:letterSpacing">-0.01</item>
+        <item name="android:lineSpacingMultiplier">1.3</item>
+    </style>
+
+    <!-- Title Text -->
+    <style name="ModernTextTitle">
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <!-- Subtitle Text -->
+    <style name="ModernTextSubtitle">
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:letterSpacing">0.01</item>
+    </style>
+
+    <!-- Body Text - Primary -->
+    <style name="ModernTextBody">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:letterSpacing">0.01</item>
+        <item name="android:lineSpacingMultiplier">1.4</item>
+    </style>
+
+    <!-- Caption Text - Small -->
+    <style name="ModernTextCaption">
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textColor">@color/text_tertiary</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+
+    <!-- Label Text - Medium Weight -->
+    <style name="ModernTextLabel">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+
+    <!-- ============================================== -->
+    <!-- MODERN INPUT FIELD STYLES -->
+    <!-- ============================================== -->
+
+    <!-- Text Input Layout -->
+    <style name="ModernTextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">12dp</item>
+        <item name="boxCornerRadiusTopEnd">12dp</item>
+        <item name="boxCornerRadiusBottomStart">12dp</item>
+        <item name="boxCornerRadiusBottomEnd">12dp</item>
+        <item name="boxStrokeColor">@color/border_focus</item>
+        <item name="boxBackgroundColor">@color/surface</item>
+        <item name="hintTextColor">@color/text_secondary</item>
+        <item name="android:textColorHint">@color/text_secondary</item>
+        <item name="errorTextColor">@color/error_600</item>
+    </style>
+
+    <!-- Edit Text Style -->
+    <style name="ModernEditText" parent="Widget.Material3.TextInputEditText.OutlinedBox">
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:background">@drawable/input_field_bg</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+    <!-- ============================================== -->
+    <!-- MODERN SWITCH STYLES -->
+    <!-- ============================================== -->
+
+    <!-- Modern Switch Style -->
+    <style name="ModernSwitch" parent="Widget.Material3.CompoundButton.Switch">
+        <item name="android:thumb">@drawable/switch_thumb</item>
+        <item name="android:track">@drawable/switch_track</item>
+        <item name="android:switchMinWidth">50dp</item>
+        <item name="android:switchPadding">16dp</item>
+        <item name="android:textOff"></item>
+        <item name="android:textOn"></item>
+    </style>
+
+    <!-- ============================================== -->
+    <!-- MODERN NAVIGATION STYLES -->
+    <!-- ============================================== -->
+
+    <!-- Bottom Navigation Style -->
+    <style name="ModernBottomNavigation" parent="Widget.Material3.BottomNavigationView">
+        <item name="android:background">@drawable/bottom_nav_bg</item>
+        <item name="itemIconTint">@color/nav_item_color</item>
+        <item name="itemTextColor">@color/nav_item_color</item>
+        <item name="itemRippleColor">@color/ripple_primary</item>
+        <item name="elevation">16dp</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="itemIconSize">24dp</item>
+        <item name="itemTextAppearanceActive">@style/ModernNavTextActive</item>
+        <item name="itemTextAppearanceInactive">@style/ModernNavTextInactive</item>
+    </style>
+
+    <!-- Navigation Text Active -->
+    <style name="ModernNavTextActive">
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Navigation Text Inactive -->
+    <style name="ModernNavTextInactive">
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <!-- ============================================== -->
+    <!-- MODERN ICON STYLES -->
+    <!-- ============================================== -->
+
+    <!-- Icon Container - Small -->
+    <style name="ModernIconSmall">
+        <item name="android:layout_width">32dp</item>
+        <item name="android:layout_height">32dp</item>
+        <item name="android:padding">6dp</item>
+        <item name="android:background">@drawable/nav_button_bg</item>
+    </style>
+
+    <!-- Icon Container - Medium -->
+    <style name="ModernIconMedium">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:padding">12dp</item>
+    </style>
+
+    <!-- Icon Container - Large -->
+    <style name="ModernIconLarge">
+        <item name="android:layout_width">60dp</item>
+        <item name="android:layout_height">60dp</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+    <!-- ============================================== -->
+    <!-- MODERN STATUS STYLES -->
+    <!-- ============================================== -->
+
+    <!-- Status Badge -->
+    <style name="ModernStatusBadge">
+        <item name="android:background">@drawable/status_badge_bg</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:paddingHorizontal">12dp</item>
+        <item name="android:paddingVertical">6dp</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <!-- Online Status -->
+    <style name="ModernStatusOnline" parent="ModernStatusBadge">
+        <item name="android:textColor">@color/success_600</item>
+    </style>
+
+    <!-- Offline Status -->
+    <style name="ModernStatusOffline" parent="ModernStatusBadge">
+        <item name="android:textColor">@color/neutral_600</item>
+    </style>
+
+    <!-- Active Status -->
+    <style name="ModernStatusActive" parent="ModernStatusBadge">
+        <item name="android:textColor">@color/success_600</item>
+    </style>
+
+    <!-- ============================================== -->
+    <!-- LEGACY COMPATIBILITY STYLES -->
+    <!-- ============================================== -->
+
+    <!-- No Action Bar variant -->
+    <style name="Theme.Master2.NoActionBar" parent="Theme.Master2">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    </style>
+
+    <!-- Splash screen theme -->
+    <style name="Theme.Master2.Splash" parent="Theme.Master2.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <!-- Dialog theme -->
+    <style name="Theme.Master2.Dialog" parent="ThemeOverlay.Material3.Dialog">
+        <item name="colorPrimary">@color/primary_600</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="android:windowBackground">@drawable/dialog_background</item>
+    </style>
+
+    <!-- Legacy Button Styles - Keep for backward compatibility -->
+    <style name="ButtonPrimary" parent="ModernButtonPrimary" />
+    <style name="ButtonSecondary" parent="ModernButtonSecondary" />
+    <style name="CardStyle" parent="ModernCard" />
+    <style name="HeadlineLarge" parent="ModernTextDisplay" />
+    <style name="HeadlineMedium" parent="ModernTextHeadline" />
+    <style name="TitleLarge" parent="ModernTextTitle" />
+    <style name="TitleMedium" parent="ModernTextSubtitle" />
+    <style name="BodyLarge" parent="ModernTextBody" />
+    <style name="BodyMedium" parent="ModernTextBody" />
+    <style name="LabelLarge" parent="ModernTextLabel" />
+    <style name="TextInputLayoutStyle" parent="ModernTextInputLayout" />
+    
+    <!-- NumberPicker Theme - FORCE LIGHT MODE -->
+    <style name="NumberPickerTheme" parent="Theme.Material3.Light.Dialog.Alert">
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+        <item name="colorControlNormal">@color/primary_600</item>
+        <item name="colorControlActivated">@color/primary_600</item>
+        <item name="android:textColorPrimary">#212121</item>
+        <item name="android:textColor">#212121</item>
+        <item name="android:textColorSecondary">#757575</item>
+    </style>
+
+    <!-- Custom Alert Dialog Style - LIGHT MODE -->
+    <style name="AlertDialogCustom" parent="Theme.Material3.Light.Dialog.Alert">
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+        <item name="colorPrimary">@color/primary_600</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="dialogCornerRadius">16dp</item>
+        <item name="android:windowBackground">@drawable/dialog_background</item>
+    </style>
+
+    <!-- Switch Theme for Blocking Toggle -->
+    <style name="SwitchTheme" parent="Theme.AppCompat.Light">
+        <item name="colorControlActivated">#9E9E9E</item>
+        <item name="colorSwitchThumbNormal">#BDBDBD</item>
+        <item name="android:colorForeground">#E0E0E0</item>
+    </style>
+
+    <!-- Bottom Sheet Dialog Theme -->
+    <style name="BottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/CustomBottomSheetStyle</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="CustomBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+</resources>

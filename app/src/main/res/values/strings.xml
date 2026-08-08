@@ -1,0 +1,151 @@
+<resources>
+    <!-- App branding -->
+    <string name="app_name">Sentinel</string>
+    <string name="app_tagline">The parental monitoring application</string>
+
+    <!-- Welcome screen -->
+    <string name="welcome_title">Manage Family Devices and Screen Time</string>
+    <string name="welcome_description">Empower healthy digital habits with real-time monitoring, smart focus modes, and gentle guidance that brings families closer together.</string>
+    <string name="get_started">Get Started</string>
+
+    <!-- Login type selection -->
+    <string name="login_as_parent">Continue as Parent</string>
+    <string name="login_as_child">Continue as Child</string>
+    <string name="monitor_control_devices">Monitor and guide your family\'s digital wellness</string>
+    <string name="view_usage_settings">View your activity and personalize your experience</string>
+
+    <!-- Authentication -->
+    <string name="username">Username</string>
+    <string name="email">Email Address</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="send_otp">Send Verification Code</string>
+    <string name="verify_otp">Verify Code</string>
+    <string name="enter_otp">Enter verification code</string>
+    <string name="otp_sent_message">We\'ll send a verification code to your phone</string>
+    <string name="verify_otp_message">Enter the 6-digit code sent to your phone</string>
+    <string name="resend_otp">Didn\'t receive the code? Resend</string>
+
+    <!-- Dashboard -->
+    <string name="usage_overview">Digital Wellness Overview</string>
+    <string name="focus_mode">Focus Time</string>
+    <string name="smart_controls">Smart Controls</string>
+    <string name="family_insights">Family Insights</string>
+
+    <!-- Status indicators -->
+    <string name="active">Active</string>
+    <string name="inactive">Inactive</string>
+    <string name="online">Online</string>
+    <string name="offline">Offline</string>
+    <string name="focused">In Focus Mode</string>
+    <string name="screen_time">Screen Time</string>
+
+    <!-- QR Code connectivity -->
+    <string name="scan_qr_code">Connect Device</string>
+    <string name="camera_instruction">Align the QR code within the frame to connect the device</string>
+    <string name="qr_share_title">Connect Your Family</string>
+    <string name="qr_share_description">Share this code with your child\'s device to start monitoring</string>
+
+    <!-- Features -->
+    <string name="real_time_monitoring">Real-time Monitoring</string>
+    <string name="real_time_monitoring_desc">Track app usage and screen time instantly</string>
+    <string name="smart_focus_modes">Smart Focus Modes</string>
+    <string name="smart_focus_modes_desc">Custom presets for study time and sleep</string>
+    <string name="secure_private">Linked Parent Access</string>
+    <string name="secure_private_desc">Child-device data is available to the linked parent account</string>
+
+    <!-- Preset management -->
+    <string name="create_preset">Create Focus Mode</string>
+    <string name="manage_presets">Manage Focus Modes</string>
+    <string name="preset_name">Focus Mode Name</string>
+    <string name="preset_duration">Duration</string>
+    <string name="allowed_apps">Allowed Apps</string>
+    <string name="blocked_apps">Restricted Apps</string>
+
+    <!-- App management -->
+    <string name="select_apps">Choose Apps</string>
+    <string name="app_categories">Categories</string>
+    <string name="educational_apps">Educational</string>
+    <string name="entertainment_apps">Entertainment</string>
+    <string name="social_apps">Social</string>
+    <string name="games">Games</string>
+    <string name="productivity_apps">Productivity</string>
+
+    <!-- Time management -->
+    <string name="daily_limit">Daily Limit</string>
+    <string name="time_remaining">Time Remaining</string>
+    <string name="bedtime_mode">Bedtime Mode</string>
+    <string name="study_time">Study Time</string>
+    <string name="break_time">Break Time</string>
+
+    <!-- Task management -->
+    <string name="add_task">Add Task</string>
+    <string name="complete_task">Mark Complete</string>
+    <string name="task_rewards">Earn Extra Time</string>
+    <string name="pending_tasks">Pending Tasks</string>
+    <string name="completed_tasks">Completed Tasks</string>
+
+    <!-- Notifications and messages -->
+    <string name="notification_title">Sentinel</string>
+    <string name="focus_mode_started">Focus mode activated</string>
+    <string name="focus_mode_ended">Focus mode completed</string>
+    <string name="time_limit_warning">5 minutes remaining</string>
+    <string name="app_blocked_message">This app is currently restricted</string>
+
+    <!-- Settings and preferences -->
+    <string name="settings">Settings</string>
+    <string name="notifications">Notifications</string>
+    <string name="privacy">Privacy</string>
+    <string name="help_support">Help &amp; Support</string>
+    <string name="about">About</string>
+    <string name="logout">Sign Out</string>
+
+    <!-- Error messages -->
+    <string name="error_network">Please check your internet connection</string>
+    <string name="error_invalid_code">Invalid verification code</string>
+    <string name="error_permission_required">Permission required to continue</string>
+    <string name="error_camera_permission">Camera permission needed for QR scanning</string>
+
+    <!-- Success messages -->
+    <string name="success_device_connected">Device connected successfully</string>
+    <string name="success_preset_created">Focus mode created</string>
+    <string name="success_settings_saved">Settings saved</string>
+
+    <!-- Common actions -->
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="done">Done</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="share">Share</string>
+    <string name="retry">Try Again</string>
+    <string name="continue_text">Continue</string>
+    <string name="back">Back</string>
+    <string name="next">Next</string>
+    <string name="skip">Skip</string>
+
+    <!-- Time formats -->
+    <string name="minutes_short">min</string>
+    <string name="hours_short">hr</string>
+    <string name="time_format">%1$d:%2$02d</string>
+
+    <string name="duration_format">%1$dh %2$dm</string>
+
+    <!-- Accessibility -->
+    <string name="accessibility_service_description">Sentinel observes page views and taps in app and other actions on this child device to detect when a restricted app is opened and enforce parent-selected blocks and screen-time limits. App package names and enforcement events are synchronized with the linked parent account. Sentinel does not collect passwords, payment details, private messages, or unrelated screen content.</string>
+    <string name="accessibility_logo">App logo</string>
+    <string name="accessibility_feature_icon">Feature icon</string>
+    <string name="accessibility_close_button">Close</string>
+    <string name="accessibility_menu_button">Menu</string>
+
+    <!-- Onboarding -->
+    <string name="welcome_step_1_title">Welcome to Sentinel</string>
+    <string name="welcome_step_1_desc">Your family\'s digital wellness companion</string>
+    <string name="welcome_step_2_title">Smart Monitoring</string>
+    <string name="welcome_step_2_desc">Real-time insights without compromising privacy</string>
+    <string name="welcome_step_3_title">Focus Together</string>
+    <string name="welcome_step_3_desc">Build healthy digital habits as a family</string>
+
+    <!-- Google Auth -->
+    <string name="error_legal_agreement">Please accept the Terms of Service and Privacy Policy</string>
+    <string name="signing_in_google">Signing in with Google...</string>
+</resources>

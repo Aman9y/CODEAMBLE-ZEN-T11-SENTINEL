@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tablet-specific dimensions (7" and up) -->
+    
+    <!-- Card styling - larger margins for tablets -->
+    <dimen name="card_margin">24dp</dimen>
+    <dimen name="card_margin_horizontal">32dp</dimen>
+    <dimen name="card_corner_radius">20dp</dimen>
+    <dimen name="card_elevation">8dp</dimen>
+    
+    <!-- Padding -->
+    <dimen name="content_padding">32dp</dimen>
+    <dimen name="content_padding_small">16dp</dimen>
+    <dimen name="content_padding_large">40dp</dimen>
+    
+    <!-- Status bar -->
+    <dimen name="status_bar_spacer">48dp</dimen>
+    
+    <!-- Button sizes -->
+    <dimen name="button_height">56dp</dimen>
+    <dimen name="button_height_large">64dp</dimen>
+    <dimen name="button_corner_radius">16dp</dimen>
+    
+    <!-- Text sizes - larger for tablets -->
+    <dimen name="text_size_header">28sp</dimen>
+    <dimen name="text_size_title">20sp</dimen>
+    <dimen name="text_size_body">16sp</dimen>
+    <dimen name="text_size_caption">14sp</dimen>
+    
+    <!-- Icon sizes -->
+    <dimen name="icon_size_small">24dp</dimen>
+    <dimen name="icon_size_medium">56dp</dimen>
+    <dimen name="icon_size_large">72dp</dimen>
+    
+    <!-- Search input -->
+    <dimen name="search_input_height">56dp</dimen>
+    <dimen name="search_input_corner_radius">16dp</dimen>
+    
+    <!-- Bottom navigation -->
+    <dimen name="bottom_nav_elevation">20dp</dimen>
+    
+    <!-- Item spacing -->
+    <dimen name="item_spacing">12dp</dimen>
+    <dimen name="item_spacing_large">24dp</dimen>
+    
+    <!-- Timer display -->
+    <dimen name="timer_text_size">56sp</dimen>
+</resources>

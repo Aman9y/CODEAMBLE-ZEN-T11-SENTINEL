@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/bg_gradient_mesh">
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Set App Timer"
+        android:textColor="@color/neutral_900"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center" />
+
+    <!-- Subtitle -->
+    <TextView
+        android:id="@+id/tvTimerSubtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="This app timer will reset at midnight"
+        android:textColor="@color/neutral_600"
+        android:textSize="14sp"
+        android:gravity="center" />
+
+    <!-- Warning/Info Banner -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_card_glass"
+        android:backgroundTint="#E8F5E9"
+        android:padding="12dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Timer set on apps won't block apps after timer has expired. Blocking is to be done manually."
+            android:textColor="#1B5E20"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:lineSpacingExtra="2dp"/>
+    </LinearLayout>
+
+    <!-- Time Pickers Container (Glass) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:background="@drawable/bg_card_glass"
+        android:paddingVertical="16dp"
+        android:paddingHorizontal="16dp">
+
+        <!-- Hours Picker -->
+        <NumberPicker
+            android:id="@+id/npHours"
+            android:layout_width="60dp"
+            android:layout_height="140dp"
+            android:theme="@style/NumberPickerTheme" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="hr"
+            android:textColor="@color/neutral_900"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium" />
+
+        <!-- Spacer -->
+        <View
+            android:layout_width="32dp"
+            android:layout_height="1dp" />
+
+        <!-- Minutes Picker -->
+        <NumberPicker
+            android:id="@+id/npMinutes"
+            android:layout_width="60dp"
+            android:layout_height="140dp"
+            android:theme="@style/NumberPickerTheme" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="min"
+            android:textColor="@color/neutral_900"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium" />
+    </LinearLayout>
+
+    <!-- Delete Timer Button (shown when timer exists) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginTop="24dp">
+        
+        <Button
+            android:id="@+id/btnDeleteTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_glass_round"
+            app:backgroundTint="@color/error_50"
+            android:drawableStart="@drawable/ic_delete"
+            android:drawableTint="@color/error_600"
+            android:drawablePadding="8dp"
+            android:paddingHorizontal="16dp"
+            android:text="Delete Timer"
+            android:textColor="@color/error_600"
+            android:textSize="14sp"
+            android:textAllCaps="false"
+            android:fontFamily="sans-serif-medium"
+            android:visibility="gone"
+            xmlns:app="http://schemas.android.com/apk/res-auto"/>
+    </LinearLayout>
+
+    <!-- Action Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:gravity="end"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:text="Cancel"
+            android:textColor="@color/neutral_500"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/btnOk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_button_primary"
+            android:text="Save Timer"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium"
+            android:textAllCaps="false"
+            android:paddingHorizontal="24dp"/>
+    </LinearLayout>
+</LinearLayout>

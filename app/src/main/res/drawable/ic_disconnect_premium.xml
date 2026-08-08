@@ -1,0 +1,32 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+  <!-- Soft Background Circle -->
+  <path
+      android:pathData="M24,24m-22,0a22,22 0,1 1,44 0a22,22 0,1 1,-44 0"
+      android:fillColor="#FEF2F2"/>
+  
+  <!-- Lid Handle -->
+  <path
+      android:pathData="M22,12 h4 v2 h-4 z"
+      android:fillColor="#EF4444"/>
+  
+  <!-- Lid -->
+  <path
+      android:pathData="M16,14 h16 v3 h-16 z"
+      android:fillColor="#DC2626"/>
+      
+  <!-- Bin Body -->
+  <path
+      android:pathData="M18,18 h12 l-1,16 h-10 l-1,-16 z"
+      android:fillColor="#EF4444"/>
+      
+  <!-- Bin Texture Lines (Vertical) -->
+  <path
+      android:pathData="M21,21 v10 M24,21 v10 M27,21 v10"
+      android:strokeWidth="1.5"
+      android:strokeColor="#FECACA"
+      android:strokeLineCap="round"/>
+</vector>

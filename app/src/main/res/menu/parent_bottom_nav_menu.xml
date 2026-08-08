@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/ic_nav_home_premium"
+        android:title="Home" />
+    <item
+        android:id="@+id/nav_timer_status"
+        android:icon="@drawable/ic_timer_status"
+        android:title="Timers" />
+    <item
+        android:id="@+id/nav_assistant"
+        android:icon="@drawable/ic_assistant"
+        android:title="Assistant" />
+    <item
+        android:id="@+id/nav_settings"
+        android:icon="@drawable/ic_nav_settings_premium"
+        android:title="Settings" />
+</menu> 

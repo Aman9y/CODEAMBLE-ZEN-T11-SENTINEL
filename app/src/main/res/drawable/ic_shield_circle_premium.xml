@@ -1,0 +1,19 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    
+    <!-- Outer Circle Ring -->
+    <path
+        android:pathData="M60,60m-59,0a59,59 0,1 1,118 0a59,59 0,1 1,-118 0"
+        android:strokeWidth="1.5"
+        android:strokeColor="#E2E8F0"
+        android:fillColor="#00000000"/>
+        
+    <!-- Shield Icon (Blue) -->
+    <path
+        android:pathData="M60,35 L85,45 V65 C85,80 75,95 60,100 C45,95 35,80 35,65 V45 L60,35Z"
+        android:fillColor="#2563EB"/>
+        
+</vector>

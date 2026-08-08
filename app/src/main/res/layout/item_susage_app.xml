@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="16dp"
+    android:paddingHorizontal="4dp"
+    android:background="?android:attr/selectableItemBackground">
+
+    <!-- App Icon -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardIcon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        app:cardCornerRadius="14dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+        
+        <ImageView
+            android:id="@+id/appIcon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+    </androidx.cardview.widget.CardView>
+
+    <!-- App Name -->
+    <TextView
+        android:id="@+id/appName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="App Name"
+        android:textSize="16sp"
+        android:textColor="@color/neutral_900"
+        android:fontFamily="sans-serif-medium"
+        android:maxLines="1"
+        android:ellipsize="end"
+        app:layout_constraintStart_toEndOf="@id/cardIcon"
+        app:layout_constraintEnd_toStartOf="@id/usageTime"
+        app:layout_constraintTop_toTopOf="@id/cardIcon"
+        app:layout_constraintBottom_toTopOf="@id/categoryText"
+        app:layout_constraintVertical_chainStyle="packed"/>
+
+    <!-- Category -->
+    <TextView
+        android:id="@+id/categoryText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="Category"
+        android:textSize="13sp"
+        android:textColor="@color/neutral_500"
+        android:fontFamily="sans-serif"
+        android:maxLines="1"
+        app:layout_constraintStart_toEndOf="@id/cardIcon"
+        app:layout_constraintEnd_toStartOf="@id/usageTime"
+        app:layout_constraintTop_toBottomOf="@id/appName"
+        app:layout_constraintBottom_toBottomOf="@id/cardIcon" />
+
+    <!-- Usage Time -->
+    <TextView
+        android:id="@+id/usageTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="45 min"
+        android:textSize="14sp"
+        android:textColor="@color/primary_600"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/cardIcon"
+        app:layout_constraintBottom_toTopOf="@id/usageStatusBadge"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <TextView
+        android:id="@+id/usageStatusBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="3dp"
+        android:text="UNINSTALLED"
+        android:textSize="9sp"
+        android:textStyle="bold"
+        android:textColor="@color/error_700"
+        android:fontFamily="sans-serif-medium"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/usageTime"
+        app:layout_constraintBottom_toBottomOf="@id/cardIcon" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

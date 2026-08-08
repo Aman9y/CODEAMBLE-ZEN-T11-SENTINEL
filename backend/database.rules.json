@@ -1,0 +1,223 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "v2": {
+      "directory": {
+        "phone_to_email": {
+          "$phone": {
+            ".read": true,
+            ".write": "auth != null && (!data.exists() || root.child('v2/parent_profiles/' + auth.uid + '/phone').val() === $phone)",
+            ".validate": "newData.isString()"
+          }
+        }
+      },
+      "users": {
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "!newData.exists() || (newData.child('authUid').val() === $uid && newData.child('role').val() === 'parent')"
+        }
+      },
+      "parent_profiles": {
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid"
+        }
+      },
+      "parent_clients": {
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid"
+        }
+      },
+      "legal_acceptances": {
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid"
+        }
+      },
+      "consents": {
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          "$deviceId": {
+            ".write": "auth != null && (auth.uid === $uid || (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === $uid && root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid))",
+            ".validate": "!newData.exists() || newData.child('parentUid').val() === $uid"
+          }
+        }
+      },
+      "consent_events": {
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid",
+          "$eventId": {
+            ".validate": "!newData.exists() || newData.child('parentUid').val() === $uid"
+          }
+        }
+      },
+      "pairing_sessions": {
+        "$sessionId": {
+          ".read": "auth != null && (data.child('parentUid').val() === auth.uid || (data.child('isActive').val() === true && data.child('expiresAt').val() > now))",
+          ".write": "auth != null && ((!data.exists() && newData.child('parentUid').val() === auth.uid) || data.child('parentUid').val() === auth.uid)",
+          ".validate": "!newData.exists() || (newData.child('parentUid').isString() && newData.child('parentDeviceId').isString() && newData.child('baseQRKey').isString() && newData.child('expiresAt').isNumber() && (newData.child('parentUid').val() === auth.uid || newData.child('parentUid').val() === data.child('parentUid').val()))",
+          "connections": {
+            "$deviceId": {
+              ".write": "auth != null && root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid && root.child('v2/device_owners').child($deviceId).child('pairingSessionId').val() === $sessionId",
+              ".validate": "!newData.exists() || (newData.child('childDeviceId').val() === $deviceId && newData.child('childAuthUid').val() === auth.uid)"
+            }
+          }
+        }
+      },
+      "devices": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".validate": "!newData.exists() || newData.child('deviceId').val() === $deviceId"
+        }
+      },
+      "device_owners": {
+        "$deviceId": {
+          ".read": "auth != null",
+          ".write": "auth != null && ((!newData.exists() && data.child('parentUid').val() === auth.uid) || (data.exists() && data.child('parentUid').val() === auth.uid && newData.exists() && newData.child('parentUid').val() === auth.uid && newData.child('status').val() === 'removing') || (newData.exists() && newData.child('childAuthUid').val() === auth.uid && newData.child('status').val() === 'active' && root.child('v2/pairing_sessions').child(newData.child('pairingSessionId').val()).child('parentUid').val() === newData.child('parentUid').val() && root.child('v2/pairing_sessions').child(newData.child('pairingSessionId').val()).child('parentDeviceId').isString() && root.child('v2/pairing_sessions').child(newData.child('pairingSessionId').val()).child('baseQRKey').val() === newData.child('pairingKey').val() && root.child('v2/pairing_sessions').child(newData.child('pairingSessionId').val()).child('expiresAt').val() > now && (root.child('v2/pairing_sessions').child(newData.child('pairingSessionId').val()).child('isActive').val() === true || root.child('v2/pairing_sessions').child(newData.child('pairingSessionId').val()).child('status').val() === 'active') && (!data.exists() || data.child('parentUid').val() === newData.child('parentUid').val() || data.child('status').val() === 'stale' || (data.child('lastSeenAt').isNumber() && data.child('lastSeenAt').val() + 7776000000 <= now))))",
+          ".validate": "!newData.exists() || (newData.child('parentUid').isString() && newData.child('childAuthUid').isString() && newData.child('connectionId').isString() && newData.child('status').isString() && (!data.exists() || data.child('parentUid').val() === newData.child('parentUid').val() || data.child('status').val() === 'stale' || (data.child('lastSeenAt').isNumber() && data.child('lastSeenAt').val() + 7776000000 <= now)))",
+          "lastSeenAt": {
+            ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid))",
+            ".validate": "newData.isNumber()"
+          }
+        }
+      },
+      "parent_device_links": {
+        "$parentUid": {
+          ".read": "auth != null && auth.uid === $parentUid",
+          "$deviceId": {
+            ".write": "auth != null && ((auth.uid === $parentUid && !newData.exists()) || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+            ".validate": "!newData.exists() || newData.child('deviceId').val() === $deviceId"
+          }
+        }
+      },
+      "parent_notification_state": {
+        "$parentUid": {
+          ".read": "auth != null && auth.uid === $parentUid",
+          "$deviceId": {
+            ".write": "auth != null && (auth.uid === $parentUid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid))"
+          }
+        }
+      },
+      "usage_daily": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid))"
+        }
+      },
+      "app_catalog": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid))"
+        }
+      },
+      "device_installs": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid))"
+        }
+      },
+      "app_events": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid))"
+        }
+      },
+      "device_policies": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid))"
+        }
+      },
+      "app_block_state": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid))"
+        }
+      },
+      "device_status": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid))"
+        }
+      },
+      "commands": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)"
+        }
+      },
+      "permissions_current": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid))"
+        }
+      },
+      "permission_logs": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)"
+        }
+      },
+      "device_health": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid))"
+        }
+      },
+      "locations": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid))"
+        }
+      },
+      "timer_execution": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid))"
+        }
+      },
+      "timer_state_requests": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)"
+        }
+      },
+      "timer_events": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid))"
+        }
+      },
+      "client_capabilities": {
+        "$deviceId": {
+          ".read": "auth != null && (root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && (root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid || (!newData.exists() && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid))"
+        }
+      },
+      "device_removals": {
+        "$deviceId": {
+          ".read": "auth != null && (data.child('targetParentUid').val() === auth.uid || data.child('childAuthUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)",
+          ".write": "auth != null && ((newData.exists() && newData.child('targetParentUid').val() === auth.uid && root.child('v2/device_owners').child($deviceId).child('parentUid').val() === auth.uid) || (!newData.exists() && (data.child('targetParentUid').val() === auth.uid || data.child('childAuthUid').val() === auth.uid || root.child('v2/device_owners').child($deviceId).child('childAuthUid').val() === auth.uid)))",
+          ".validate": "!newData.exists() || (newData.child('targetParentUid').isString() && newData.child('targetConnectionId').isString() && newData.child('issuedAt').isNumber() && newData.child('expiresAt').isNumber())",
+          "acknowledgedAt": {
+            ".write": "auth != null && root.child('v2/device_removals').child($deviceId).child('childAuthUid').val() === auth.uid",
+            ".validate": "newData.isNumber()"
+          },
+          "localCleanupComplete": {
+            ".write": "auth != null && root.child('v2/device_removals').child($deviceId).child('childAuthUid').val() === auth.uid",
+            ".validate": "newData.val() === true"
+          },
+          "acknowledgedByChildUid": {
+            ".write": "auth != null && root.child('v2/device_removals').child($deviceId).child('childAuthUid').val() === auth.uid",
+            ".validate": "newData.val() === auth.uid"
+          }
+        }
+      }
+    }
+  }
+}

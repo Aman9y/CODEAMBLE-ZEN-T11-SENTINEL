@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+   CUSTOM BACKUP RULES - DISABLE BACKUP FOR PARENTAL CONTROL APP
+   We don't want session data, connections, or device pairings to persist
+   across uninstall/reinstall cycles for security and fresh start behavior
+-->
+<full-backup-content>
+    <!-- EXCLUDE ALL SENSITIVE DATA FROM BACKUP -->
+    
+    <!-- Exclude all SharedPreferences - no session persistence after uninstall -->
+    <exclude domain="sharedpref" path="MasterAppSession.xml"/>
+    <exclude domain="sharedpref" path="user_session.xml"/>
+    <exclude domain="sharedpref" path="device_connection.xml"/>
+    <exclude domain="sharedpref" path="child_session.xml"/>
+    <exclude domain="sharedpref" path="connected_devices.xml"/>
+    <exclude domain="sharedpref" path="permanently_removed_devices.xml"/>
+    <exclude domain="sharedpref" path="app_install_detection.xml"/>
+    <exclude domain="sharedpref" path="timer_state.xml"/>
+    <exclude domain="sharedpref" path="app_usage_limits.xml"/>
+    <exclude domain="sharedpref" path="blocked_apps.xml"/>
+    <exclude domain="sharedpref" path="device_pairing.xml"/>
+    <exclude domain="sharedpref" path="qr_scanning_state.xml"/>
+    <exclude domain="sharedpref" path="parent_dashboard_cache.xml"/>
+    <exclude domain="sharedpref" path="child_dashboard_cache.xml"/>
+    <exclude domain="sharedpref" path="logout_state.xml"/>
+    
+    <!-- Exclude all files that might contain session data -->
+    <exclude domain="file" path="."/>
+    
+    <!-- Exclude databases if any -->
+    <exclude domain="database" path="."/>
+    
+    <!-- For maximum security, exclude everything -->
+    <exclude domain="sharedpref" path="."/>
+</full-backup-content>

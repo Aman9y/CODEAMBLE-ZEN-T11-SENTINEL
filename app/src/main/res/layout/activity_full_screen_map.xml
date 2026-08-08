@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Full screen MapView -->
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/fullScreenMapView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Top-left minimize (collapse) button -->
+    <FrameLayout
+        android:id="@+id/btnMinimizeMap"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_margin="16dp"
+        android:background="@drawable/bg_map_toggle_btn"
+        android:clickable="true"
+        android:focusable="true"
+        android:elevation="6dp">
+
+        <ImageView
+            android:id="@+id/ivMinimizeIcon"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_map_minimize"
+            android:contentDescription="Minimize map" />
+    </FrameLayout>
+
+    <!-- Bottom-right My Location button -->
+    <FrameLayout
+        android:id="@+id/btnMyLocationFull"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="112dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/bg_location_btn"
+        android:clickable="true"
+        android:focusable="true"
+        android:elevation="6dp">
+
+        <ImageView
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_my_location"
+            android:contentDescription="My location" />
+    </FrameLayout>
+    <!-- GPS-off warning banner — shown when child GPS is disabled -->
+    <TextView
+        android:id="@+id/tvFullMapGpsOff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="80dp"
+        android:background="@drawable/bg_warning_banner_rounded"
+        android:paddingHorizontal="18dp"
+        android:paddingVertical="10dp"
+        android:text="⚠️ GPS is off on child device"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif-medium"
+        android:elevation="6dp"
+        android:visibility="gone" />
+
+    <!-- Non-blocking location status badge -->
+    <FrameLayout
+        android:id="@+id/fullMapStatusBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_margin="16dp"
+        android:background="@drawable/bg_white_rounded"
+        android:elevation="6dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp">
+
+            <!-- Progress Bar for Locating state -->
+            <ProgressBar
+                android:id="@+id/fullMapStatusProgress"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:indeterminateTint="#1A73E8"
+                android:visibility="gone" />
+
+            <!-- Status Dot for Idle state -->
+            <View
+                android:id="@+id/fullMapStatusDot"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:background="@drawable/bg_circle_green"
+                android:visibility="visible" />
+
+            <!-- Status Text (e.g. "Locating...", "Live", "Last seen 5m ago") -->
+            <TextView
+                android:id="@+id/tvFullMapStatusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="Locating..."
+                android:textColor="#1F2937"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-medium" />
+        </LinearLayout>
+    </FrameLayout>
+
+</FrameLayout>

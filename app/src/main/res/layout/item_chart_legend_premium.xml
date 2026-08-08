@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingVertical="6dp"
+    android:paddingEnd="16dp">
+
+    <!-- Color Indicator -->
+    <View
+        android:id="@+id/vColorIndicator"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:background="@drawable/bg_circle_primary_soft"
+        android:layout_marginEnd="8dp" />
+
+    <!-- Label -->
+    <TextView
+        android:id="@+id/tvLegendLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Instagram"
+        android:textSize="14sp"
+        android:textColor="@color/neutral_700"
+        android:fontFamily="sans-serif-medium"
+        android:maxLines="1"
+        android:ellipsize="end"/>
+
+</LinearLayout>

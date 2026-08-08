@@ -1,0 +1,10 @@
+{
+  "name": "sentinel-firebase-v2-migration",
+  "private": true,
+  "scripts": {
+    "dry-run": "node migrate-production-to-v2.js --dry-run"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.7.0"
+  }
+}

@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy Policy and Compliance Disclosure</title>
+  <style>
+    :root {
+      --ink: #17202a;
+      --muted: #52606d;
+      --line: #d8dee6;
+      --panel: #f7f9fc;
+      --accent: #1f6feb;
+      --accent-dark: #123d7a;
+    }
+
+    @page {
+      margin: 22mm 18mm 20mm;
+      @bottom-center {
+        content: "Privacy Policy and Compliance Disclosure | Page " counter(page);
+        color: #52606d;
+        font-size: 9pt;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #fff;
+      font-family: "Aptos", "Segoe UI", Arial, sans-serif;
+      font-size: 11pt;
+      line-height: 1.62;
+    }
+
+    .document {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 44px 48px 72px;
+    }
+
+    .running-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 9.5pt;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .cover {
+      min-height: 760px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 40px 0;
+      border-bottom: 1px solid var(--line);
+      page-break-after: always;
+    }
+
+    .eyebrow {
+      color: var(--accent-dark);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-size: 10pt;
+      margin-bottom: 18px;
+    }
+
+    h1, h2, h3, h4 {
+      line-height: 1.22;
+      margin: 0;
+      color: var(--ink);
+    }
+
+    h1 {
+      font-size: 36pt;
+      font-weight: 760;
+      letter-spacing: 0;
+      max-width: 760px;
+    }
+
+    .subtitle {
+      margin-top: 20px;
+      max-width: 730px;
+      color: var(--muted);
+      font-size: 14pt;
+      line-height: 1.52;
+    }
+
+    .metadata {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 46px;
+      max-width: 760px;
+    }
+
+    .meta-card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 6px;
+      padding: 16px 18px;
+    }
+
+    .meta-label {
+      color: var(--muted);
+      font-size: 9pt;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 5px;
+    }
+
+    .meta-value {
+      font-weight: 650;
+      color: var(--ink);
+    }
+
+    .notice {
+      margin-top: 34px;
+      padding: 18px 20px;
+      border-left: 4px solid var(--accent);
+      background: #f3f7ff;
+      color: #233449;
+      border-radius: 4px;
+    }
+
+    .toc {
+      page-break-after: always;
+      padding: 26px 0 42px;
+    }
+
+    .toc h2,
+    section h2 {
+      font-size: 21pt;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+      margin: 0 0 18px;
+    }
+
+    .toc ol {
+      list-style: none;
+      counter-reset: toc;
+      padding: 0;
+      margin: 20px 0 0;
+    }
+
+    .toc li {
+      counter-increment: toc;
+      border-bottom: 1px solid #edf0f4;
+    }
+
+    .toc a {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 10px;
+      padding: 10px 0;
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .toc a::before {
+      content: counter(toc, decimal-leading-zero);
+      color: var(--accent-dark);
+      font-weight: 700;
+    }
+
+    section {
+      padding: 28px 0 8px;
+      page-break-inside: avoid;
+    }
+
+    h3 {
+      font-size: 14.5pt;
+      margin: 22px 0 8px;
+    }
+
+    h4 {
+      font-size: 12pt;
+      margin: 18px 0 6px;
+    }
+
+    p { margin: 8px 0 12px; }
+
+    ul {
+      margin: 8px 0 14px 22px;
+      padding: 0;
+    }
+
+    li { margin: 6px 0; }
+
+    a { color: var(--accent); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 22px;
+      font-size: 10pt;
+      page-break-inside: avoid;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      background: #edf4ff;
+      color: #153b69;
+      font-weight: 700;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #eaf2ff;
+      color: #123d7a;
+      font-weight: 700;
+      font-size: 9pt;
+    }
+
+    .disclaimer {
+      border: 1px solid var(--line);
+      background: #fbfcfe;
+      border-radius: 6px;
+      padding: 16px 18px;
+      color: #344054;
+    }
+
+    .footer-note {
+      margin-top: 34px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 9.5pt;
+    }
+
+    @media print {
+      .document {
+        max-width: none;
+        padding: 0;
+      }
+
+      .running-header {
+        position: running(header);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      section {
+        break-inside: avoid;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .document {
+        padding: 28px 22px 52px;
+      }
+
+      h1 {
+        font-size: 28pt;
+      }
+
+      .metadata {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="document">
+    <div class="running-header" aria-label="Document header">
+      <span>Sentinel / FamilyGuard</span>
+      <span>Privacy, Data Safety, and Platform Compliance</span>
+    </div>
+
+    <article class="cover" aria-labelledby="document-title">
+      <div class="eyebrow">Confidential Review Draft</div>
+      <h1 id="document-title">Privacy Policy and Compliance Disclosure</h1>
+      <p class="subtitle">
+        A professional privacy, data safety, permissions, SDK, and child-safety disclosure package for a parental-control Android application.
+      </p>
+
+      <div class="metadata" aria-label="Document metadata">
+        <div class="meta-card">
+          <div class="meta-label">Application</div>
+          <div class="meta-value">Sentinel / FamilyGuard</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">Android Package</div>
+          <div class="meta-value">online.monarchlabs.sentinel</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">Effective Date</div>
+          <div class="meta-value">[Insert Effective Date]</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">Publisher / Controller</div>
+          <div class="meta-value">[Insert Legal Entity Name]</div>
+        </div>
+      </div>
+
+      <div class="notice" role="note">
+        This document is prepared from the application codebase review and should be finalized with the publisher's legal entity details, support contact, jurisdiction, and operational data-retention practices before publication.
+      </div>
+    </article>
+
+    <nav class="toc" aria-labelledby="toc-heading">
+      <h2 id="toc-heading">Table of Contents</h2>
+      <ol>
+        <li><a href="#executive-summary">Executive Summary</a></li>
+        <li><a href="#privacy-policy">Privacy Policy</a></li>
+        <li><a href="#data-safety">Google Play Data Safety Disclosures</a></li>
+        <li><a href="#accessibility">Accessibility Service Disclosure</a></li>
+        <li><a href="#permissions">Permission Usage Statement</a></li>
+        <li><a href="#sdk-disclosures">Third-Party SDK and Service Provider Disclosure</a></li>
+        <li><a href="#children">Child Privacy and Parental Consent</a></li>
+        <li><a href="#retention-deletion">Retention, Access, and Deletion</a></li>
+        <li><a href="#inventory">Data Collection Inventory</a></li>
+        <li><a href="#review-notes">Implementation Review Notes</a></li>
+        <li><a href="#legal-disclaimer">Legal Disclaimer</a></li>
+      </ol>
+    </nav>
+
+    <section id="executive-summary">
+      <h2>1. Executive Summary</h2>
+      <p>
+        Sentinel / FamilyGuard is a parental-control application designed to allow a parent or legal guardian to connect a parent device with a child device, review child-device activity, manage app access, apply screen-time limits, and view child-device location where location permission is granted.
+      </p>
+      <p>
+        The application processes sensitive child-device information as part of its core parental-control purpose. The codebase supports collection and processing of account details, device identifiers, installed-app information, app usage data, child-device location, QR pairing data, local session data, and parental-control settings. The application uses Firebase, Appwrite, Google Maps, Google Play Services Location, CameraX, ZXing, and related Android platform services to deliver these features.
+      </p>
+      <p>
+        This document is structured for Google Play submission, enterprise review, investor diligence, public website publication, and legal counsel review. It avoids unsupported claims and includes placeholders where publisher-specific information must be completed.
+      </p>
+    </section>
+
+    <section id="privacy-policy">
+      <h2>2. Privacy Policy</h2>
+      <h3>2.1 Introduction</h3>
+      <p>
+        This Privacy Policy explains how [Insert Legal Entity Name] ("Company," "we," "us," or "our") collects, uses, stores, and shares information when users access or use Sentinel / FamilyGuard (the "App"). The App is a parental-control service intended to be configured and used by a parent or legal guardian to supervise and manage a child device.
+      </p>
+      <p>
+        By creating a parent account, pairing a child device, enabling monitoring permissions, or using the App, the parent or legal guardian confirms that they have the authority to configure parental controls for the relevant child device and to consent to the processing described in this Privacy Policy.
+      </p>
+
+      <h3>2.2 Information We Collect</h3>
+      <p>We collect information required to provide parental-control functionality. The categories supported by the codebase include:</p>
+      <ul>
+        <li><strong>Account information:</strong> parent name or username, email address, phone number, user type, Firebase or Appwrite identifiers, and account timestamps.</li>
+        <li><strong>Child and device information:</strong> child name, parent name, Android ID, device name, device model, manufacturer, connection state, QR pairing information, and parent-child connection records.</li>
+        <li><strong>Installed app information:</strong> app names, package names, app icons, app categories, system-app status, app counts, and update timestamps.</li>
+        <li><strong>Usage and activity information:</strong> foreground app activity, app usage duration, screen-time totals, daily and weekly summaries, usage categories, active timers, app limits, blocked-app status, and related timestamps.</li>
+        <li><strong>Location information:</strong> child-device latitude, longitude, accuracy, GPS/location status, and timestamps when location permission is granted and location services are available.</li>
+        <li><strong>Permission, device, and service status information:</strong> app install/uninstall events, permission-related events, device status, heartbeat values, logout or removal commands, and service operation data.</li>
+        <li><strong>Authentication and pairing information:</strong> QR pairing identifiers, share keys, OTP email data, and authentication state.</li>
+        <li><strong>Local session information:</strong> login state, account role, user ID, email or phone, child device ID, parent ID/name, QR share key, connection status, and related local preferences.</li>
+      </ul>
+
+      <h3>2.3 How We Use Information</h3>
+      <p>We use collected information to provide, secure, and maintain the App, including to:</p>
+      <ul>
+        <li>Authenticate parent users and manage app sessions.</li>
+        <li>Pair parent and child devices using QR codes.</li>
+        <li>Display installed apps from the child device to the connected parent.</li>
+        <li>Calculate and present screen-time and app-usage reports.</li>
+        <li>Apply app blocking, focus modes, timers, and daily usage limits.</li>
+        <li>Display child-device location to the connected parent when location permission is enabled.</li>
+        <li>Maintain device connection status, service reliability, and synchronization.</li>
+        <li>Send OTP emails for verification or recovery through Appwrite-backed functions.</li>
+        <li>Detect app installation or removal events relevant to parental monitoring.</li>
+        <li>Help protect the App from unauthorized removal or tampering where Device Admin and related protections are enabled.</li>
+      </ul>
+      <p>
+        We do not use child-device information for behavioral advertising. No advertising SDK was detected in the reviewed codebase.
+      </p>
+
+      <h3>2.4 Local and Remote Storage</h3>
+      <p>
+        The App stores certain data locally on the device using Android app-private storage and SharedPreferences. Local data includes session state, user role, user identifiers, device pairing details, blocked-app settings, timers, app limits, and connection flags.
+      </p>
+      <p>
+        The App also stores data remotely through Firebase and Appwrite services. Remote data may include account records, parent-child connection data, installed-app lists, app usage summaries, child-device location, app-blocking commands, timers, device status, QR pairing data, and OTP/email-function data.
+      </p>
+
+      <h3>2.5 Data Sharing and Service Providers</h3>
+      <p>
+        We do not sell personal information. We do not share child information with advertisers. We share information only as necessary to operate the App, including with infrastructure and service providers such as Firebase, Appwrite, Google Maps, and Google Play Services Location.
+      </p>
+      <p>
+        Child-device information is also made available to the connected parent account or parent device as a core feature of the App. This parent-child data flow is essential to parental-control functionality.
+      </p>
+
+      <h3>2.6 International Data Transfers</h3>
+      <p>
+        Service providers used by the App may process data on servers located in countries other than the country where the user resides. Where applicable, we rely on appropriate contractual and technical measures provided by our service providers to support lawful data transfers.
+      </p>
+
+      <h3>2.7 Security</h3>
+      <p>
+        The App declares HTTPS-only network configuration and disables cleartext traffic. Data transmitted to supported backend services is expected to use encrypted network connections. Local app data is stored within app-private storage protected by the Android operating system. No security measure is perfect, and users should maintain device-level protections such as screen locks and operating-system updates.
+      </p>
+    </section>
+
+    <section id="data-safety">
+      <h2>3. Google Play Data Safety Disclosures</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Play Console Question</th>
+            <th>Recommended Answer Based on Code Review</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Does the app collect or share user data?</td>
+            <td><span class="pill">Yes</span> The App collects data required for parental-control functionality and shares data with service providers for app operation.</td>
+          </tr>
+          <tr>
+            <td>Is data encrypted in transit?</td>
+            <td><span class="pill">Yes</span> The manifest includes HTTPS-only network security and disables cleartext traffic.</td>
+          </tr>
+          <tr>
+            <td>Can users request deletion?</td>
+            <td><span class="pill">Yes</span> Provide deletion by support/privacy request. No confirmed self-service in-app account deletion flow was found in the reviewed codebase.</td>
+          </tr>
+          <tr>
+            <td>Is data shared with advertisers?</td>
+            <td><span class="pill">No</span> No advertising SDK was detected.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>3.1 Data Types Collected</h3>
+      <ul>
+        <li><strong>Personal information:</strong> name, email address, phone number, user type, user IDs.</li>
+        <li><strong>Location:</strong> precise or approximate child-device location, accuracy, GPS status, timestamps.</li>
+        <li><strong>App activity:</strong> foreground app events, screen time, app usage duration, daily/weekly summaries.</li>
+        <li><strong>App information:</strong> installed apps, app names, package names, icons, categories, system-app status.</li>
+        <li><strong>Device identifiers:</strong> Android ID, device name, model, manufacturer, Firebase/Appwrite identifiers.</li>
+        <li><strong>Diagnostics and analytics:</strong> Firebase Analytics dependency is present; no custom analytics event calls were found during the scan.</li>
+        <li><strong>Settings and user-generated data:</strong> child name, parent name, QR share keys, app limits, timers, blocked apps, connection state.</li>
+      </ul>
+
+      <h3>3.2 Purposes</h3>
+      <p>
+        Data is collected for account management, authentication, parental-control functionality, app blocking, screen-time reporting, device pairing, location display, service reliability, app synchronization, and security/tamper-resistance features.
+      </p>
+    </section>
+
+    <section id="accessibility">
+      <h2>4. Accessibility Service Disclosure</h2>
+      <p>
+        Sentinel / FamilyGuard uses Android Accessibility Service exclusively to support parental-control and app-blocking functionality on a child device. The service helps detect the currently visible app or window, enforce parent-selected restrictions, and prevent unauthorized tampering with protection settings where applicable.
+      </p>
+      <p>The Accessibility Service may:</p>
+      <ul>
+        <li>Receive window and view-focus events.</li>
+        <li>Identify foreground apps and visible windows.</li>
+        <li>Inspect limited screen text in settings contexts to detect attempts to disable protection.</li>
+        <li>Return the device to the home screen when a blocked app is opened.</li>
+        <li>Support multi-window, floating-window, and app-blocking enforcement.</li>
+      </ul>
+      <p>
+        The Accessibility Service is not used to collect passwords, payment information, private messages, or unrelated personal content. Accessibility-derived information is used for app blocking, timer enforcement, device-protection workflows, and parental-control reliability.
+      </p>
+    </section>
+
+    <section id="permissions">
+      <h2>5. Permission Usage Statement</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Permission or Capability</th>
+            <th>Purpose and Justification</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Internet</td><td>Synchronizes account, device, usage, location, app-list, QR, OTP, and command data with Firebase and Appwrite.</td></tr>
+          <tr><td>Camera</td><td>Scans parent QR codes to pair the child device.</td></tr>
+          <tr><td>Query all packages / package visibility</td><td>Reads installed apps so parents can view apps and configure blocking or limits.</td></tr>
+          <tr><td>Accessibility Service</td><td>Detects foreground apps and enforces app-blocking rules on the child device.</td></tr>
+          <tr><td>Usage Stats</td><td>Calculates per-app screen time, foreground activity, daily totals, and weekly summaries.</td></tr>
+          <tr><td>Fine/coarse location and foreground location service</td><td>Uploads child-device location to Firebase for parent viewing when permission is granted.</td></tr>
+          <tr><td>Foreground services</td><td>Keeps monitoring, synchronization, app timers, notifications, and location-related operations active.</td></tr>
+          <tr><td>Notifications</td><td>Shows persistent service, timer, monitoring, and permission-related notifications.</td></tr>
+          <tr><td>Boot completed</td><td>Restarts required parental-control services after device reboot.</td></tr>
+          <tr><td>Wake lock</td><td>Improves reliability of background parental-control services on restrictive devices.</td></tr>
+          <tr><td>Battery optimization exemption request</td><td>Requests user permission to maintain reliable monitoring and control services.</td></tr>
+          <tr><td>Exact alarms and alarm APIs</td><td>Supports timers, daily reset behavior, and scheduled limit enforcement.</td></tr>
+          <tr><td>Device Admin</td><td>Supports uninstall/tamper protection where the parent enables device-administration controls.</td></tr>
+          <tr><td>Read phone state</td><td>Declared in the manifest, but no clear supported source usage was found. Review and remove unless required.</td></tr>
+          <tr><td>External storage read/write</td><td>Declared in the manifest, but no clear supported source usage was found. Review and remove unless required.</td></tr>
+          <tr><td>System alert window</td><td>Declared in the manifest, but no clear supported overlay use was confirmed in the reviewed source. Review and justify or remove.</td></tr>
+          <tr><td>GET_TASKS, REORDER_TASKS, kill background processes</td><td>Supports app-blocking/task-management behavior, but these are legacy or sensitive capabilities and should be reviewed for Play policy fit.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="sdk-disclosures">
+      <h2>6. Third-Party SDK and Service Provider Disclosure</h2>
+      <p>The reviewed codebase includes the following third-party SDKs, libraries, or services:</p>
+      <ul>
+        <li>Google Firebase Authentication</li>
+        <li>Google Firebase Realtime Database</li>
+        <li>Google Cloud Firestore</li>
+        <li>Firebase Analytics dependency</li>
+        <li>Google Maps SDK for Android</li>
+        <li>Google Play Services Location</li>
+        <li>Appwrite Android SDK and Appwrite Functions</li>
+        <li>AndroidX CameraX</li>
+        <li>ZXing and JourneyApps barcode scanning</li>
+        <li>OkHttp, Retrofit, and Gson</li>
+        <li>AndroidX WorkManager</li>
+        <li>AnyChart Android</li>
+        <li>AndroidX, AppCompat, Material Components, ConstraintLayout, and CardView</li>
+      </ul>
+      <p>
+        No advertising SDK was detected in the reviewed dependency configuration.
+      </p>
+    </section>
+
+    <section id="children">
+      <h2>7. Child Privacy and Parental Consent</h2>
+      <p>
+        The App is designed for use by parents or legal guardians. A parent or guardian must authorize setup and monitoring on the child device, including sensitive permissions such as Accessibility, Usage Access, Location, Camera, Notifications, and Device Admin where enabled.
+      </p>
+      <p>
+        The App collects child-device information only to provide parental-control features requested by the parent or guardian. The App does not use child-device data for behavioral advertising and does not sell child data.
+      </p>
+      <h3>7.1 COPPA-Oriented Notice</h3>
+      <p>
+        For users in the United States, the App should be operated by a parent or legal guardian who consents to the collection and use of child-device information for parental-control purposes. Parents may request access, correction, disconnection, or deletion of child-device data by contacting [Insert Privacy Contact Email].
+      </p>
+      <h3>7.2 GDPR-Oriented Notice</h3>
+      <p>
+        Where GDPR or similar privacy laws apply, the parent or guardian may have rights to access, correct, delete, restrict, object to processing, withdraw consent where applicable, and request a copy of personal data. Requests may be submitted to [Insert Privacy Contact Email].
+      </p>
+      <h3>7.3 Google Play Families Policy Alignment</h3>
+      <p>
+        Before publication, ensure that all child-directed or family-positioned store listings, screenshots, in-app permission screens, and privacy disclosures are consistent with actual app behavior. Sensitive monitoring features should be clearly disclosed before activation and should be limited to parental-control purposes.
+      </p>
+    </section>
+
+    <section id="retention-deletion">
+      <h2>8. Retention, Access, and Deletion</h2>
+      <p>
+        We retain account, device, usage, connection, location, and parental-control data for as long as reasonably necessary to provide the App, maintain connected devices, enforce parent-selected settings, comply with legal obligations, resolve disputes, and protect the service.
+      </p>
+      <p>
+        Local data may remain on a device until the user logs out, clears app data, uninstalls the App, disconnects a device, or the data is otherwise cleared by app logic. Remote data may remain in Firebase or Appwrite until deleted by app workflows or upon verified request.
+      </p>
+      <h3>8.1 Account and Data Deletion Instructions</h3>
+      <p>
+        To request deletion of a parent account and associated child-device data, contact [Insert Privacy Contact Email] from the email address or phone number associated with the parent account. Include the parent account identifier and, where available, the connected child device names or device IDs.
+      </p>
+      <p>
+        We will delete or de-identify account records and connected child-device data unless retention is required by law, needed for security, or necessary to resolve an active dispute. If a self-service in-app deletion workflow is added in the future, this section should be updated with the exact navigation path.
+      </p>
+    </section>
+
+    <section id="inventory">
+      <h2>9. Data Collection Inventory</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Data Category</th>
+            <th>Collection Source</th>
+            <th>Local Storage</th>
+            <th>Remote Storage</th>
+            <th>Business Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Parent account data</td><td>Signup/login/session</td><td>Yes</td><td>Yes, Firebase/Appwrite</td><td>Authentication and account management</td></tr>
+          <tr><td>Child name and parent name</td><td>Setup and pairing</td><td>Yes</td><td>Yes, Firebase</td><td>Device pairing and dashboard display</td></tr>
+          <tr><td>Android ID, model, manufacturer</td><td>Android device APIs</td><td>Yes</td><td>Yes, Firebase</td><td>Device identity and sync</td></tr>
+          <tr><td>Installed apps</td><td>PackageManager</td><td>Transient or settings-dependent</td><td>Yes, Firebase</td><td>Parent visibility and blocking controls</td></tr>
+          <tr><td>App usage and screen time</td><td>UsageStatsManager and UsageEvents</td><td>Some local state</td><td>Yes, Firebase</td><td>Monitoring, limits, timers, reporting</td></tr>
+          <tr><td>Foreground app/window events</td><td>Accessibility Service and Usage Stats</td><td>Transient/local broadcasts</td><td>Summaries uploaded</td><td>Blocking and timer enforcement</td></tr>
+          <tr><td>Location</td><td>Google Play Services Location</td><td>Transient</td><td>Yes, Firebase</td><td>Parent child-location view</td></tr>
+          <tr><td>Blocked apps, limits, timers</td><td>Parent controls and app settings</td><td>Yes</td><td>Yes, Firebase</td><td>Parental-control enforcement</td></tr>
+          <tr><td>QR pairing and share keys</td><td>QR scanner and Firebase</td><td>Yes</td><td>Yes, Firebase</td><td>Parent-child device pairing</td></tr>
+          <tr><td>OTP email data</td><td>User input and OTP service</td><td>In-memory fallback</td><td>Appwrite function</td><td>Verification and recovery</td></tr>
+          <tr><td>Device and service status</td><td>Services and receivers</td><td>Yes</td><td>Yes, Firebase</td><td>Reliability and connection status</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="review-notes">
+      <h2>10. Implementation Review Notes</h2>
+      <p>The following items should be reviewed before production release and Google Play submission:</p>
+      <ul>
+        <li>Remove or justify manifest permissions where no source-level use was confirmed, including external storage, read phone state, and system alert window.</li>
+        <li>Review Device Admin policies carefully, especially sensitive policies such as wipe-data, reset-password, and disable-camera. Disclose only features actually used and necessary.</li>
+        <li>Confirm whether Firebase Analytics is enabled in production and update Data Safety disclosures accordingly.</li>
+        <li>Provide a verified privacy contact email, legal entity name, jurisdiction, and retention schedule.</li>
+        <li>Add or document a self-service account deletion flow if required by the target Play policy category and launch region.</li>
+        <li>Ensure all sensitive permissions are preceded by clear in-app disclosures that match actual behavior.</li>
+      </ul>
+    </section>
+
+    <section id="legal-disclaimer">
+      <h2>11. Legal Disclaimer</h2>
+      <div class="disclaimer">
+        <p>
+          This document is a compliance drafting aid based on a technical review of the application codebase. It is not legal advice and does not create an attorney-client relationship. The publisher should have qualified legal counsel review this document, confirm operational practices, and adapt it to the publisher's jurisdiction, business model, target audience, retention practices, and Google Play distribution settings before publication.
+        </p>
+      </div>
+      <p class="footer-note">
+        Document owner: [Insert Legal Entity Name] | Privacy contact: [Insert Privacy Contact Email] | Last reviewed: [Insert Review Date]
+      </p>
+    </section>
+  </main>
+</body>
+</html>

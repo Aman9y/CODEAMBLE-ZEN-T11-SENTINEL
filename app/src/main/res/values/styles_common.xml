@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Common UI Styles for Master2 - Using Common prefix to avoid conflicts -->
+
+    <!-- Card Styles -->
+    <style name="CommonCard" parent="Widget.MaterialComponents.CardView">
+        <item name="cardCornerRadius">@dimen/card_corner_radius</item>
+        <item name="cardElevation">@dimen/card_elevation</item>
+        <item name="cardBackgroundColor">@android:color/white</item>
+    </style>
+
+    <style name="CommonCard.Primary">
+        <item name="android:layout_marginBottom">@dimen/card_margin</item>
+    </style>
+
+    <style name="CommonCard.Flat">
+        <item name="cardElevation">2dp</item>
+    </style>
+
+    <!-- Base Button Style -->
+    <style name="CommonButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/button_height</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="CommonButton.Primary">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="CommonButton.Secondary">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="CommonButton.Danger">
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <!-- Base Text Style -->
+    <style name="CommonText">
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="CommonText.Header">
+        <item name="android:textSize">@dimen/text_size_header</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/neutral_900</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="CommonText.Title">
+        <item name="android:textSize">@dimen/text_size_title</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/neutral_900</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="CommonText.Body">
+        <item name="android:textSize">@dimen/text_size_body</item>
+        <item name="android:textColor">@color/neutral_700</item>
+    </style>
+
+    <style name="CommonText.Caption">
+        <item name="android:textSize">@dimen/text_size_caption</item>
+        <item name="android:textColor">@color/neutral_500</item>
+    </style>
+
+    <!-- Search Input Style -->
+    <style name="CommonSearchInput">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/search_input_height</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:paddingHorizontal">16dp</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/neutral_900</item>
+        <item name="android:textColorHint">@color/neutral_500</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:imeOptions">actionSearch</item>
+    </style>
+
+    <!-- Base Icon Container Style -->
+    <style name="CommonIcon">
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="CommonIcon.Primary">
+        <item name="android:layout_width">@dimen/icon_size_medium</item>
+        <item name="android:layout_height">@dimen/icon_size_medium</item>
+    </style>
+
+    <style name="CommonIcon.Large">
+        <item name="android:layout_width">@dimen/icon_size_large</item>
+        <item name="android:layout_height">@dimen/icon_size_large</item>
+    </style>
+
+</resources>

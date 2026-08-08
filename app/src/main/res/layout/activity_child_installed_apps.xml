@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:background="@drawable/bg_gradient_mesh">
+
+    <!-- Header Content -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_glass_round"
+            android:padding="10dp"
+            android:src="@drawable/ic_arrow_left"
+            app:tint="@color/neutral_900"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Installed Apps"
+            android:textColor="@color/neutral_900"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Search Card (Glass) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/searchCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:background="@drawable/bg_card_glass"
+        android:padding="4dp"
+        app:layout_constraintTop_toBottomOf="@id/header">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="12dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@android:drawable/ic_menu_search"
+                app:tint="@color/neutral_500" />
+
+            <EditText
+                android:id="@+id/etSearch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:background="@android:color/transparent"
+                android:hint="Search apps..."
+                android:textColorHint="@color/neutral_500"
+                android:textColor="@color/neutral_900"
+                android:textSize="16sp"
+                android:singleLine="true"
+                android:imeOptions="actionSearch" />
+
+            <!-- Clear Search Button -->
+            <ImageButton
+                android:id="@+id/btnClearSearch"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_clear"
+                android:visibility="gone"
+                android:contentDescription="Clear search"
+                app:tint="@color/neutral_500" />
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/tvTimerStatusPrompt"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="12dp"
+        android:text="Click here to view the timer status for the apps you have set timers on"
+        android:textColor="@color/neutral_700"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif-medium"
+        app:layout_constraintTop_toBottomOf="@id/searchCard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+    
+    <!-- Needed for existing logic, keep hidden -->
+    <TextView
+        android:id="@+id/tvChildName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <!-- Combined List (Top 5 + All Apps) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvInstalledApps"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="24dp"
+        android:clipToPadding="false"
+        app:layout_constraintTop_toBottomOf="@id/tvTimerStatusPrompt"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+
+    <LinearLayout
+        android:id="@+id/appListSkeleton"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="24dp"
+        android:importantForAccessibility="no"
+        app:layout_constraintTop_toBottomOf="@id/tvTimerStatusPrompt"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="4dp"
+            android:paddingVertical="12dp">
+
+            <View
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:background="@drawable/bg_skeleton_pill" />
+
+            <View
+                android:layout_width="150dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/bg_skeleton_pill" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="78dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/bg_skeleton_card"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="14dp">
+
+            <View
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:background="@drawable/bg_skeleton_pill" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <View
+                    android:layout_width="130dp"
+                    android:layout_height="16dp"
+                    android:background="@drawable/bg_skeleton_pill" />
+
+                <View
+                    android:layout_width="190dp"
+                    android:layout_height="11dp"
+                    android:layout_marginTop="9dp"
+                    android:background="@drawable/bg_skeleton_pill" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="48dp"
+                android:layout_height="22dp"
+                android:background="@drawable/bg_skeleton_pill" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="78dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/bg_skeleton_card"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="14dp">
+
+            <View
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:background="@drawable/bg_skeleton_pill" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <View
+                    android:layout_width="160dp"
+                    android:layout_height="16dp"
+                    android:background="@drawable/bg_skeleton_pill" />
+
+                <View
+                    android:layout_width="150dp"
+                    android:layout_height="11dp"
+                    android:layout_marginTop="9dp"
+                    android:background="@drawable/bg_skeleton_pill" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="48dp"
+                android:layout_height="22dp"
+                android:background="@drawable/bg_skeleton_pill" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="78dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/bg_skeleton_card"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="14dp">
+
+            <View
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:background="@drawable/bg_skeleton_pill" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <View
+                    android:layout_width="110dp"
+                    android:layout_height="16dp"
+                    android:background="@drawable/bg_skeleton_pill" />
+
+                <View
+                    android:layout_width="180dp"
+                    android:layout_height="11dp"
+                    android:layout_marginTop="9dp"
+                    android:background="@drawable/bg_skeleton_pill" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="48dp"
+                android:layout_height="22dp"
+                android:background="@drawable/bg_skeleton_pill" />
+        </LinearLayout>
+    </LinearLayout>
+    <!-- Empty State -->
+    <LinearLayout
+        android:id="@+id/emptyState"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/tvTimerStatusPrompt"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_refresh" 
+            app:tint="@color/neutral_400"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:id="@+id/tvEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="No apps found"
+            android:textColor="@color/neutral_600"
+            android:textSize="18sp"
+            android:fontFamily="sans-serif-medium" />
+    </LinearLayout>
+
+    <!-- Loading Overlay -->
+    <FrameLayout
+        android:id="@+id/loadingOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CCFFFFFF"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="24dp"
+            android:background="#FFFFFF">
+
+            <ProgressBar
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:indeterminateTint="@color/primary_600" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Loading installed apps..."
+                android:textColor="@color/neutral_900"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

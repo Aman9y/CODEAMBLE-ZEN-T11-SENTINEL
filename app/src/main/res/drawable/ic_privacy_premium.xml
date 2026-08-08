@@ -1,0 +1,23 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+  <!-- Soft Background -->
+  <path
+      android:pathData="M24,24m-22,0a22,22 0,1 1,44 0a22,22 0,1 1,-44 0"
+      android:fillColor="#E0F7FA"/>
+      
+  <!-- Shield Shape -->
+  <path
+      android:pathData="M24,12 L14,16 v6 c0,5.55 4.19,10.74 10,12 5.81,-1.26 10,-6.45 10,-12 v-6 l-10,-4 z"
+      android:fillColor="#00BCD4"/>
+      
+  <!-- Checkmark / Lock Detail -->
+  <path
+      android:pathData="M20,24 l3,3 l5,-5"
+      android:strokeWidth="3"
+      android:strokeColor="#FFFFFF"
+      android:strokeLineCap="round"
+      android:strokeLineJoin="round"/>
+</vector>

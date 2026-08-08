@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+   CUSTOM DATA EXTRACTION RULES - DISABLE BACKUP FOR PARENTAL CONTROL APP
+   Prevents data from being backed up to cloud or transferred between devices
+   Ensures true fresh start after uninstall/reinstall
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- EXCLUDE ALL DATA FROM CLOUD BACKUP -->
+        <!-- No session data should persist after uninstall for security -->
+        
+        <!-- Exclude all SharedPreferences -->
+        <exclude domain="sharedpref" path="MasterAppSession.xml"/>
+        <exclude domain="sharedpref" path="user_session.xml"/>
+        <exclude domain="sharedpref" path="device_connection.xml"/>
+        <exclude domain="sharedpref" path="child_session.xml"/>
+        <exclude domain="sharedpref" path="connected_devices.xml"/>
+        <exclude domain="sharedpref" path="permanently_removed_devices.xml"/>
+        <exclude domain="sharedpref" path="app_install_detection.xml"/>
+        <exclude domain="sharedpref" path="timer_state.xml"/>
+        <exclude domain="sharedpref" path="app_usage_limits.xml"/>
+        <exclude domain="sharedpref" path="blocked_apps.xml"/>
+        <exclude domain="sharedpref" path="device_pairing.xml"/>
+        <exclude domain="sharedpref" path="qr_scanning_state.xml"/>
+        <exclude domain="sharedpref" path="parent_dashboard_cache.xml"/>
+        <exclude domain="sharedpref" path="child_dashboard_cache.xml"/>
+        <exclude domain="sharedpref" path="logout_state.xml"/>
+        
+        <!-- Exclude all app data for complete fresh start -->
+        <exclude domain="sharedpref" path="."/>
+        <exclude domain="file" path="."/>
+        <exclude domain="database" path="."/>
+    </cloud-backup>
+    
+    <device-transfer>
+        <!-- ALSO EXCLUDE FROM DEVICE TRANSFER -->
+        <!-- Prevents data transfer when switching devices -->
+        
+        <exclude domain="sharedpref" path="."/>
+        <exclude domain="file" path="."/>
+        <exclude domain="database" path="."/>
+    </device-transfer>
+</data-extraction-rules>

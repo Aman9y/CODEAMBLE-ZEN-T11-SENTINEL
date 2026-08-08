@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base colors -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Custom Theme Colors from CSV -->
+    <color name="soft_blue">#BAF2F4</color>
+    <color name="violet_red">#A04261</color>
+    <color name="soft_grey">#75878E</color>
+    <color name="light_blue">#B9D7DA</color>
+    <color name="burgundy">#5D2638</color>
+    <color name="slate_black">#2B2C30</color>
+
+    <!-- ============================================== -->
+    <!-- MODERN DESIGN COLORS - NEW ADDITIONS -->
+    <!-- ============================================== -->
+
+    <!-- Modern Blue Palette -->
+    <color name="modern_blue_50">#EFF6FF</color>
+    <color name="modern_blue_100">#DBEAFE</color>
+    <color name="modern_blue_200">#BFDBFE</color>
+    <color name="modern_blue_300">#93C5FD</color>
+    <color name="modern_blue_400">#60A5FA</color>
+    <color name="modern_blue_500">#3B82F6</color>
+    <color name="modern_blue_600">#2563EB</color>
+    <color name="modern_blue_700">#1D4ED8</color>
+    <color name="modern_blue_800">#1E40AF</color>
+    <color name="modern_blue_900">#1E3A8A</color>
+
+    <!-- Modern Purple Gradient -->
+    <color name="gradient_start">#667eea</color>
+    <color name="gradient_end">#764ba2</color>
+    <color name="gradient_overlay_start">#80667eea</color>
+    <color name="gradient_overlay_end">#80764ba2</color>
+
+    <!-- Modern Red Palette -->
+    <color name="modern_red_50">#FEF2F2</color>
+    <color name="modern_red_100">#FEE2E2</color>
+    <color name="modern_red_200">#FECACA</color>
+    <color name="modern_red_300">#FCA5A5</color>
+    <color name="modern_red_400">#F87171</color>
+    <color name="modern_red_500">#EF4444</color>
+    <color name="modern_red_600">#DC2626</color>
+    <color name="modern_red_700">#B91C1C</color>
+    <color name="modern_red_800">#991B1B</color>
+    <color name="modern_red_900">#7F1D1D</color>
+
+    <!-- Modern Green Palette -->
+    <color name="modern_green_50">#ECFDF5</color>
+    <color name="modern_green_100">#D1FAE5</color>
+    <color name="modern_green_200">#A7F3D0</color>
+    <color name="modern_green_300">#6EE7B7</color>
+    <color name="modern_green_400">#34D399</color>
+    <color name="modern_green_500">#10B981</color>
+    <color name="modern_green_600">#059669</color>
+    <color name="modern_green_700">#047857</color>
+    <color name="modern_green_800">#065F46</color>
+    <color name="modern_green_900">#064E3B</color>
+
+    <!-- Modern Orange Palette -->
+    <color name="modern_orange_50">#FFFBEB</color>
+    <color name="modern_orange_100">#FEF3C7</color>
+    <color name="modern_orange_200">#FDE68A</color>
+    <color name="modern_orange_300">#FCD34D</color>
+    <color name="modern_orange_400">#FBBF24</color>
+    <color name="modern_orange_500">#F59E0B</color>
+    <color name="modern_orange_600">#D97706</color>
+    <color name="modern_orange_700">#B45309</color>
+    <color name="modern_orange_800">#92400E</color>
+    <color name="modern_orange_900">#78350F</color>
+
+    <!-- Modern Cyan Palette -->
+    <color name="modern_cyan_50">#ECFEFF</color>
+    <color name="modern_cyan_100">#CFFAFE</color>
+    <color name="modern_cyan_200">#A5F3FC</color>
+    <color name="modern_cyan_300">#67E8F9</color>
+    <color name="modern_cyan_400">#22D3EE</color>
+    <color name="modern_cyan_500">#06B6D4</color>
+    <color name="modern_cyan_600">#0891B2</color>
+    <color name="modern_cyan_700">#0E7490</color>
+    <color name="modern_cyan_800">#155E75</color>
+    <color name="modern_cyan_900">#164E63</color>
+
+    <!-- Modern Grey Palette -->
+    <color name="modern_grey_50">#F9FAFB</color>
+    <color name="modern_grey_100">#F3F4F6</color>
+    <color name="modern_grey_200">#E5E7EB</color>
+    <color name="modern_grey_300">#D1D5DB</color>
+    <color name="modern_grey_400">#9CA3AF</color>
+    <color name="modern_grey_500">#6B7280</color>
+    <color name="modern_grey_600">#4B5563</color>
+    <color name="modern_grey_700">#374151</color>
+    <color name="modern_grey_800">#1F2937</color>
+    <color name="modern_grey_900">#111827</color>
+
+    <!-- ============================================== -->
+    <!-- UPDATED PRIMARY PALETTE -->
+    <!-- ============================================== -->
+
+    <!-- Primary palette - Updated with Modern Blue -->
+    <color name="primary_50">@color/modern_blue_50</color>
+    <color name="primary_100">@color/modern_blue_100</color>
+    <color name="primary_200">@color/modern_blue_200</color>
+    <color name="primary_300">@color/modern_blue_300</color>
+    <color name="primary_400">@color/modern_blue_400</color>
+    <color name="primary_500">@color/modern_blue_500</color>
+    <color name="primary_600">@color/modern_blue_600</color>
+    <color name="primary_700">@color/modern_blue_700</color>
+    <color name="primary_800">@color/modern_blue_800</color>
+    <color name="primary_900">@color/modern_blue_900</color>
+
+    <!-- Secondary palette - Updated with Violet Red accent -->
+    <color name="secondary_50">#F9F1F4</color>
+    <color name="secondary_100">#F3E3E8</color>
+    <color name="secondary_200">#E7C7D1</color>
+    <color name="secondary_300">#D19BAE</color>
+    <color name="secondary_400">#BC6F8B</color>
+    <color name="secondary_500">#A04261</color> <!-- Main violet red -->
+    <color name="secondary_600">#8A375A</color>
+    <color name="secondary_700">#732D52</color>
+    <color name="secondary_800">#5D2347</color>
+    <color name="secondary_900">#4A1C3C</color>
+
+    <!-- Success palette - Updated with Modern Green -->
+    <color name="success_50">@color/modern_green_50</color>
+    <color name="success_100">@color/modern_green_100</color>
+    <color name="success_200">@color/modern_green_200</color>
+    <color name="success_300">@color/modern_green_300</color>
+    <color name="success_400">@color/modern_green_400</color>
+    <color name="success_500">@color/modern_green_500</color>
+    <color name="success_600">@color/modern_green_600</color>
+    <color name="success_700">@color/modern_green_700</color>
+    <color name="success_800">@color/modern_green_800</color>
+    <color name="success_900">@color/modern_green_900</color>
+
+    <!-- Warning palette - Updated with Modern Orange -->
+    <color name="warning_50">@color/modern_orange_50</color>
+    <color name="warning_100">@color/modern_orange_100</color>
+    <color name="warning_200">@color/modern_orange_200</color>
+    <color name="warning_300">@color/modern_orange_300</color>
+    <color name="warning_400">@color/modern_orange_400</color>
+    <color name="warning_500">@color/modern_orange_500</color>
+    <color name="warning_600">@color/modern_orange_600</color>
+    <color name="warning_700">@color/modern_orange_700</color>
+    <color name="warning_800">@color/modern_orange_800</color>
+    <color name="warning_900">@color/modern_orange_900</color>
+
+    <!-- Error palette - Updated with Modern Red -->
+    <color name="error_50">@color/modern_red_50</color>
+    <color name="error_100">@color/modern_red_100</color>
+    <color name="error_200">@color/modern_red_200</color>
+    <color name="error_300">@color/modern_red_300</color>
+    <color name="error_400">@color/modern_red_400</color>
+    <color name="error_500">@color/modern_red_500</color>
+    <color name="error_600">@color/modern_red_600</color>
+    <color name="error_700">@color/modern_red_700</color>
+    <color name="error_800">@color/modern_red_800</color>
+    <color name="error_900">@color/modern_red_900</color>
+
+    <!-- Neutral palette - Updated with Modern Grey -->
+    <color name="neutral_50">@color/modern_grey_50</color>
+    <color name="neutral_100">@color/modern_grey_100</color>
+    <color name="neutral_200">@color/modern_grey_200</color>
+    <color name="neutral_300">@color/modern_grey_300</color>
+    <color name="neutral_400">@color/modern_grey_400</color>
+    <color name="neutral_500">@color/modern_grey_500</color>
+    <color name="neutral_600">@color/modern_grey_600</color>
+    <color name="neutral_700">@color/modern_grey_700</color>
+    <color name="neutral_800">@color/modern_grey_800</color>
+    <color name="neutral_900">@color/modern_grey_900</color>
+
+    <!-- ============================================== -->
+    <!-- SURFACE & BACKGROUND COLORS -->
+    <!-- ============================================== -->
+
+    <!-- Surface colors - Updated to match modern theme -->
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_variant">#F8FAFC</color>
+    <color name="surface_container">#F1F5F9</color>
+    <color name="surface_container_high">#E2E8F0</color>
+    <color name="surface_dim">#F8FAFC</color>
+    <color name="surface_bright">#FFFFFF</color>
+    <color name="bg_gradient_start">@color/modern_blue_50</color>
+    <color name="bg_gradient_end">@color/white</color>
+
+    <!-- Main theme application colors -->
+    <color name="primary_background">@color/soft_blue</color>
+    <color name="primary_accent">@color/violet_red</color>
+    <color name="secondary_accent">@color/soft_grey</color>
+    <color name="success_message">@color/light_blue</color>
+    <color name="alert_block">@color/burgundy</color>
+    <color name="main_text">@color/slate_black</color>
+
+    <!-- ============================================== -->
+    <!-- MODERN UI SPECIFIC COLORS -->
+    <!-- ============================================== -->
+
+    <!-- Card and Container backgrounds -->
+    <color name="card_background">#FFFFFF</color>
+    <color name="card_surface">#FAFBFC</color>
+    <color name="card_border">#F1F5F9</color>
+
+    <!-- Status and state colors -->
+    <color name="online">@color/success_600</color>
+    <color name="offline">@color/neutral_500</color>
+    <color name="away">@color/warning_600</color>
+    <color name="busy">@color/error_600</color>
+    <color name="active_badge">#10B981</color>
+    <color name="inactive_badge">#6B7280</color>
+
+    <!-- Button and interaction colors -->
+    <color name="button_primary">#3B82F6</color>
+    <color name="button_primary_pressed">#1D4ED8</color>
+    <color name="button_secondary">#F3F4F6</color>
+    <color name="button_secondary_pressed">#E5E7EB</color>
+    <color name="button_accent">#06B6D4</color>
+    <color name="button_accent_pressed">#0891B2</color>
+
+    <!-- Text colors hierarchy -->
+    <color name="text_primary">@color/neutral_900</color>
+    <color name="text_secondary">@color/neutral_600</color>
+    <color name="text_tertiary">@color/neutral_500</color>
+    <color name="text_disabled">#9CA3AF</color>
+    <color name="text_on_primary">#FFFFFF</color>
+    <color name="text_on_surface">#1F2937</color>
+
+    <!-- Border and divider colors -->
+    <color name="border_primary">#E5E7EB</color>
+    <color name="border_secondary">#F3F4F6</color>
+    <color name="border_focus">#3B82F6</color>
+    <color name="divider">#E5E7EB</color>
+
+    <!-- Shadow colors -->
+    <color name="shadow_light">#1A000000</color>
+    <color name="shadow_medium">#33000000</color>
+    <color name="shadow_strong">#4D000000</color>
+
+    <!-- Ripple and press effects -->
+    <color name="ripple_primary">#1A3B82F6</color>
+    <color name="ripple_secondary">#1A6B7280</color>
+    <color name="ripple_surface">#1A000000</color>
+
+    <!-- Focus mode specific colors -->
+    <color name="focus_active">#EF4444</color>
+    <color name="focus_inactive">#9CA3AF</color>
+    <color name="focus_background">#FEF2F2</color>
+
+    <!-- Timer specific colors -->
+    <color name="timer_active">#F59E0B</color>
+    <color name="timer_inactive">#9CA3AF</color>
+    <color name="timer_background">#FFFBEB</color>
+
+    <!-- Bottom Navigation colors -->
+    <color name="bottom_nav_selected">@color/primary_600</color>
+    <color name="bottom_nav_unselected">@color/neutral_500</color>
+    <color name="bottom_nav_background">#FFFFFF</color>
+    <color name="nav_item_color">@color/neutral_600</color>
+    <color name="nav_item_selected_color">@color/primary_600</color>
+
+    <!-- ============================================== -->
+    <!-- LEGACY COMPATIBILITY -->
+    <!-- ============================================== -->
+
+    <!-- Keep existing colors for backward compatibility -->
+    <color name="accent_purple">#8B5CF6</color>
+    <color name="accent_pink">#EC4899</color>
+    <color name="accent_indigo">#6366F1</color>
+    <color name="accent_teal">#14B8A6</color>
+
+    <!-- Additional semantic color mappings -->
+    <color name="background_primary">@color/primary_background</color>
+    <color name="background_secondary">@color/surface_variant</color>
+    <color name="button_primary_old">@color/primary_accent</color>
+    <color name="button_secondary_old">@color/soft_grey</color>
+    
+    <!-- Bottom Navigation -->
+    <color name="bottom_nav_color">@color/modern_blue_600</color>
+    
+    <!-- Timer Status Missing Colors -->
+    <color name="background_light">@color/modern_grey_50</color>
+    <color name="text_hint">@color/text_tertiary</color>
+</resources>

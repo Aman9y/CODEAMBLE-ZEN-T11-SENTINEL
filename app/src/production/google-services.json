@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "727704588991",
+    "firebase_url": "https://master2-dbbc1-default-rtdb.firebaseio.com",
+    "project_id": "master2-dbbc1",
+    "storage_bucket": "master2-dbbc1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:727704588991:android:8e48550bcaabececbe2c0a",
+        "android_client_info": {
+          "package_name": "com.example.master2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKncVcqAghVky7wmDDPYeB84Gc8tMz6B4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:727704588991:android:c0f98111abf53046be2c0a",
+        "android_client_info": {
+          "package_name": "online.monarchlabs.sentinel"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKncVcqAghVky7wmDDPYeB84Gc8tMz6B4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="60dp"
+    android:height="60dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    
+    <!-- Blue Shield Background -->
+    <path
+        android:fillColor="#4F46E5"
+        android:pathData="M50,10L20,20V45C20,65 35,80 50,85C65,80 80,65 80,45V20L50,10Z" />
+    
+    <!-- Top-Left White Quarter -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M20,20L50,30L50,47.5L20,37.5L20,20Z" />
+    
+    <!-- Bottom-Right White Quarter -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M50,47.5L80,37.5L80,45C80,65 65,80 50,85L50,47.5Z" />
+    
+</vector>
