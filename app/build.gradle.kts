@@ -76,6 +76,7 @@ android {
         // Cloudflare Workers Configuration
         buildConfigField("String", "CLOUDFLARE_EMAIL_WORKER_URL", buildConfigString(localValue("CLOUDFLARE_EMAIL_WORKER_URL", "")))
         buildConfigField("String", "CLOUDFLARE_PRIVACY_WORKER_URL", buildConfigString(localValue("CLOUDFLARE_PRIVACY_WORKER_URL", "")))
+        buildConfigField("String", "CLOUDFLARE_NEXTDNS_WORKER_URL", buildConfigString(localValue("CLOUDFLARE_NEXTDNS_WORKER_URL", "")))
         buildConfigField("String", "CLOUDFLARE_CLIENT_SECRET", buildConfigString(localValue("CLOUDFLARE_CLIENT_SECRET", "")))
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", buildConfigString(localValue("GOOGLE_WEB_CLIENT_ID", "")))
     }
