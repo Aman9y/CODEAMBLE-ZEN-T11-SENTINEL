@@ -228,15 +228,11 @@ test("different active parent cannot take over an owned child device", async () 
 });
 
 test("parent removal writes marker and deletes relationship data", async () => {
-  await assertSucceeds(update(ref(dbFor(PARENT_UID),
-    `v2/device_owners/${DEVICE_ID}`), {
-    status: "removing",
-    removalRequestedAt: Date.now(),
-    removalReason: "removed_by_parent",
-  }));
-
   const now = Date.now();
   await assertSucceeds(update(ref(dbFor(PARENT_UID)), {
+    [`v2/device_owners/${DEVICE_ID}/status`]: "removing",
+    [`v2/device_owners/${DEVICE_ID}/removalRequestedAt`]: now,
+    [`v2/device_owners/${DEVICE_ID}/removalReason`]: "removed_by_parent",
     [`v2/device_removals/${DEVICE_ID}`]: {
       trigger: true,
       removed_by_parent: true,
@@ -249,6 +245,9 @@ test("parent removal writes marker and deletes relationship data", async () => {
       reason: "removed_by_parent",
       status: "pending",
     },
+  }));
+
+  await assertSucceeds(update(ref(dbFor(PARENT_UID)), {
     [`v2/usage_daily/${DEVICE_ID}`]: null,
     [`v2/client_capabilities/${DEVICE_ID}`]: null,
     [`v2/devices/${DEVICE_ID}`]: null,
