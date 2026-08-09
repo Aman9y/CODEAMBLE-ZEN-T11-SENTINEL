@@ -36,7 +36,7 @@ public class Master2Application extends Application {
             public void onActivityStopped(Activity activity) {
                 startedActivityCount = Math.max(0, startedActivityCount - 1);
                 if (startedActivityCount == 0) {
-                    ParentAccessGate.clearVerification();
+                    ParentAccessGate.onAppUiHidden();
                 }
             }
 

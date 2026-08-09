@@ -14,6 +14,7 @@ import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 
+import java.lang.ref.WeakReference;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Locale;
@@ -25,11 +26,13 @@ public final class ParentAccessGate {
     private static final String KEY_PIN_SALT = "pin_salt";
     private static boolean verifiedForCurrentAppSession = false;
     private static boolean promptShowing = false;
+    private static WeakReference<AppCompatActivity> promptActivity = new WeakReference<>(null);
 
     private ParentAccessGate() {
     }
 
     public static void requireVerifiedParent(AppCompatActivity activity) {
+        resetStalePromptIfNeeded(activity);
         if (activity == null || activity.isFinishing() || hasFreshVerification() || promptShowing) {
             return;
         }
@@ -45,21 +48,21 @@ public final class ParentAccessGate {
             return;
         }
 
-        promptShowing = true;
+        markPromptShowing(activity);
         Executor executor = ContextCompat.getMainExecutor(activity);
         BiometricPrompt prompt = new BiometricPrompt(activity, executor,
                 new BiometricPrompt.AuthenticationCallback() {
                     @Override
                     public void onAuthenticationSucceeded(
                             @NonNull BiometricPrompt.AuthenticationResult result) {
-                        promptShowing = false;
+                        clearPromptShowing();
                         markVerified();
                     }
 
                     @Override
                     public void onAuthenticationError(int errorCode,
                             @NonNull CharSequence errString) {
-                        promptShowing = false;
+                        clearPromptShowing();
                         if (!activity.isFinishing()) {
                             showVerifyPinDialog(activity);
                         }
@@ -81,7 +84,7 @@ public final class ParentAccessGate {
     }
 
     private static void showCreatePinDialog(AppCompatActivity activity) {
-        promptShowing = true;
+        markPromptShowing(activity);
         LinearLayout container = pinContainer(activity);
         EditText pin = pinInput(activity, "Create 4-digit PIN");
         EditText confirmPin = pinInput(activity, "Confirm PIN");
@@ -94,14 +97,15 @@ public final class ParentAccessGate {
                 .setView(container)
                 .setPositiveButton("Create PIN", null)
                 .setNegativeButton("Close", (d, which) -> {
-                    promptShowing = false;
+                    clearPromptShowing();
                     activity.finish();
                 })
                 .setOnCancelListener(d -> {
-                    promptShowing = false;
+                    clearPromptShowing();
                     activity.finish();
                 })
                 .create();
+        dialog.setOnDismissListener(d -> clearPromptShowing());
         dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             String pinValue = pin.getText().toString();
             String confirmValue = confirmPin.getText().toString();
@@ -115,7 +119,7 @@ public final class ParentAccessGate {
             }
             savePin(activity, pinValue);
             markVerified();
-            promptShowing = false;
+            clearPromptShowing();
             dialog.dismiss();
             Toast.makeText(activity, "Sentinel PIN created", Toast.LENGTH_SHORT).show();
         }));
@@ -123,7 +127,7 @@ public final class ParentAccessGate {
     }
 
     private static void showVerifyPinDialog(AppCompatActivity activity) {
-        promptShowing = true;
+        markPromptShowing(activity);
         EditText pin = pinInput(activity, "Sentinel PIN");
         LinearLayout container = pinContainer(activity);
         container.addView(pin);
@@ -134,14 +138,15 @@ public final class ParentAccessGate {
                 .setView(container)
                 .setPositiveButton("Unlock", null)
                 .setNegativeButton("Close", (d, which) -> {
-                    promptShowing = false;
+                    clearPromptShowing();
                     activity.finish();
                 })
                 .setOnCancelListener(d -> {
-                    promptShowing = false;
+                    clearPromptShowing();
                     activity.finish();
                 })
                 .create();
+        dialog.setOnDismissListener(d -> clearPromptShowing());
         dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             String value = pin.getText().toString();
             if (!verifyPin(activity, value)) {
@@ -149,7 +154,7 @@ public final class ParentAccessGate {
                 return;
             }
             markVerified();
-            promptShowing = false;
+            clearPromptShowing();
             dialog.dismiss();
         }));
         dialog.show();
@@ -187,8 +192,36 @@ public final class ParentAccessGate {
         verifiedForCurrentAppSession = false;
     }
 
+    public static void onAppUiHidden() {
+        clearVerification();
+        clearPromptShowing();
+    }
+
     private static void markVerified() {
         verifiedForCurrentAppSession = true;
+    }
+
+    private static void markPromptShowing(AppCompatActivity activity) {
+        promptShowing = true;
+        promptActivity = new WeakReference<>(activity);
+    }
+
+    private static void clearPromptShowing() {
+        promptShowing = false;
+        promptActivity.clear();
+    }
+
+    private static void resetStalePromptIfNeeded(AppCompatActivity activity) {
+        if (!promptShowing) {
+            return;
+        }
+        AppCompatActivity existingActivity = promptActivity.get();
+        if (existingActivity == null
+                || existingActivity != activity
+                || existingActivity.isFinishing()
+                || existingActivity.isDestroyed()) {
+            clearPromptShowing();
+        }
     }
 
     private static boolean hasPin(Context context) {
