@@ -1,9 +1,12 @@
 package online.monarchlabs.sentinel.models;
 
+import com.google.firebase.database.IgnoreExtraProperties;
+
 /**
  * Represents a permission change event on a child device.
  * Used to track and display permission changes to parents.
  */
+@IgnoreExtraProperties
 public class PermissionEvent {
     private String permissionName;
     private String action; // "ACTIVATED" or "DEACTIVATED"
