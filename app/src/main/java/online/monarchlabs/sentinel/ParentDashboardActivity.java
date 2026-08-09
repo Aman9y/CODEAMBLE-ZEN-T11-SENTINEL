@@ -1340,6 +1340,15 @@ public class ParentDashboardActivity extends BaseActivity {
             Log.d(TAG, "Ã¯Â¿Â½Ã°Å¸â€Â¥Ã°Å¸â€Â¥ NUCLEAR DEVICE ADDITION: " + device.deviceName + " (ID: " + device.deviceId + ")");
             Log.d(TAG, "Ã¯Â¿Â½ FUCK ALL BLOCKING - ADDING DEVICE IMMEDIATELY!");
 
+            if (isPermanentlyRemoved(device.deviceId)) {
+                Log.d(TAG, "Ignoring Firebase listener re-add for permanently removed device: "
+                        + device.deviceName + " (" + device.deviceId + ")");
+                connectedDevicesManager.removeDevice(device.deviceId);
+                connectedDevices.removeIf(d -> Objects.equals(d.deviceId, device.deviceId));
+                refreshDeviceListPremium();
+                return;
+            }
+
             // Check if already exists
             boolean exists = connectedDevices.stream().anyMatch(d -> Objects.equals(d.deviceId, device.deviceId));
 
@@ -4002,6 +4011,9 @@ public class ParentDashboardActivity extends BaseActivity {
     }
 
     private void removeChildDeviceV2Only(String deviceId, String parentUid) {
+        addToPermanentRemovalList(deviceId);
+        removeDeviceFromCurrentSession(deviceId);
+
         online.monarchlabs.sentinel.services.RelationshipService relationshipService =
                 new online.monarchlabs.sentinel.services.RelationshipService(
                         getApplicationContext());
