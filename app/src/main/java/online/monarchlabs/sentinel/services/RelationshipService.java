@@ -300,20 +300,27 @@ public final class RelationshipService {
                     Map<String, Object> owner = mapValue(snapshot.getValue());
                     String ownerParentUid = stringValue(owner.get("parentUid"));
                     if (!parentUid.equals(ownerParentUid)) {
-                        Log.w(TAG, "Removal rejected: parent mismatch "
+                        Log.w(TAG, "Removal owner mismatch; clearing stale "
+                                + "parent link only "
                                 + "deviceId=" + childDeviceId
                                 + " authParentUid=" + parentUid
                                 + " ownerParentUid=" + ownerParentUid
                                 + " ownerStatus="
                                 + stringValue(owner.get("status")));
-                        future.complete(Result.error(
-                                "This parent account does not own the child device.",
-                                "NOT_OWNER"));
+                        completeAlreadyRemovedCleanup(
+                                childDeviceId, parentUid, future);
                         return;
                     }
-                    completeRemoval(
-                            childDeviceId, parentUid, reason,
-                            new HashMap<>(owner), requestedAt, future);
+                    Map<String, Object> ownedDevice = new HashMap<>(owner);
+                    if (isBlank(stringValue(ownedDevice.get("connectionId")))) {
+                        resolveConnectionIdAndRemove(
+                                childDeviceId, parentUid, reason,
+                                ownedDevice, requestedAt, future);
+                    } else {
+                        completeRemoval(
+                                childDeviceId, parentUid, reason,
+                                ownedDevice, requestedAt, future);
+                    }
                 })
                 .addOnFailureListener(error -> {
                     Log.w(TAG, "Removal owner read failed deviceId="
@@ -325,6 +332,28 @@ public final class RelationshipService {
                             "REMOVAL_OWNER_READ_FAILED"));
                 });
         return future;
+    }
+
+    private void resolveConnectionIdAndRemove(String childDeviceId,
+            String parentUid, String reason, Map<String, Object> owner,
+            long requestedAt, CompletableFuture<Result> future) {
+        root.child("v2").child("parent_device_links").child(parentUid)
+                .child(childDeviceId).child("connectionId").get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        String connectionId = task.getResult()
+                                .getValue(String.class);
+                        if (!isBlank(connectionId)) {
+                            owner.put("connectionId", connectionId);
+                        }
+                    } else {
+                        Log.w(TAG, "Could not resolve legacy connection ID for "
+                                + "removal deviceId=" + childDeviceId,
+                                task.getException());
+                    }
+                    completeRemoval(childDeviceId, parentUid, reason,
+                            owner, requestedAt, future);
+                });
     }
 
     private void completeAlreadyRemovedCleanup(String childDeviceId,
@@ -352,15 +381,14 @@ public final class RelationshipService {
     private void completeRemoval(String childDeviceId, String parentUid,
             String reason, Map<String, Object> owner, long issuedAt,
             CompletableFuture<Result> future) {
-        Map<String, Object> updates = new HashMap<>();
         Map<String, Object> marker = new HashMap<>();
         marker.put("trigger", true);
         marker.put("removed_by_parent", true);
         marker.put("childDeviceId", childDeviceId);
         marker.put("childAuthUid", stringValue(owner.get("childAuthUid")));
         marker.put("targetParentUid", parentUid);
-        marker.put("targetConnectionId",
-                stringValue(owner.get("connectionId")));
+        marker.put("targetConnectionId", defaultString(
+                stringValue(owner.get("connectionId")), ""));
         marker.put("issuedAt", issuedAt);
         marker.put("expiresAt", issuedAt + REMOVAL_TTL_MS);
         marker.put("reason", isBlank(reason)
@@ -368,7 +396,33 @@ public final class RelationshipService {
         marker.put("status", "pending");
         marker.put("requires_qr_reconnection", true);
         marker.put("schemaVersion", 2);
-        updates.put("v2/device_removals/" + childDeviceId, marker);
+
+        Map<String, Object> signalUpdates = new HashMap<>();
+        signalUpdates.put("v2/device_owners/" + childDeviceId
+                + "/status", "removing");
+        signalUpdates.put("v2/device_owners/" + childDeviceId
+                + "/removalRequestedAt", issuedAt);
+        signalUpdates.put("v2/device_owners/" + childDeviceId
+                + "/removalReason", marker.get("reason"));
+        signalUpdates.put("v2/device_removals/" + childDeviceId, marker);
+
+        root.updateChildren(signalUpdates)
+                .addOnSuccessListener(ignored -> deleteRemovedDeviceData(
+                        childDeviceId, parentUid, future))
+                .addOnFailureListener(error -> {
+                    Log.w(TAG, "Child removal signal failed deviceId="
+                            + childDeviceId
+                            + " parentUid=" + parentUid
+                            + " message=" + error.getMessage(), error);
+                    future.complete(Result.error(
+                            "Could not start child removal. Please retry.",
+                            "REMOVAL_SIGNAL_FAILED"));
+                });
+    }
+
+    private void deleteRemovedDeviceData(String childDeviceId,
+            String parentUid, CompletableFuture<Result> future) {
+        Map<String, Object> updates = new HashMap<>();
         addDeviceDeletes(updates, childDeviceId);
         updates.put("v2/devices/" + childDeviceId, null);
         updates.put("v2/device_owners/" + childDeviceId, null);
@@ -387,16 +441,14 @@ public final class RelationshipService {
                             + " parentUid=" + parentUid
                             + " message=" + error.getMessage()
                             + "; retrying parent-scoped removal", error);
-                    completeParentScopedRemoval(childDeviceId, parentUid, marker,
-                            future);
+                    completeParentScopedRemoval(
+                            childDeviceId, parentUid, future);
                 });
     }
 
     private void completeParentScopedRemoval(String childDeviceId,
-            String parentUid, Map<String, Object> marker,
-            CompletableFuture<Result> future) {
+            String parentUid, CompletableFuture<Result> future) {
         Map<String, Object> updates = new HashMap<>();
-        updates.put("v2/device_removals/" + childDeviceId, marker);
         updates.put("v2/parent_device_links/" + parentUid
                 + "/" + childDeviceId, null);
         updates.put("v2/parent_notification_state/" + parentUid

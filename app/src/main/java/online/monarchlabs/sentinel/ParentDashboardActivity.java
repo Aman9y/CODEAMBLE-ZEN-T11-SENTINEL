@@ -1254,6 +1254,9 @@ public class ParentDashboardActivity extends BaseActivity {
             long linkedAtValue = linkedAt != null && linkedAt > 0
                     ? linkedAt : 0L;
             String connectionId = snapshot.child("connectionId").getValue(String.class);
+            if (displayName.equals(resolvedDeviceId)) {
+                displayName = "Child Device";
+            }
             String parentUid = getCurrentParentUserId();
             if (parentUid != null && !parentUid.isEmpty()) {
                 syncParentConnectionMarkerAndMaybeClearCaches(
@@ -4011,9 +4014,6 @@ public class ParentDashboardActivity extends BaseActivity {
     }
 
     private void removeChildDeviceV2Only(String deviceId, String parentUid) {
-        addToPermanentRemovalList(deviceId);
-        removeDeviceFromCurrentSession(deviceId);
-
         online.monarchlabs.sentinel.services.RelationshipService relationshipService =
                 new online.monarchlabs.sentinel.services.RelationshipService(
                         getApplicationContext());
@@ -4022,18 +4022,20 @@ public class ParentDashboardActivity extends BaseActivity {
                     if (result.success) {
                         completeV2ChildRemoval(deviceId, parentUid);
                     } else {
-                        showV2RemovalFailure(result.message);
+                        Log.w(TAG, "Child removal failed code=" + result.code
+                                + " message=" + result.message);
+                        showV2RemovalFailure(result.code);
                     }
                 }))
                 .exceptionally(error -> {
-                    runOnUiThread(() -> showV2RemovalFailure(
-                            error.getMessage() != null
-                                    ? error.getMessage()
-                                    : "Relationship service failed."));
+                    Log.e(TAG, "Unexpected child removal failure", error);
+                    runOnUiThread(() -> showV2RemovalFailure(null));
                     return null;
                 });
     }
     private void completeV2ChildRemoval(String deviceId, String parentUid) {
+        addToPermanentRemovalList(deviceId);
+        removeDeviceFromCurrentSession(deviceId);
         clearParentConnectionCaches(deviceId, parentUid);
         clearParentConnectionMarker(parentUid, deviceId);
         if (deviceStatusManager != null) {
@@ -4072,12 +4074,14 @@ public class ParentDashboardActivity extends BaseActivity {
         }, 3000L);
     }
 
-    private void showV2RemovalFailure(String message) {
+    private void showV2RemovalFailure(String code) {
         loadingDialogManager.hide();
         deviceIdJustRemoved = null;
-        Toast.makeText(this,
-                "Failed to remove device: " + (message != null ? message : "Unknown error"),
-                Toast.LENGTH_LONG).show();
+        String message = "Could not remove this device. Check your connection and try again.";
+        if ("INVALID_PARENT_AUTH".equals(code)) {
+            message = "Your parent session has expired. Sign in again and retry.";
+        }
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
     private void syncParentConnectionMarkerAndMaybeClearCaches(String parentId,
             String childDeviceId, String connectionId, long linkedAt) {
