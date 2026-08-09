@@ -385,6 +385,31 @@ public final class RelationshipService {
                     Log.w(TAG, "Atomic child removal failed deviceId="
                             + childDeviceId
                             + " parentUid=" + parentUid
+                            + " message=" + error.getMessage()
+                            + "; retrying parent-scoped removal", error);
+                    completeParentScopedRemoval(childDeviceId, parentUid, marker,
+                            future);
+                });
+    }
+
+    private void completeParentScopedRemoval(String childDeviceId,
+            String parentUid, Map<String, Object> marker,
+            CompletableFuture<Result> future) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("v2/device_removals/" + childDeviceId, marker);
+        updates.put("v2/parent_device_links/" + parentUid
+                + "/" + childDeviceId, null);
+        updates.put("v2/parent_notification_state/" + parentUid
+                + "/" + childDeviceId, null);
+
+        root.updateChildren(updates)
+                .addOnSuccessListener(ignored -> future.complete(
+                        new Result(true, "Removed", null,
+                                parentUid, null, null, 0L)))
+                .addOnFailureListener(error -> {
+                    Log.w(TAG, "Parent-scoped child removal failed deviceId="
+                            + childDeviceId
+                            + " parentUid=" + parentUid
                             + " message=" + error.getMessage(), error);
                     future.complete(Result.error(
                             "Could not complete child removal. Please retry.",
