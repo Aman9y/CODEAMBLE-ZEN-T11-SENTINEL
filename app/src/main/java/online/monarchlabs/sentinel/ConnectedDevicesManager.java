@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
+import online.monarchlabs.sentinel.utils.ChildDisplayName;
+
 public class ConnectedDevicesManager {
     private static final String TAG = "ConnectedDevicesManager";
     private static final String PREF_NAME = "connected_devices";
@@ -49,6 +51,8 @@ public class ConnectedDevicesManager {
     public void addOrUpdateDevice(ChildDevice device) {
         if (device == null || device.deviceId == null)
             return;
+
+        normalizeDisplayName(device);
 
         // Remove existing device with same ID
         connectedDevices.removeIf(d -> d.deviceId.equals(device.deviceId));
@@ -228,6 +232,7 @@ public class ConnectedDevicesManager {
             connectedDevices = new ArrayList<>();
             for (ChildDevice device : rawDevices) {
                 if (!isPermanentlyRemoved(device.deviceId)) {
+                    normalizeDisplayName(device);
                     connectedDevices.add(device);
                     Log.d(TAG, "  ✅ Loaded device: " + device.deviceName + " (ID: " + device.deviceId + ")");
                 } else {
@@ -235,6 +240,7 @@ public class ConnectedDevicesManager {
                             + device.deviceId + ")");
                 }
             }
+            saveConnectedDevices();
 
             // Load current device (check if it's permanently removed)
             String savedCurrentDeviceId = prefs.getString(KEY_CURRENT_DEVICE, null);
@@ -265,6 +271,13 @@ public class ConnectedDevicesManager {
         } catch (Exception e) {
             Log.e(TAG, "Error saving connected devices: " + e.getMessage());
         }
+    }
+
+    private static void normalizeDisplayName(ChildDevice device) {
+        String displayName = ChildDisplayName.resolve(
+                device.deviceId, device.userName, device.deviceName);
+        device.deviceName = displayName;
+        device.userName = displayName;
     }
 
     // Save current device to persistent storage

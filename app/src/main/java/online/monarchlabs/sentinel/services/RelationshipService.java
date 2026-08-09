@@ -21,6 +21,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import online.monarchlabs.sentinel.utils.ChildDisplayName;
+
 /** Firebase-only v2 ownership, pairing, and removal operations. */
 public final class RelationshipService {
     private static final String TAG = "RelationshipService";
@@ -115,10 +117,9 @@ public final class RelationshipService {
                 boolean active = isBlank(status) || "active".equals(status);
                 boolean stale = active && lastSeen > 0L
                         && linkedAt - lastSeen >= STALE_AFTER_MS;
-                boolean removing = "removing".equals(status);
-                if (removing || (!isBlank(existingParent)
+                if (!isBlank(existingParent)
                         && active && !stale
-                        && !session.parentUid.equals(existingParent))) {
+                        && !session.parentUid.equals(existingParent)) {
                     ownershipLocked.set(true);
                     return Transaction.abort();
                 }
@@ -181,8 +182,8 @@ public final class RelationshipService {
             addDeviceDeletes(updates, childDeviceId);
         }
 
-        String displayName = isBlank(childDeviceName)
-                ? "Child Device" : childDeviceName.trim();
+        String displayName = ChildDisplayName.resolve(
+                childDeviceId, childDeviceName, childDeviceModel);
         updates.put("v2/device_removals/" + childDeviceId, null);
 
         Map<String, Object> device = new HashMap<>();

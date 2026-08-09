@@ -75,6 +75,7 @@ import java.lang.reflect.Type;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import online.monarchlabs.sentinel.models.ChildDeviceManager;
 import online.monarchlabs.sentinel.security.ParentAccessGate;
+import online.monarchlabs.sentinel.utils.ChildDisplayName;
 import online.monarchlabs.sentinel.utils.LoadingDialogManager;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1248,15 +1249,13 @@ public class ParentDashboardActivity extends BaseActivity {
             String userName = snapshot.child("userName").getValue(String.class);
             String childDeviceName = snapshot.child("childDeviceName").getValue(String.class);
             String deviceName = snapshot.child("deviceName").getValue(String.class);
-            String displayName = firstNonEmpty(childName, userName, childDeviceName, deviceName, "Child Device");
+            String displayName = ChildDisplayName.resolve(resolvedDeviceId,
+                    childName, userName, childDeviceName, deviceName);
 
             Long linkedAt = snapshot.child("linkedAt").getValue(Long.class);
             long linkedAtValue = linkedAt != null && linkedAt > 0
                     ? linkedAt : 0L;
             String connectionId = snapshot.child("connectionId").getValue(String.class);
-            if (displayName.equals(resolvedDeviceId)) {
-                displayName = "Child Device";
-            }
             String parentUid = getCurrentParentUserId();
             if (parentUid != null && !parentUid.isEmpty()) {
                 syncParentConnectionMarkerAndMaybeClearCaches(
@@ -1344,11 +1343,7 @@ public class ParentDashboardActivity extends BaseActivity {
             Log.d(TAG, "Ã¯Â¿Â½ FUCK ALL BLOCKING - ADDING DEVICE IMMEDIATELY!");
 
             if (isPermanentlyRemoved(device.deviceId)) {
-                Log.d(TAG, "Ignoring Firebase listener re-add for permanently removed device: "
-                        + device.deviceName + " (" + device.deviceId + ")");
-                connectedDevicesManager.removeDevice(device.deviceId);
-                connectedDevices.removeIf(d -> Objects.equals(d.deviceId, device.deviceId));
-                refreshDeviceListPremium();
+                verifyFreshReconnection(device);
                 return;
             }
 
@@ -1421,6 +1416,30 @@ public class ParentDashboardActivity extends BaseActivity {
         } catch (Exception e) {
             Log.e(TAG, "Ã°Å¸â€Â¥ Error in nuclear device addition: " + e.getMessage());
         }
+    }
+
+    private void verifyFreshReconnection(ChildDevice device) {
+        FirebaseDatabase.getInstance().getReference("v2")
+                .child("device_removals").child(device.deviceId).get()
+                .addOnSuccessListener(marker -> runOnUiThread(() -> {
+                    if (marker.exists()) {
+                        Log.d(TAG, "Ignoring stale link for removed device: "
+                                + device.deviceId);
+                        connectedDevicesManager.removeDevice(device.deviceId);
+                        connectedDevices.removeIf(d -> Objects.equals(
+                                d.deviceId, device.deviceId));
+                        refreshDeviceListPremium();
+                        return;
+                    }
+
+                    Log.d(TAG, "Fresh QR reconnection confirmed for device: "
+                            + device.deviceId);
+                    removePermanentRemoval(device.deviceId);
+                    nuclearAddDevice(device);
+                }))
+                .addOnFailureListener(error -> Log.w(TAG,
+                        "Could not verify reconnection for removed device: "
+                                + device.deviceId, error));
     }
 
     private void continueDeviceConnection(ChildDevice device, boolean isFromQRScan) {
@@ -2147,10 +2166,10 @@ public class ParentDashboardActivity extends BaseActivity {
         }
 
         ChildDevice device = connectedDevicesManager.getDevice(deviceId);
-        String deviceName = (device != null && device.deviceName != null && !device.deviceName.isEmpty())
-                ? device.deviceName
-                : deviceId;
-        String userName = (device != null) ? device.userName : null;
+        String deviceName = ChildDisplayName.resolve(deviceId,
+                device != null ? device.userName : null,
+                device != null ? device.deviceName : null);
+        String userName = deviceName;
 
         // Stop monitoring old device
         stopUninstallDetection();
@@ -4192,13 +4211,8 @@ public class ParentDashboardActivity extends BaseActivity {
     }
 
     private String getCurrentChildDisplayName() {
-        if (currentChildUserName != null && !currentChildUserName.trim().isEmpty()) {
-            return currentChildUserName.trim();
-        }
-        if (currentChildDeviceName != null && !currentChildDeviceName.trim().isEmpty()) {
-            return currentChildDeviceName.trim();
-        }
-        return "Device";
+        return ChildDisplayName.resolve(currentChildDeviceId,
+                currentChildUserName, currentChildDeviceName);
     }
 
     @Override
@@ -8276,10 +8290,13 @@ public class ParentDashboardActivity extends BaseActivity {
         }
         shownSosEventKeys.add(dedupeKey);
 
-        String childName = snapshot.child("childName").getValue(String.class);
-        String deviceName = snapshot.child("deviceName").getValue(String.class);
-        String reason = snapshot.child("reason").getValue(String.class);
         String childDeviceId = snapshot.child("childDeviceId").getValue(String.class);
+        String childName = ChildDisplayName.resolve(childDeviceId,
+                snapshot.child("childName").getValue(String.class),
+                snapshot.child("userName").getValue(String.class));
+        String deviceName = ChildDisplayName.resolve(childDeviceId,
+                snapshot.child("deviceName").getValue(String.class));
+        String reason = snapshot.child("reason").getValue(String.class);
         Integer battery = snapshot.child("batteryPercent").getValue(Integer.class);
         Double latitude = snapshot.child("location").child("latitude").getValue(Double.class);
         Double longitude = snapshot.child("location").child("longitude").getValue(Double.class);

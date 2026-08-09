@@ -92,7 +92,7 @@ public class MainActivity extends BaseActivity {
         Log.d(TAG, "🔍 IMMEDIATE child session check - childDeviceId: " + childDeviceId +
                 ", parentName: " + parentName + ", shareKey: " + shareKey);
 
-        // �️ BULLETPROOF VALIDATION: Check for removal/disconnection flags first
+        // Check for removal/disconnection flags first.
         if (isBulletproofDisconnectionActive()) {
             Log.d(TAG, "Persistent child removal state found; completing local cleanup");
             ChildDisconnectionCoordinator.disconnectCurrentSession(
@@ -100,7 +100,7 @@ public class MainActivity extends BaseActivity {
             return;
         }
 
-        // �🔧 LOGOUT FIX: Check for explicit logout flags
+        // Check for explicit logout flags.
         boolean requiresQRReconnection = getIntent().getBooleanExtra("require_qr_reconnection", false);
         boolean forceLoginScreen = getIntent().getBooleanExtra("force_login_screen", false);
         boolean autoLogoutCompleted = getIntent().getBooleanExtra("auto_logout_completed", false);

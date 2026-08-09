@@ -31,6 +31,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import online.monarchlabs.sentinel.utils.ChildDisplayName;
+
 /**
  * Background service that listens for child device permission changes
  * and shows Android system notifications on parent device
@@ -134,17 +136,12 @@ public class PermissionEventListener extends Service {
             public void onChildAdded(DataSnapshot childSnapshot, String previousChildKey) {
                 String childDeviceId = childSnapshot.getKey();
                 Log.d(TAG, "Ã°Å¸â€ â€¢ Detected child device: " + childDeviceId);
-                String displayName = childSnapshot.child("childName").getValue(String.class);
-                if (displayName == null || displayName.isEmpty()) {
-                    displayName = childSnapshot.child("userName").getValue(String.class);
-                }
-                if (displayName == null || displayName.isEmpty()) {
-                    displayName = childSnapshot.child("childDeviceName").getValue(String.class);
-                }
-                if (displayName == null || displayName.isEmpty()) {
-                    displayName = childSnapshot.child("deviceName").getValue(String.class);
-                }
-                if (displayName != null && !displayName.isEmpty() && childDeviceId != null) {
+                String displayName = ChildDisplayName.resolve(childDeviceId,
+                        childSnapshot.child("childName").getValue(String.class),
+                        childSnapshot.child("userName").getValue(String.class),
+                        childSnapshot.child("childDeviceName").getValue(String.class),
+                        childSnapshot.child("deviceName").getValue(String.class));
+                if (childDeviceId != null) {
                     childNames.put(childDeviceId, displayName);
                 }
                 listenToChildEvents(childDeviceId);
@@ -281,7 +278,9 @@ public class PermissionEventListener extends Service {
         }
         deliveryPrefs.edit().putLong(deliveryKey, eventTime).apply();
 
-        String childName = snapshot.child("childName").getValue(String.class);
+        String childName = ChildDisplayName.resolve(
+                snapshot.child("childDeviceId").getValue(String.class),
+                snapshot.child("childName").getValue(String.class));
         String reason = snapshot.child("reason").getValue(String.class);
         showSosSystemNotification(eventId, childName, reason);
     }

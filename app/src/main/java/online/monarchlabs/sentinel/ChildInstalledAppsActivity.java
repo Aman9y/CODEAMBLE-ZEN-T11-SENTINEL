@@ -46,6 +46,7 @@ import online.monarchlabs.sentinel.data.FirebaseSchemaV2Repository;
 import online.monarchlabs.sentinel.data.StudyModeContract;
 import online.monarchlabs.sentinel.data.StudyModePolicyRepository;
 import online.monarchlabs.sentinel.data.ParentAppInventoryCache;
+import online.monarchlabs.sentinel.utils.ChildDisplayName;
 import online.monarchlabs.sentinel.utils.AppCategorizer;
 import online.monarchlabs.sentinel.utils.StudyModeScheduleEvaluator;
 
@@ -218,13 +219,14 @@ public class ChildInstalledAppsActivity extends BaseActivity {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    String userName = snapshot.child("userName").getValue(String.class);
-                    if (userName != null && !userName.isEmpty()) {
-                        childName = userName; // Update with actual child name
-                        TextView tvChildName = findViewById(R.id.tvChildName);
-                        if (tvChildName != null) {
-                            tvChildName.setText(childName);
-                        }
+                    String userName = ChildDisplayName.resolve(childDeviceId,
+                            snapshot.child("userName").getValue(String.class),
+                            snapshot.child("childName").getValue(String.class),
+                            snapshot.child("deviceName").getValue(String.class));
+                    childName = userName;
+                    TextView tvChildName = findViewById(R.id.tvChildName);
+                    if (tvChildName != null) {
+                        tvChildName.setText(childName);
                     }
                 }
             }
