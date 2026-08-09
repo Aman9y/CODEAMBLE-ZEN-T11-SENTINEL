@@ -20,6 +20,8 @@ const CHILD_UID = "child-auth-a";
 const OTHER_CHILD_UID = "child-auth-b";
 const SESSION_A = "session-a";
 const SESSION_B = "session-b";
+const DATABASE_EMULATOR = (process.env.FIREBASE_DATABASE_EMULATOR_HOST
+  || "127.0.0.1:9000").split(":");
 
 let env;
 
@@ -45,8 +47,8 @@ before(async () => {
   env = await initializeTestEnvironment({
     projectId: PROJECT_ID,
     database: {
-      host: "127.0.0.1",
-      port: 9000,
+      host: DATABASE_EMULATOR[0],
+      port: Number(DATABASE_EMULATOR[1]),
       rules: fs.readFileSync(
         path.join(__dirname, "..", "database.rules.json"),
         "utf8"
@@ -225,6 +227,20 @@ test("different active parent cannot take over an owned child device", async () 
     `v2/parent_device_links/${OTHER_PARENT_UID}/${DEVICE_ID}`), {
     deviceId: DEVICE_ID,
   }));
+});
+
+test("valid QR pairing can reclaim a child marked for removal", async () => {
+  await assertSucceeds(update(ref(dbFor(PARENT_UID),
+    `v2/device_owners/${DEVICE_ID}`), {
+    status: "removing",
+    removalRequestedAt: Date.now(),
+    removalReason: "removed_by_parent",
+  }));
+
+  await assertSucceeds(set(ref(dbFor(OTHER_CHILD_UID),
+    `v2/device_owners/${DEVICE_ID}`),
+    owner(OTHER_PARENT_UID, OTHER_CHILD_UID,
+      SESSION_B, "qr-b", "connection-b")));
 });
 
 test("parent removal writes marker and deletes relationship data", async () => {

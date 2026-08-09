@@ -874,7 +874,7 @@ public class BlockService extends AccessibilityService {
                         String taskPkg = task.getTaskInfo().baseIntent.getComponent().getPackageName();
                         if (taskPkg.equals(packageName)) {
                             task.finishAndRemoveTask();
-                            Log.d(TAG, "� Layer 2: Removed task " + taskPkg);
+                            Log.d(TAG, "Layer 2: Removed task " + taskPkg);
                         }
                     }
                 }

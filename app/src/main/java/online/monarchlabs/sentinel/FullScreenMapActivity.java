@@ -28,6 +28,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import online.monarchlabs.sentinel.utils.ChildDisplayName;
+
 /**
  * Full screen map view — shows the child's live location.
  * Opened when parent taps the map card on the dashboard.
@@ -105,8 +107,10 @@ public class FullScreenMapActivity extends BaseActivity implements OnMapReadyCal
                                     if (userName == null || userName.isEmpty()) {
                                         userName = snapshot.child("deviceName").getValue(String.class);
                                     }
-                                    if (userName != null && !userName.isEmpty()) {
-                                        childName = userName;
+                                    String displayName = ChildDisplayName.resolve(
+                                            childDeviceId, userName);
+                                    if (!ChildDisplayName.FALLBACK.equals(displayName)) {
+                                        childName = displayName;
                                         if (childMarker != null) {
                                             childMarker.setTitle(childName);
                                             childMarker.setIcon(BitmapDescriptorFactory.fromBitmap(createInitialsBitmap(childName)));

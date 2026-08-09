@@ -1959,7 +1959,7 @@ public class ChildDashboardActivity extends BaseActivity {
             }
 
             // For testing: ALWAYS show timer if data exists, ignore date/day restrictions
-            Log.d(TAG, "� Timer data is valid - showing timer regardless of date restrictions for testing");
+            Log.d(TAG, "Timer data is valid - showing timer regardless of date restrictions for testing");
 
             // Update local state
             isLimiterActive = Boolean.TRUE.equals(isActive);
@@ -2458,7 +2458,7 @@ public class ChildDashboardActivity extends BaseActivity {
     }
 
     // ================================
-    // � PERMANENT NOTIFICATION SERVICE INTEGRATION
+    // PERMANENT NOTIFICATION SERVICE INTEGRATION
     // ================================
 
     /**

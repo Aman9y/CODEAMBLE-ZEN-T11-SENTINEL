@@ -168,8 +168,9 @@ function migrateRelationships(data, planner, report) {
       });
       continue;
     }
-    const name = firstString(record,
-      ["childName", "deviceName", "userName"]) || deviceId;
+    const rawName = firstString(record,
+      ["childName", "deviceName", "userName"]);
+    const name = rawName && rawName !== deviceId ? rawName : "Child Device";
     const owner = {
       parentUid,
       childAuthUid,

@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import online.monarchlabs.sentinel.utils.ChildDisplayName;
+
 import online.monarchlabs.sentinel.AppInfo;
 import online.monarchlabs.sentinel.ChildDevice;
 
@@ -156,8 +158,7 @@ public final class ChildDeviceManager {
         }
         ChildDevice device = new ChildDevice();
         device.deviceId = deviceId;
-        device.deviceName = name == null || name.trim().isEmpty()
-                ? "Child device" : name;
+        device.deviceName = ChildDisplayName.resolve(deviceId, name);
         Long linkedAt = link.child("linkedAt").getValue(Long.class);
         device.lastConnected = linkedAt == null ? 0L : linkedAt;
         device.apps = new ArrayList<>();
