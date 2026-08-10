@@ -14,6 +14,7 @@ import android.util.Log;
 
 import com.google.firebase.database.ServerValue;
 
+import online.monarchlabs.sentinel.ChildMonitoringDisclosureActivity;
 import online.monarchlabs.sentinel.data.FirebaseSchemaV2Repository;
 
 import java.io.ByteArrayOutputStream;
@@ -52,6 +53,14 @@ public class InstalledAppsManager {
 
     public void syncInstalledApps(String deviceId, boolean force,
             OnSyncCompleteListener listener) {
+        if (!ChildMonitoringDisclosureActivity.hasAcceptedDisclosure(context)) {
+            Log.w(TAG, "Installed-app sync blocked until prominent disclosure is accepted");
+            if (listener != null) {
+                listener.onError("Installed-app disclosure has not been accepted");
+            }
+            return;
+        }
+
         if (deviceId == null || deviceId.isEmpty()) {
             if (listener != null) {
                 listener.onError("No device ID");

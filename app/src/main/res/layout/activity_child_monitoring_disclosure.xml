@@ -68,7 +68,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-medium"
-                    android:text="What the linked parent can access"
+                    android:text="What Sentinel Collects and Uploads"
                     android:textColor="#111827"
                     android:textSize="17sp"
                     android:textStyle="bold" />
@@ -78,7 +78,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:lineSpacingExtra="4dp"
-                    android:text="• Installed apps and app-usage history\n• Screen-time, timers, blocked apps, and focus settings\n• Device and permission status (including Accessibility Service)\n• Device location when location permission is enabled"
+                    android:text="Sentinel collects, transmits, syncs, and stores this child device's installed application information, including app names, package names, app icons, install/removal status, version information, and timestamps, to enable the linked parent to view installed apps and choose apps for blocking, timers, focus modes, and screen-time limits after this child device is paired."
                     android:textColor="#374151"
                     android:textSize="14sp" />
 
@@ -87,7 +87,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="18dp"
                     android:lineSpacingExtra="3dp"
-                    android:text="This can include package names, app icons, install or removal status, device identifiers, connection status, Uninstall Protection status, location accuracy, timestamps, page views and taps in app, and other actions. Accessibility Service events are used solely to detect when restricted apps are opened and enforce parent-selected blocks. Background location is used only if granted so the linked parent can see location while Sentinel is closed or not in use."
+                    android:text="Sentinel also collects and syncs app-usage history, screen-time totals, timers, blocked apps, focus settings, device identifiers, connection status, permission status, Uninstall Protection status, and location data when location permission is enabled. Accessibility Service events are used solely to detect when restricted apps are opened and enforce parent-selected blocks. Background location is used only if granted so the linked parent can see location while Sentinel is closed or not in use."
                     android:textColor="#374151"
                     android:textSize="14sp" />
 
@@ -126,7 +126,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
-            android:text="I confirm that a parent or legal guardian authorized this setup, and I understand that this device and the data listed above will be monitored."
+            android:text="I agree that Sentinel may collect, transmit, sync, and store the installed application information and other child-device data described above for parental-control features."
             android:textColor="@color/text_primary"
             android:textSize="14sp"
             app:buttonTint="#2563EB" />

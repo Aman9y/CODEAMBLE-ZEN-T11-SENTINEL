@@ -26,7 +26,7 @@ public class ChildMonitoringDisclosureActivity extends BaseActivity {
     private static final String PREFS_NAME = "child_monitoring_disclosure";
     private static final String KEY_VERSION = "accepted_version";
     private static final String KEY_ACCEPTED_AT = "accepted_at";
-    private static final String DISCLOSURE_VERSION = "child-monitoring-2026-06-13";
+    private static final String DISCLOSURE_VERSION = "child-monitoring-installed-apps-2026-08-10";
 
     public static boolean hasAcceptedDisclosure(Context context) {
         return DISCLOSURE_VERSION.equals(context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)

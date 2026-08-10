@@ -16,6 +16,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 
+import online.monarchlabs.sentinel.ChildMonitoringDisclosureActivity;
 import online.monarchlabs.sentinel.SessionManager;
 
 import java.io.ByteArrayOutputStream;
@@ -68,6 +69,10 @@ public final class AppInventoryDeltaSync {
         }
 
         Context appContext = context.getApplicationContext();
+        if (!ChildMonitoringDisclosureActivity.hasAcceptedDisclosure(appContext)) {
+            return;
+        }
+
         String deviceId = new SessionManager(appContext).getChildDeviceId();
         if (deviceId == null || deviceId.isEmpty()) {
             return;
